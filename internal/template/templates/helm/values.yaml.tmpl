@@ -1,0 +1,30 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/[[ .Metadata.Owner ]]/[[ .Metadata.Name ]]
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+[[ if .Spec.Dependencies.Database ]]
+postgresql:
+  enabled: true
+  auth:
+    database: [[ .Metadata.Name ]]
+    postgresPassword: "cakd-auto-password" # Trong thực tế sẽ sinh random
+  primary:
+    persistence:
+      size: [[ .Spec.Dependencies.Database.Storage ]]
+[[ end ]]
