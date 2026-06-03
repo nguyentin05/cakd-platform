@@ -3,7 +3,6 @@ replicaCount: 1
 image:
   repository: ghcr.io/[[ .Metadata.Owner ]]/[[ .Metadata.Name ]]
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
 service:
@@ -23,7 +22,7 @@ postgresql:
   enabled: true
   auth:
     database: [[ .Metadata.Name ]]
-    postgresPassword: "cakd-auto-password" # Trong thực tế sẽ sinh random
+    postgresPassword: "cakd-auto-password"
   primary:
     persistence:
       size: [[ .Spec.Dependencies.Database.Storage ]]
