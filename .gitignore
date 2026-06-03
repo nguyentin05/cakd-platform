@@ -1,4 +1,29 @@
+# Build
 bin/
+dist/
+out/
+
+# Test
+coverage.out
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+terraform.tfvars.json
+terraform.log
+.platform/
+
+# IDE
 .idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
 out/
 platform.yaml
+
+report.md

@@ -1,0 +1,41 @@
+name: Feature Request
+description: Suggest a new feature for CAKD Platform
+labels: [ "enhancement" ]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      placeholder: Describe the problem this feature would solve.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      placeholder: Describe how you'd like this to work.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: Any alternative solutions or workarounds?
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - CLI
+        - Template Engine
+        - Terraform Bridge
+        - ArgoCD Integration
+        - Monitoring
+        - AI Observability
+        - Documentation
+        - Other
+    validations:
+      required: true

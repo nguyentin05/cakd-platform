@@ -1,0 +1,109 @@
+version: '3'
+vars:
+  BINARY: cakd
+  CMD_PATH: ./cmd/cakd
+  OUT_DIR: bin
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build CLI binary
+    cmds:
+      - go build -ldflags "-s -w -X main.version={{.VERSION}}" -o {{.OUT_DIR}}/{{.BINARY}} {{.CMD_PATH}}
+    vars:
+      VERSION:
+        sh: git describe --tags --always --dirty 2>/dev/null || echo "dev"
+    sources:
+      - ./**/*.go
+      - go.mod
+      - go.sum
+    generates:
+      - "{{.OUT_DIR}}/{{.BINARY}}"
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run ./...
+
+  test:
+    desc: Run unit tests
+    cmds:
+      - go test ./... -v -race -coverprofile=coverage.out
+      - go tool cover -func=coverage.out
+
+  :short:
+    desc: Run unit tests (short mode)
+    cmds:
+      - go test ./... -short
+
+  fmt:
+    desc: Format code
+    cmds:
+      - gofmt -s -w .
+      - goimports -w .
+
+  vet:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  trivy:fs:
+    desc: Scan filesystem for vulnerabilities
+    cmds:
+      - trivy fs --severity HIGH,CRITICAL .
+
+  trivy:config:
+    desc: Scan IaC configs (Terraform, Helm, Dockerfile)
+    cmds:
+      - trivy config .
+
+  trivy:image:
+    desc: Scan Docker image
+    cmds:
+      - trivy image ghcr.io/{{.OWNER}}/{{.BINARY}}:latest
+    vars:
+      OWNER:
+        sh: git remote get-url origin 2>/dev/null | sed -n 's/.*github.com[:/]\([^/]*\).*/\1/p' || echo "nguyentin05"
+
+  gitleaks:
+    desc: Scan for secrets in git history
+    cmds:
+      - gitleaks detect --source . --verbose
+
+  release:snapshot:
+    desc: Build release artifacts (snapshot, no publish)
+    cmds:
+      - goreleaser release --snapshot --clean
+
+  release:check:
+    desc: Validate GoReleaser config
+    cmds:
+      - goreleaser check
+
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - rm -rf bin/ out/ dist/ coverage.out
+
+  ci:
+    desc: Run all CI checks locally
+    cmds:
+      - task: fmt
+      - task: vet
+      - task: lint
+      - task: test
+      - task: build
+      - task: trivy:fs
+
+  validate:
+    desc: Validate sample platform.yaml
+    cmds:
+      - go run {{.CMD_PATH}} validate -f platform.yaml
+
+  generate:
+    desc: Run code generation (bootstrap) with sample config
+    cmds:
+      - go run {{.CMD_PATH}} create -f platform.yaml

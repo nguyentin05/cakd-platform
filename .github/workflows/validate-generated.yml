@@ -1,0 +1,35 @@
+name: Validate Generated
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-templates:
+    name: Validate Templates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build CAKD CLI
+        run: go build -o bin/cakd ./cmd/cakd
+
+      - name: Run CAKD Create (Generate Templates Only)
+        run: |
+          export GITHUB_TOKEN=""
+          ./bin/cakd create -f platform.yaml || true
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm Lint
+        run: helm lint out/*/helm
