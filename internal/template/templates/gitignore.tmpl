@@ -9,9 +9,15 @@
 # CAKD Platform Internal
 .platform/
 
-# Application Builds
+# Java / Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.jar
+*.war
+
+# Build
 bin/
 out/
-target/
-*.jar
-*.exe
+dist/
