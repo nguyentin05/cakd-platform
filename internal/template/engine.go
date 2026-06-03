@@ -23,6 +23,7 @@ func New(cfg *config.PlatformConfig) *Engine {
 
 func (e *Engine) Generate(outDir string) error {
 	mappings := map[string]string{
+		"templates/gitignore.tmpl":                      ".gitignore",
 		"templates/dockerfile.tmpl":                     "Dockerfile",
 		"templates/ci/ci.yml.tmpl":                      ".github/workflows/ci.yml",
 		"templates/helm/Chart.yaml.tmpl":                "helm/Chart.yaml",

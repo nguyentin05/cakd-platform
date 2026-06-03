@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
-// InitAndPush initializes a git repository in projectDir and pushes to the remote
 func InitAndPush(projectDir, repoCloneURL, ghToken string) error {
+	os.RemoveAll(filepath.Join(projectDir, ".git"))
+
 	steps := []struct {
 		name string
 		args []string
@@ -24,7 +26,6 @@ func InitAndPush(projectDir, repoCloneURL, ghToken string) error {
 		}
 	}
 
-	// Construct authenticated remote URL: https://<token>@github.com/owner/repo.git
 	authedURL := insertTokenInURL(repoCloneURL, ghToken)
 
 	if err := run(projectDir, "remote", "add", "origin", authedURL); err != nil {
@@ -35,8 +36,6 @@ func InitAndPush(projectDir, repoCloneURL, ghToken string) error {
 		return fmt.Errorf("git push failed: %w", err)
 	}
 
-	// Security: replace authenticated URL with clean URL in .git/config
-	// to avoid persisting the token in plaintext
 	if err := run(projectDir, "remote", "set-url", "origin", repoCloneURL); err != nil {
 		return fmt.Errorf("git remote set-url failed: %w", err)
 	}
@@ -44,10 +43,7 @@ func InitAndPush(projectDir, repoCloneURL, ghToken string) error {
 	return nil
 }
 
-// insertTokenInURL converts https://github.com/owner/repo.git
-// into https://<token>@github.com/owner/repo.git
 func insertTokenInURL(cloneURL, token string) string {
-	// cloneURL format: https://github.com/owner/repo.git
 	const prefix = "https://"
 	if len(cloneURL) > len(prefix) {
 		return prefix + token + "@" + cloneURL[len(prefix):]
