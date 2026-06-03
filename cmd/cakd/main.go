@@ -15,8 +15,8 @@ func main() {
 	var filePath string
 
 	rootCmd := &cobra.Command{
-		Use:   "platform",
-		Short: "CAKD Platform CLI",
+		Use:   "cakd",
+		Short: "CAKD Platform CLI — Cloud-Agnostic Kubernetes Developer Platform",
 	}
 
 	validateCmd := &cobra.Command{
@@ -58,7 +58,7 @@ func main() {
 		Use:   "version",
 		Short: "Print the CLI version",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("platform version %s\n", version)
+			fmt.Printf("cakd version %s\n", version)
 		},
 	}
 
