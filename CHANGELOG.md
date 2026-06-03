@@ -1,3 +1,10 @@
+# [0.2.0](https://github.com/nguyentin05/cakd-platform/compare/v0.1.1...v0.2.0) (2026-06-03)
+
+
+### Features
+
+* integrate argocd to cluster into create workflow ([#1](https://github.com/nguyentin05/cakd-platform/issues/1)) ([bb3ed33](https://github.com/nguyentin05/cakd-platform/commit/bb3ed3361fc08c31565decc9b3559cba7ae21ea5))
+
 ## [0.1.1](https://github.com/nguyentin05/cakd-platform/compare/v0.1.0...v0.1.1) (2026-06-03)
 
 
