@@ -16,9 +16,9 @@ var moduleFS embed.FS
 
 // Bridge orchestrates Terraform execution for infrastructure provisioning
 type Bridge struct {
-	cfg      *config.PlatformConfig
-	workDir  string
-	ghToken  string
+	cfg     *config.PlatformConfig
+	workDir string
+	ghToken string
 }
 
 // TerraformOutputs holds the parsed outputs from terraform
@@ -105,7 +105,7 @@ func (b *Bridge) copyModule(tfDir string) error {
 		}
 
 		outPath := filepath.Join(tfDir, entry.Name())
-		if err := os.WriteFile(outPath, data, 0644); err != nil {
+		if err := os.WriteFile(outPath, data, 0600); err != nil {
 			return fmt.Errorf("write file %s: %w", outPath, err)
 		}
 	}

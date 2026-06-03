@@ -25,6 +25,16 @@ jobs:
 
       - name: Run CAKD Create (Generate Templates Only)
         run: |
+          cat << 'EOF' > platform.yaml
+          apiVersion: platform.dev/v1alpha1
+          kind: Project
+          metadata:
+            name: my-app
+            owner: test-owner
+          spec:
+            language: java-spring-boot
+          EOF
+        
           export GITHUB_TOKEN=""
           ./bin/cakd create -f platform.yaml || true
 
