@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/nguyentin05/cakd-platform/compare/v0.2.0...v0.3.0) (2026-06-03)
+
+
+### Features
+
+* migrate from template to spring initializr ([#2](https://github.com/nguyentin05/cakd-platform/issues/2)) ([908682b](https://github.com/nguyentin05/cakd-platform/commit/908682ba5e97e85c888ea587104b5dd92679d560))
+
 # [0.2.0](https://github.com/nguyentin05/cakd-platform/compare/v0.1.1...v0.2.0) (2026-06-03)
 
 
