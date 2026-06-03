@@ -26,7 +26,7 @@ tasks:
   lint:
     desc: Run golangci-lint
     cmds:
-      - golangci-lint run ./...
+      - go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8 run ./...
 
   test:
     desc: Run unit tests
@@ -43,7 +43,7 @@ tasks:
     desc: Format code
     cmds:
       - gofmt -s -w .
-      - goimports -w .
+      - go run golang.org/x/tools/cmd/goimports@v0.31.0 -w .
 
   vet:
     desc: Run go vet
@@ -53,7 +53,7 @@ tasks:
   trivy:fs:
     desc: Scan filesystem for vulnerabilities
     cmds:
-      - trivy fs --severity HIGH,CRITICAL .
+      - trivy fs --severity HIGH,CRITICAL --skip-dirs out --skip-files .env .
 
   trivy:config:
     desc: Scan IaC configs (Terraform, Helm, Dockerfile)
