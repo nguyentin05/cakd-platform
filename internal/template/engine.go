@@ -34,9 +34,11 @@ func (e *Engine) Generate(outDir string) error {
 	}
 
 	if e.cfg.Spec.Language == "java-spring-boot" {
-		mappings["templates/spring-boot/pom.xml.tmpl"] = "pom.xml"
 		mappings["templates/spring-boot/src/main/resources/application.yml.tmpl"] = "src/main/resources/application.yml"
-		mappings["templates/spring-boot/src/main/java/com/example/demo/Application.java.tmpl"] = "src/main/java/com/example/demo/Application.java"
+
+		if e.cfg.Spec.Dependencies.Database != nil {
+			mappings["templates/spring-boot/src/test/resources/application.yml.tmpl"] = "src/test/resources/application.yml"
+		}
 	}
 
 	for tmplPath, outPath := range mappings {
