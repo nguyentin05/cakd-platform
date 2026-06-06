@@ -7,7 +7,7 @@ appVersion: "1.0"
 [[ if .Spec.Dependencies.Database ]]
 dependencies:
   - name: postgresql
-    version: "15.x.x"
+    version: "18.x.x"
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
 [[ end ]]
