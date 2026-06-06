@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/nguyentin05/cakd-platform/compare/v0.4.1...v0.5.0) (2026-06-06)
+
+
+### Features
+
+* implement starlight documentation site and autonomous docs pipeline ([#5](https://github.com/nguyentin05/cakd-platform/issues/5)) ([ac7667f](https://github.com/nguyentin05/cakd-platform/commit/ac7667feaf34176c5c8deb3cd56a76e74a77f8c0))
+
 ## [0.4.1](https://github.com/nguyentin05/cakd-platform/compare/v0.4.0...v0.4.1) (2026-06-06)
 
 
