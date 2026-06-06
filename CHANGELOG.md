@@ -1,3 +1,10 @@
+## [0.5.4](https://github.com/nguyentin05/cakd-platform/compare/v0.5.3...v0.5.4) (2026-06-06)
+
+
+### Bug Fixes
+
+* update model gemini flash latest for cdoc ([decca8f](https://github.com/nguyentin05/cakd-platform/commit/decca8f9597c8312255703fb0b6599c6bb73d9c9))
+
 ## [0.5.3](https://github.com/nguyentin05/cakd-platform/compare/v0.5.2...v0.5.3) (2026-06-06)
 
 
