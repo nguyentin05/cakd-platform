@@ -1,3 +1,10 @@
+## [0.5.3](https://github.com/nguyentin05/cakd-platform/compare/v0.5.2...v0.5.3) (2026-06-06)
+
+
+### Bug Fixes
+
+* change absolute links to relative paths in homepage ([598d7fa](https://github.com/nguyentin05/cakd-platform/commit/598d7faaf7ec25fd6d921d797d4f1a3f9ec3c9bf))
+
 ## [0.5.2](https://github.com/nguyentin05/cakd-platform/compare/v0.5.1...v0.5.2) (2026-06-06)
 
 
