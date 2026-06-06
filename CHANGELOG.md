@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/nguyentin05/cakd-platform/compare/v0.3.0...v0.4.0) (2026-06-06)
+
+
+### Features
+
+* implement ai-powered observability and diagnosis with gemini ([a595201](https://github.com/nguyentin05/cakd-platform/commit/a59520138a46880ee65abe88c1b8235beea2ae04))
+
 # [0.3.0](https://github.com/nguyentin05/cakd-platform/compare/v0.2.0...v0.3.0) (2026-06-03)
 
 
