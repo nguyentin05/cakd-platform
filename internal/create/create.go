@@ -13,10 +13,20 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/terraform"
 )
 
-func Run(cfg *config.PlatformConfig) error {
+func Run(cfg *config.PlatformConfig, force bool) error {
 	fmt.Printf("Starting create for project: %s\n", cfg.Metadata.Name)
 
 	outDir := filepath.Join(".", "out", cfg.Metadata.Name)
+
+	if _, err := os.Stat(outDir); !os.IsNotExist(err) {
+		if !force {
+			return fmt.Errorf("directory %s already exists. Use --force to overwrite", outDir)
+		}
+		if err := os.RemoveAll(outDir); err != nil {
+			return fmt.Errorf("failed to clean out directory: %w", err)
+		}
+	}
+
 	if err := os.MkdirAll(outDir, 0755); err != nil {
 		return fmt.Errorf("failed to create out directory: %w", err)
 	}
