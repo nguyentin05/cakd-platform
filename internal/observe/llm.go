@@ -69,7 +69,7 @@ func (c *GeminiClient) Analyze(prompt string) (string, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("gemini api returned status %d: %s", resp.StatusCode, string(body))
+		return "", fmt.Errorf("gemini api return status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var geminiResp GeminiResponse
