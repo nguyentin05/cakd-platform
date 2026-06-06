@@ -1,3 +1,10 @@
+## [0.5.2](https://github.com/nguyentin05/cakd-platform/compare/v0.5.1...v0.5.2) (2026-06-06)
+
+
+### Bug Fixes
+
+* add site and base config to fix github pages css paths ([b899081](https://github.com/nguyentin05/cakd-platform/commit/b8990815d520ac00e8d645ebdaa7db05bec85e4b))
+
 ## [0.5.1](https://github.com/nguyentin05/cakd-platform/compare/v0.5.0...v0.5.1) (2026-06-06)
 
 
