@@ -1,3 +1,10 @@
+## [0.4.1](https://github.com/nguyentin05/cakd-platform/compare/v0.4.0...v0.4.1) (2026-06-06)
+
+
+### Bug Fixes
+
+* resolve deployment edge cases in helm and ci templates ([#4](https://github.com/nguyentin05/cakd-platform/issues/4)) ([6dc9e50](https://github.com/nguyentin05/cakd-platform/commit/6dc9e503a1771320df102b61b8f7026ea6683a91))
+
 # [0.4.0](https://github.com/nguyentin05/cakd-platform/compare/v0.3.0...v0.4.0) (2026-06-06)
 
 
