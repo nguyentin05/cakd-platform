@@ -1,3 +1,10 @@
+## [0.5.1](https://github.com/nguyentin05/cakd-platform/compare/v0.5.0...v0.5.1) (2026-06-06)
+
+
+### Bug Fixes
+
+* bump node version to 22 for astro starlight compatibility ([598e925](https://github.com/nguyentin05/cakd-platform/commit/598e9258620ded6bb2eec559487b4f3339f98e62))
+
 # [0.5.0](https://github.com/nguyentin05/cakd-platform/compare/v0.4.1...v0.5.0) (2026-06-06)
 
 
