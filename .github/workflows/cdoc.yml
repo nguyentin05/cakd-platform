@@ -1,0 +1,56 @@
+name: Continuous Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'cmd/**'
+      - 'internal/**'
+      - 'go.mod'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  auto-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CAKD_BOT_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: docs
+
+      - name: Run CAKD Docs Agent
+        run: npm run docs:autogen
+        working-directory: docs
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Commit and Push changes
+        run: |
+          git config user.name "cakd-bot"
+          git config user.email "cakd-bot@users.noreply.github.com"
+          git add docs/src/content/docs/
+          
+          if git diff --staged --quiet; then
+            echo "No documentation changes detected."
+            exit 0
+          fi
+
+          git commit -m "docs: Auto-update documentation based on recent code changes
+
+          Co-authored-by: cakd-bot <cakd-bot@users.noreply.github.com>"
+          
+          git push origin main
