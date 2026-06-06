@@ -32,7 +32,7 @@ func InitAndPush(projectDir, repoCloneURL, ghToken string) error {
 		return fmt.Errorf("git remote add failed: %w", err)
 	}
 
-	if err := run(projectDir, "push", "-u", "origin", "main"); err != nil {
+	if err := run(projectDir, "push", "-f", "-u", "origin", "main"); err != nil {
 		return fmt.Errorf("git push failed: %w", err)
 	}
 
