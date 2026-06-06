@@ -4,6 +4,8 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://nguyentin05.github.io',
+	base: '/cakd-platform',
 	integrations: [
 		starlight({
 			title: 'CAKD Platform',
