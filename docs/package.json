@@ -8,7 +8,8 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "docs:autogen": "tsx scripts/auto-doc-agent.ts"
+    "docs:autogen": "tsx scripts/auto-doc-agent.ts",
+    "docs:autogen:force": "tsx scripts/auto-doc-agent.ts --force"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.39.3",

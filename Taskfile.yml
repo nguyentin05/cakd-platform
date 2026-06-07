@@ -107,3 +107,13 @@ tasks:
     desc: Run code generation (bootstrap) with sample config
     cmds:
       - go run {{.CMD_PATH}} create -f platform.yaml
+
+  docs:generate:
+    desc: Generate all docs from source code (incremental)
+    cmds:
+      - cd docs && npm run docs:autogen
+
+  docs:generate:force:
+    desc: Force regenerate ALL docs from scratch
+    cmds:
+      - cd docs && npm run docs:autogen:force
