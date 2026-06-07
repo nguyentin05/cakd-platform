@@ -1,0 +1,83 @@
+{
+  "modules": [
+    {
+      "id": "cli-create",
+      "sources": [
+        "cmd/cakd/main.go",
+        "internal/create/create.go",
+        "internal/config/schema.go",
+        "internal/config/parser.go"
+      ],
+      "target": "src/content/docs/reference/cli-create.md",
+      "promptTemplate": "prompts/command-reference.md"
+    },
+    {
+      "id": "architecture",
+      "sources": [
+        "internal/config/schema.go",
+        "internal/config/parser.go",
+        "internal/create/create.go",
+        "internal/template/engine.go",
+        "internal/terraform/bridge.go",
+        "internal/git/git.go"
+      ],
+      "target": "src/content/docs/explanation/architecture.md",
+      "promptTemplate": "prompts/architecture.md"
+    },
+    {
+      "id": "tutorial-quickstart",
+      "sources": [
+        "cmd/cakd/main.go",
+        "internal/create/create.go",
+        "internal/config/schema.go"
+      ],
+      "target": "src/content/docs/tutorials/quickstart.md",
+      "promptTemplate": "prompts/tutorial-quickstart.md"
+    },
+    {
+      "id": "adr-dependencies",
+      "sources": ["go.mod"],
+      "target": "src/content/docs/adrs/dependency-decisions.md",
+      "promptTemplate": "prompts/adr-dependencies.md"
+    },
+    {
+      "id": "cli-init",
+      "sources": [
+        "cmd/cakd/init.go",
+        "internal/init/init.go"
+      ],
+      "target": "src/content/docs/reference/cli-init.md",
+      "promptTemplate": "prompts/command-reference.md"
+    },
+    {
+      "id": "cli-observe",
+      "sources": [
+        "cmd/cakd/observe.go",
+        "internal/observe/observe.go",
+        "internal/observe/prometheus.go",
+        "internal/observe/loki.go",
+        "internal/observe/llm.go"
+      ],
+      "target": "src/content/docs/reference/cli-observe.md",
+      "promptTemplate": "prompts/command-reference.md"
+    },
+    {
+      "id": "cli-validate",
+      "sources": [
+        "cmd/cakd/validate.go",
+        "internal/config/schema.go"
+      ],
+      "target": "src/content/docs/reference/cli-validate.md",
+      "promptTemplate": "prompts/command-reference.md"
+    },
+    {
+      "id": "howto-discord-alert",
+      "sources": [
+        "internal/discord/client.go",
+        "internal/create/create.go"
+      ],
+      "target": "src/content/docs/how-to-guides/setup-discord-alerts.md",
+      "promptTemplate": "prompts/howto-guide.md"
+    }
+  ]
+}
