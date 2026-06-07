@@ -8,6 +8,11 @@ on:
       - 'internal/**'
       - 'go.mod'
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force regenerate all docs'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -33,7 +38,12 @@ jobs:
         working-directory: docs
 
       - name: Run CAKD Docs Agent
-        run: npm run docs:autogen
+        run: |
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            npm run docs:autogen:force
+          else
+            npm run docs:autogen
+          fi
         working-directory: docs
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -49,7 +59,7 @@ jobs:
             exit 0
           fi
 
-          git commit -m "docs: Auto-update documentation based on recent code changes
+          git commit -m "docs: auto-update documentation based on recent code changes
 
           Co-authored-by: cakd-bot <cakd-bot@users.noreply.github.com>"
           
