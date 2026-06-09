@@ -20,7 +20,7 @@ var validateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		fmt.Printf("Valid! Project: %s | Owner: %s | Language: %s\n",
-			cfg.Metadata.Name, cfg.Metadata.Owner, cfg.Spec.Language)
+			cfg.Metadata.Name, cfg.Metadata.Owner, cfg.Services[0].Language)
 		return nil
 	},
 }

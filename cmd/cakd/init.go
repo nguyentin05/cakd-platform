@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	pkginit "github.com/nguyentin05/cakd-platform/internal/init"
+	"github.com/nguyentin05/cakd-platform/internal/bootstrap"
 	"github.com/spf13/cobra"
 )
 
@@ -24,13 +24,13 @@ var initCmd = &cobra.Command{
 			optLogging = true
 		}
 
-		opts := pkginit.Options{
+		opts := bootstrap.Options{
 			ArgoCD:     optArgoCD,
 			Monitoring: optMonitoring,
 			Logging:    optLogging,
 		}
 
-		if err := pkginit.Run(opts); err != nil {
+		if err := bootstrap.RunInit(opts); err != nil {
 			fmt.Fprintf(os.Stderr, "Cluster initialization failed: %v\n", err)
 			os.Exit(1)
 		}

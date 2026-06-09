@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/nguyentin05/cakd-platform/internal/bootstrap"
 	"github.com/nguyentin05/cakd-platform/internal/config"
-	"github.com/nguyentin05/cakd-platform/internal/create"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ var createCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if err := create.Run(cfg, forceCreate); err != nil {
+		if err := bootstrap.RunCreate(cfg, forceCreate); err != nil {
 			fmt.Fprintf(os.Stderr, "Create failed: %v\n", err)
 			os.Exit(1)
 		}
