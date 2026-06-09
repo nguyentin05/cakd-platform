@@ -1,3 +1,5 @@
+version: "2"
+
 run:
   timeout: 5m
 
@@ -8,7 +10,6 @@ linters:
     - govet
     - errcheck
     - ineffassign
-    - typecheck
 
     # Style
     - gofmt

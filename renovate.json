@@ -2,6 +2,11 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "labels": ["dependencies"],
+  "timezone": "Asia/Ho_Chi_Minh",
+  "schedule": ["before 8am on monday"],
+  "prCreation": "immediate",
+  "prConcurrentLimit": 10,
+  "branchConcurrentLimit": 10,
   "packageRules": [
     {
       "description": "Auto-merge patch updates if CI passes",
