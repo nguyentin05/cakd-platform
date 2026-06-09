@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/nguyentin05/cakd-platform/compare/v0.6.0...v0.7.0) (2026-06-09)
+
+
+### Features
+
+* introduce autonomous alert manager and webhook handler ([#11](https://github.com/nguyentin05/cakd-platform/issues/11)) ([08b07a0](https://github.com/nguyentin05/cakd-platform/commit/08b07a0421a6a37753365ee69cacfa21c2abcbc7))
+
 # [0.6.0](https://github.com/nguyentin05/cakd-platform/compare/v0.5.4...v0.6.0) (2026-06-09)
 
 
