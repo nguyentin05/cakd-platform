@@ -1,4 +1,4 @@
-package initializr
+package springboot
 
 import (
 	"archive/zip"
@@ -15,20 +15,36 @@ import (
 
 const baseURL = "https://start.spring.io/starter.zip"
 
-func Generate(cfg *config.PlatformConfig, outDir string) error {
+type Client struct{}
+
+func NewClient() *Client {
+	return &Client{}
+}
+
+func (c *Client) Scaffold(cfg *config.PlatformConfig, svc config.Service, outDir string) error {
 	deps := []string{"web", "actuator"}
 
-	if cfg.Spec.Features.Monitoring != nil && *cfg.Spec.Features.Monitoring {
+	if cfg.Providers.Monitoring == "prometheus" {
 		deps = append(deps, "prometheus")
 	}
 
-	if cfg.Spec.Dependencies.Database != nil {
-		deps = append(deps, "data-jpa", "h2")
-		switch cfg.Spec.Dependencies.Database.Type {
-		case "postgresql":
-			deps = append(deps, "postgresql")
-		case "mysql":
-			deps = append(deps, "mysql")
+	for _, use := range svc.Uses {
+		for _, b := range cfg.Backing {
+			if b.Name == use {
+				if b.Type == "postgresql" || b.Type == "mysql" {
+					deps = append(deps, "data-jpa")
+				}
+				switch b.Type {
+				case "postgresql":
+					deps = append(deps, "postgresql")
+				case "mysql":
+					deps = append(deps, "mysql")
+				case "redis":
+					deps = append(deps, "data-redis")
+				case "rabbitmq":
+					deps = append(deps, "amqp")
+				}
+			}
 		}
 	}
 
@@ -41,10 +57,10 @@ func Generate(cfg *config.PlatformConfig, outDir string) error {
 	url := fmt.Sprintf(
 		"%s?type=maven-project&language=java&javaVersion=%s&groupId=%s&artifactId=%s&name=%s&dependencies=%s",
 		baseURL,
-		cfg.Spec.Version,
+		svc.Version,
 		groupId,
-		cfg.Metadata.Name,
-		cfg.Metadata.Name,
+		svc.Name,
+		svc.Name,
 		strings.Join(deps, ","),
 	)
 

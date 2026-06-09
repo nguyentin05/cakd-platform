@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/nguyentin05/cakd-platform/internal/observe"
+	"github.com/nguyentin05/cakd-platform/internal/provider/llm/gemini"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +27,7 @@ var observeCmd = &cobra.Command{
 
 		metrics := observe.NewPrometheusClient()
 		logs := observe.NewLokiClient()
-		ai := observe.NewGeminiClient(apiKey)
+		ai := gemini.NewClient(apiKey)
 
 		service := observe.NewObserverService(metrics, logs, ai)
 		if err := service.Diagnose(projectName); err != nil {

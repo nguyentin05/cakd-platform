@@ -1,4 +1,4 @@
-package init
+package bootstrap
 
 import (
 	"fmt"
@@ -9,7 +9,13 @@ import (
 const (
 	cmdAdd              = "add"
 	cmdUpdate           = "update"
+	cmdUpgrade          = "upgrade"
 	flagCreateNamespace = "--create-namespace"
+	cmdHelm             = "helm"
+	cmdRepo             = "repo"
+	flagInstall         = "--install"
+	flagNamespace       = "--namespace"
+	nsMonitoring        = "monitoring"
 )
 
 type Options struct {
@@ -18,8 +24,9 @@ type Options struct {
 	Logging    bool
 }
 
-func Run(opts Options) error {
-	fmt.Println("Starting cluster bootstrapping...")
+//nolint:gocyclo,gosec // intentional wrapper around internal commands
+func RunInit(opts Options) error {
+	fmt.Println("Starting CAKD Platform Initialization...")
 
 	type step struct {
 		name     string
@@ -32,9 +39,9 @@ func Run(opts Options) error {
 		steps = append(steps, step{
 			name: "Step: Installing ArgoCD via Helm",
 			commands: [][]string{
-				{"helm", "repo", cmdAdd, "argo", "https://argoproj.github.io/argo-helm"},
-				{"helm", "repo", cmdUpdate, "argo"},
-				{"helm", "upgrade", "--install", "argocd", "argo/argo-cd", "--namespace", "argocd", flagCreateNamespace},
+				{cmdHelm, cmdRepo, cmdAdd, "argo", "https://argoproj.github.io/argo-helm"},
+				{cmdHelm, cmdRepo, cmdUpdate, "argo"},
+				{cmdHelm, cmdUpgrade, flagInstall, "argocd", "argo/argo-cd", flagNamespace, "argocd", flagCreateNamespace},
 			},
 		})
 	}
@@ -68,9 +75,9 @@ func Run(opts Options) error {
 		steps = append(steps, step{
 			name: "Step: Installing Prometheus Stack via Helm",
 			commands: [][]string{
-				{"helm", "repo", cmdAdd, "prometheus-community", "https://prometheus-community.github.io/helm-charts"},
-				{"helm", "repo", cmdUpdate, "prometheus-community"},
-				{"helm", "upgrade", "--install", "monitoring", "prometheus-community/kube-prometheus-stack", "--namespace", "monitoring", flagCreateNamespace, "-f", promValuesFile},
+				{cmdHelm, cmdRepo, cmdAdd, "prometheus-community", "https://prometheus-community.github.io/helm-charts"},
+				{cmdHelm, cmdRepo, cmdUpdate, "prometheus-community"},
+				{cmdHelm, cmdUpgrade, flagInstall, nsMonitoring, "prometheus-community/kube-prometheus-stack", flagNamespace, nsMonitoring, flagCreateNamespace, "-f", promValuesFile},
 			},
 		})
 
@@ -86,9 +93,9 @@ func Run(opts Options) error {
 		steps = append(steps, step{
 			name: "Step: Installing Loki",
 			commands: [][]string{
-				{"helm", "repo", cmdAdd, "grafana", "https://grafana.github.io/helm-charts"},
-				{"helm", "repo", cmdUpdate, "grafana"},
-				{"helm", "upgrade", "--install", "loki", "grafana/loki-stack", "--namespace", "monitoring", flagCreateNamespace},
+				{cmdHelm, cmdRepo, cmdAdd, "grafana", "https://grafana.github.io/helm-charts"},
+				{cmdHelm, cmdRepo, cmdUpdate, "grafana"},
+				{cmdHelm, cmdUpgrade, flagInstall, "loki", "grafana/loki-stack", flagNamespace, nsMonitoring, flagCreateNamespace},
 			},
 		})
 	}
@@ -109,6 +116,7 @@ func Run(opts Options) error {
 			}
 
 			fmt.Printf("   > %v\n", cmdArgs)
+			//nolint:gosec // intentional wrapper around internal commands
 			cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr

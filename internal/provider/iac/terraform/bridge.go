@@ -20,12 +20,6 @@ type Bridge struct {
 	ghToken string
 }
 
-type TerraformOutputs struct {
-	RepoFullName string
-	RepoHTMLURL  string
-	RepoCloneURL string
-}
-
 func New(cfg *config.PlatformConfig, workDir string) *Bridge {
 	return &Bridge{
 		cfg:     cfg,
@@ -33,7 +27,7 @@ func New(cfg *config.PlatformConfig, workDir string) *Bridge {
 	}
 }
 
-func (b *Bridge) Apply() (*TerraformOutputs, error) {
+func (b *Bridge) Apply() (map[string]string, error) {
 	b.ghToken = os.Getenv("GITHUB_TOKEN")
 	if b.ghToken == "" {
 		return nil, fmt.Errorf("GITHUB_TOKEN environment variable is required.\n" +
@@ -137,7 +131,7 @@ func (b *Bridge) runTerraform(tfDir string, args ...string) error {
 	return nil
 }
 
-func (b *Bridge) parseOutputs(tfDir string) (*TerraformOutputs, error) {
+func (b *Bridge) parseOutputs(tfDir string) (map[string]string, error) {
 	cmd := exec.Command("terraform", "output", "-json")
 	cmd.Dir = tfDir
 
@@ -153,9 +147,10 @@ func (b *Bridge) parseOutputs(tfDir string) (*TerraformOutputs, error) {
 		return nil, fmt.Errorf("unmarshal terraform output: %w", err)
 	}
 
-	return &TerraformOutputs{
-		RepoFullName: raw["repo_full_name"].Value,
-		RepoHTMLURL:  raw["repo_html_url"].Value,
-		RepoCloneURL: raw["repo_clone_url"].Value,
-	}, nil
+	outputs := make(map[string]string)
+	for k, v := range raw {
+		outputs[k] = v.Value
+	}
+
+	return outputs, nil
 }

@@ -1,4 +1,4 @@
-package git
+package github
 
 import (
 	"fmt"
@@ -7,7 +7,13 @@ import (
 	"path/filepath"
 )
 
-func InitAndPush(projectDir, repoCloneURL, ghToken string) error {
+type Client struct{}
+
+func NewClient() *Client {
+	return &Client{}
+}
+
+func (c *Client) InitAndPush(projectDir, repoCloneURL, ghToken string) error {
 	os.RemoveAll(filepath.Join(projectDir, ".git"))
 
 	steps := []struct {

@@ -1,4 +1,4 @@
-package observe
+package gemini
 
 import (
 	"bytes"
@@ -8,12 +8,12 @@ import (
 	"net/http"
 )
 
-type GeminiClient struct {
+type Client struct {
 	apiKey string
 }
 
-func NewGeminiClient(apiKey string) *GeminiClient {
-	return &GeminiClient{
+func NewClient(apiKey string) *Client {
+	return &Client{
 		apiKey: apiKey,
 	}
 }
@@ -38,7 +38,7 @@ type GeminiResponse struct {
 	} `json:"candidates"`
 }
 
-func (c *GeminiClient) Analyze(prompt string) (string, error) {
+func (c *Client) Analyze(prompt string) (string, error) {
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=%s", c.apiKey)
 
 	reqBody := GeminiRequest{
