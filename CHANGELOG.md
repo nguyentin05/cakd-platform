@@ -1,3 +1,10 @@
+# [0.6.0](https://github.com/nguyentin05/cakd-platform/compare/v0.5.4...v0.6.0) (2026-06-09)
+
+
+### Features
+
+* implement dynamic config validation and default engine ([#9](https://github.com/nguyentin05/cakd-platform/issues/9)) ([1722832](https://github.com/nguyentin05/cakd-platform/commit/1722832b33faab866f88c820b3e6e87e374f3e96))
+
 ## [0.5.4](https://github.com/nguyentin05/cakd-platform/compare/v0.5.3...v0.5.4) (2026-06-06)
 
 
