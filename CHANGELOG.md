@@ -1,3 +1,10 @@
+## [0.7.1](https://github.com/nguyentin05/cakd-platform/compare/v0.7.0...v0.7.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* helm lint and argocd config mistake ([07bfb12](https://github.com/nguyentin05/cakd-platform/commit/07bfb120befbaf0f0436e8ce076d4087719d142f))
+
 # [0.7.0](https://github.com/nguyentin05/cakd-platform/compare/v0.6.0...v0.7.0) (2026-06-09)
 
 
