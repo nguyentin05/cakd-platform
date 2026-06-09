@@ -35,8 +35,13 @@ jobs:
           metadata:
             name: my-app
             owner: test-owner
-          spec:
-            language: java-spring-boot
+          providers:
+            versionControl: github
+            ci: github-actions
+            cd: argocd
+          services:
+            - name: api
+              language: java-spring-boot
           EOF
         
           export GITHUB_TOKEN=""
@@ -46,4 +51,4 @@ jobs:
         uses: azure/setup-helm@v5
 
       - name: Helm Lint
-        run: helm lint out/*/helm
+        run: helm lint out/*/*/helm

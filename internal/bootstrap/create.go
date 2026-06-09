@@ -54,7 +54,14 @@ func RunCreate(cfg *config.PlatformConfig, force bool) error {
 		fmt.Printf("   %s base project generated (official)\n", svc.Language)
 	}
 
-	fmt.Println("   Applying CAKD templates (Dockerfile, Helm, CI, ArgoCD)...")
+	templatesMsg := "Dockerfile"
+	if cfg.Providers.CD != "" {
+		templatesMsg += ", Helm, ArgoCD"
+	}
+	if cfg.Providers.CI != "" {
+		templatesMsg += ", CI"
+	}
+	fmt.Printf("   Applying CAKD templates (%s)...\n", templatesMsg)
 	tmplEngine := template.New(cfg)
 	if err := tmplEngine.Generate(outDir); err != nil {
 		return fmt.Errorf("template generation failed: %w", err)
@@ -107,13 +114,17 @@ func RunCreate(cfg *config.PlatformConfig, force bool) error {
 		return fmt.Errorf("git operations failed: %w", err)
 	}
 
-	fmt.Println("Step 5/5: Registering ArgoCD application...")
-	manifestPath := filepath.Join(outDir, "deploy", "application.yaml")
-	if err := argocd.Register(manifestPath); err != nil {
-		fmt.Fprintf(os.Stderr, "   ArgoCD registration failed: %v\n", err)
-		fmt.Println("   Tip: Is your Minikube running? Do you have ArgoCD installed?")
+	if cfg.Providers.CD == "argocd" {
+		fmt.Println("Step 5/5: Registering ArgoCD application...")
+		manifestPath := filepath.Join(outDir, "deploy", "application.yaml")
+		if err := argocd.Register(manifestPath); err != nil {
+			fmt.Fprintf(os.Stderr, "   ArgoCD registration failed: %v\n", err)
+			fmt.Println("   Tip: Is your Minikube running? Do you have ArgoCD installed?")
+		} else {
+			fmt.Println("   ArgoCD application registered successfully")
+		}
 	} else {
-		fmt.Println("   ArgoCD application registered successfully")
+		fmt.Println("Step 5/5: Skipping CD deployment (not configured)")
 	}
 
 	fmt.Println()

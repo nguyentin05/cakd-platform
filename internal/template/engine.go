@@ -43,11 +43,14 @@ func (e *Engine) Generate(outDir string) error {
 	for _, svc := range e.cfg.Services {
 		svcDir := filepath.Join(outDir, svc.Name)
 		svcMappings := map[string]string{
-			"templates/dockerfile.tmpl":                     "Dockerfile",
-			"templates/helm/Chart.yaml.tmpl":                "helm/Chart.yaml",
-			"templates/helm/values.yaml.tmpl":               "helm/values.yaml",
-			"templates/helm/templates/deployment.yaml.tmpl": "helm/templates/deployment.yaml",
-			"templates/helm/templates/service.yaml.tmpl":    "helm/templates/service.yaml",
+			"templates/dockerfile.tmpl": "Dockerfile",
+		}
+
+		if e.cfg.Providers.CD != "" {
+			svcMappings["templates/helm/Chart.yaml.tmpl"] = "helm/Chart.yaml"
+			svcMappings["templates/helm/values.yaml.tmpl"] = "helm/values.yaml"
+			svcMappings["templates/helm/templates/deployment.yaml.tmpl"] = "helm/templates/deployment.yaml"
+			svcMappings["templates/helm/templates/service.yaml.tmpl"] = "helm/templates/service.yaml"
 		}
 
 		if svc.Language == "java-spring-boot" {

@@ -63,4 +63,5 @@ jobs:
 
           Co-authored-by: cakd-bot <cakd-bot@users.noreply.github.com>"
           
+          git pull origin main --rebase
           git push origin main

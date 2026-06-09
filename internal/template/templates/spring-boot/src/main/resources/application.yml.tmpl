@@ -1,7 +1,6 @@
 spring:
   application:
     name: [[ .Service.Name ]]
-  # ENV vars for backing resources will be injected here via ConfigMap/Secret from IaC
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:postgres}
     username: ${DB_USERNAME:postgres}
