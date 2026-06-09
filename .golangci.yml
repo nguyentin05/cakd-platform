@@ -1,48 +1,48 @@
 version: "2"
-
-run:
-  timeout: 5m
-
 linters:
   enable:
-    # Bugs
-    - staticcheck
-    - govet
-    - errcheck
-    - ineffassign
-
-    # Style
-    - gofmt
-    - goimports
-    - misspell
-
-    # Complexity
-    - gocyclo
     - goconst
-
-    # Security
+    - gocyclo
     - gosec
-
-    # Performance
+    - misspell
     - prealloc
-
-linters-settings:
-  gocyclo:
-    min-complexity: 15
-  goconst:
-    min-len: 3
-    min-occurrences: 3
-  misspell:
-    locale: US
-  gosec:
-    excludes:
-      - G304
-
+  settings:
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+    gocyclo:
+      min-complexity: 15
+    gosec:
+      excludes:
+        - G304
+    misspell:
+      locale: US
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - errcheck
+          - gosec
+        path: _test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gosec
-        - errcheck
   max-issues-per-linter: 50
   max-same-issues: 3
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
