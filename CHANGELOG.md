@@ -1,3 +1,10 @@
+## [0.7.2](https://github.com/nguyentin05/cakd-platform/compare/v0.7.1...v0.7.2) (2026-06-09)
+
+
+### Bug Fixes
+
+* add constant of argocd and annotation nolint ([f0a9484](https://github.com/nguyentin05/cakd-platform/commit/f0a9484d2d6f6fe8d6d4de148cbbdc562ac4376a))
+
 ## [0.7.1](https://github.com/nguyentin05/cakd-platform/compare/v0.7.0...v0.7.1) (2026-06-09)
 
 
