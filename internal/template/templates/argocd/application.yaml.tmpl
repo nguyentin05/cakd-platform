@@ -1,20 +1,23 @@
+[[ range .Services ]]
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: [[ .Metadata.Name ]]
+  name: [[ .Name ]]
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: https://github.com/[[ .Metadata.Owner ]]/[[ .Metadata.Name ]]
+    repoURL: https://github.com/[[ $.Metadata.Owner ]]/[[ $.Metadata.Name ]]
     targetRevision: HEAD
-    path: helm
+    path: [[ .Name ]]/helm
   destination:
     server: https://kubernetes.default.svc
-    namespace: [[ .Metadata.Name ]]
+    namespace: [[ $.Metadata.Name ]]
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+---
+[[ end ]]

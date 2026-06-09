@@ -1,13 +1,9 @@
 apiVersion: v2
-name: [[ .Metadata.Name ]]
+name: [[ .Service.Name ]]
 description: A Helm chart for Kubernetes
 type: application
 version: 0.1.0
 appVersion: "1.0"
-[[ if .Spec.Dependencies.Database ]]
-dependencies:
-  - name: postgresql
-    version: "18.x.x"
-    repository: https://charts.bitnami.com/bitnami
-    condition: postgresql.enabled
-[[ end ]]
+# Removed direct database dependency here to simplify V1 since backing resources
+# can be shared. For now, we will just rely on external provisioned backing resources
+# or assume the IaC provisions them. If you want bitnami charts, you'd need logic.

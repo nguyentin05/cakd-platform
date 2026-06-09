@@ -1,4 +1,4 @@
-FROM maven:3.9-eclipse-temurin-[[ .Spec.Version ]] AS build
+FROM maven:3.9-eclipse-temurin-[[ .Service.Version ]] AS build
 WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline
@@ -6,7 +6,7 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:[[ .Spec.Version ]]-jre
+FROM eclipse-temurin:[[ .Service.Version ]]-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080

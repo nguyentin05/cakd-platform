@@ -5,10 +5,10 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: [[ .Metadata.Owner ]]/[[ .Metadata.Name ]]
 
 jobs:
-  build-and-push:
+[[ range .Services ]]
+  build-[[ .Name ]]:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -20,14 +20,14 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '[[ .Spec.Version ]]'
+          java-version: '[[ .Version ]]'
           distribution: 'temurin'
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
+        run: cd [[ .Name ]] && mvn clean package -DskipTests
 
       - name: Run Tests
-        run: mvn test
+        run: cd [[ .Name ]] && mvn test
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -39,17 +39,18 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: [[ .Name ]]
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/[[ $.Metadata.Owner ]]/[[ .Name ]]:${{ github.sha }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
 
       - name: Update Helm Values
         run: |
-          sed -i "s/tag: .*/tag: \"${{ github.sha }}\"/g" helm/values.yaml
+          sed -i "s/tag: .*/tag: \"${{ github.sha }}\"/g" [[ .Name ]]/helm/values.yaml
           
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -am "chore: update image tag to ${{ github.sha }}"
-          git push
+          git commit -am "chore: update image tag for [[ .Name ]] to ${{ github.sha }}" || echo "No changes to commit"
+          git push || echo "Push failed or already up to date"
+[[ end ]]

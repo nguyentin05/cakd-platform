@@ -22,35 +22,71 @@ func New(cfg *config.PlatformConfig) *Engine {
 }
 
 func (e *Engine) Generate(outDir string) error {
-	mappings := map[string]string{
-		"templates/gitignore.tmpl":                      ".gitignore",
-		"templates/dockerfile.tmpl":                     "Dockerfile",
-		"templates/ci/ci.yml.tmpl":                      ".github/workflows/ci.yml",
-		"templates/helm/Chart.yaml.tmpl":                "helm/Chart.yaml",
-		"templates/helm/values.yaml.tmpl":               "helm/values.yaml",
-		"templates/helm/templates/deployment.yaml.tmpl": "helm/templates/deployment.yaml",
-		"templates/helm/templates/service.yaml.tmpl":    "helm/templates/service.yaml",
-		"templates/argocd/application.yaml.tmpl":        "deploy/application.yaml",
+	globalMappings := map[string]string{
+		"templates/gitignore.tmpl": ".gitignore",
 	}
 
-	if e.cfg.Spec.Language == "java-spring-boot" {
-		mappings["templates/spring-boot/src/main/resources/application.yml.tmpl"] = "src/main/resources/application.yml"
+	if e.cfg.Providers.CI != "" {
+		globalMappings["templates/ci/ci.yml.tmpl"] = ".github/workflows/ci.yml"
+	}
 
-		if e.cfg.Spec.Dependencies.Database != nil {
-			mappings["templates/spring-boot/src/test/resources/application.yml.tmpl"] = "src/test/resources/application.yml"
+	if e.cfg.Providers.CD != "" {
+		globalMappings["templates/argocd/application.yaml.tmpl"] = "deploy/application.yaml"
+	}
+
+	for tmplPath, outPath := range globalMappings {
+		if err := e.renderTemplate(tmplPath, filepath.Join(outDir, outPath), e.cfg); err != nil {
+			return fmt.Errorf("failed to render global %s: %w", tmplPath, err)
 		}
 	}
 
-	for tmplPath, outPath := range mappings {
-		if err := e.renderTemplate(tmplPath, filepath.Join(outDir, outPath)); err != nil {
-			return fmt.Errorf("failed to render %s: %w", tmplPath, err)
+	for _, svc := range e.cfg.Services {
+		svcDir := filepath.Join(outDir, svc.Name)
+		svcMappings := map[string]string{
+			"templates/dockerfile.tmpl":                     "Dockerfile",
+			"templates/helm/Chart.yaml.tmpl":                "helm/Chart.yaml",
+			"templates/helm/values.yaml.tmpl":               "helm/values.yaml",
+			"templates/helm/templates/deployment.yaml.tmpl": "helm/templates/deployment.yaml",
+			"templates/helm/templates/service.yaml.tmpl":    "helm/templates/service.yaml",
+		}
+
+		if svc.Language == "java-spring-boot" {
+			svcMappings["templates/spring-boot/src/main/resources/application.yml.tmpl"] = "src/main/resources/application.yml"
+
+			usesDB := false
+			for _, use := range svc.Uses {
+				for _, b := range e.cfg.Backing {
+					if b.Name == use && (b.Type == "postgresql" || b.Type == "mysql") {
+						usesDB = true
+						break
+					}
+				}
+			}
+			if usesDB {
+				svcMappings["templates/spring-boot/src/test/resources/application.yml.tmpl"] = "src/test/resources/application.yml"
+			}
+		}
+
+		type TemplateData struct {
+			Config  *config.PlatformConfig
+			Service config.Service
+		}
+		data := TemplateData{
+			Config:  e.cfg,
+			Service: svc,
+		}
+
+		for tmplPath, outPath := range svcMappings {
+			if err := e.renderTemplate(tmplPath, filepath.Join(svcDir, outPath), data); err != nil {
+				return fmt.Errorf("failed to render service template %s for %s: %w", tmplPath, svc.Name, err)
+			}
 		}
 	}
 
 	return nil
 }
 
-func (e *Engine) renderTemplate(tmplPath, outPath string) error {
+func (e *Engine) renderTemplate(tmplPath, outPath string, data interface{}) error {
 	tmplContent, err := content.ReadFile(tmplPath)
 	if err != nil {
 		return fmt.Errorf("read embedded template %s: %w", tmplPath, err)
@@ -71,7 +107,7 @@ func (e *Engine) renderTemplate(tmplPath, outPath string) error {
 	}
 	defer f.Close()
 
-	if err := tmpl.Execute(f, e.cfg); err != nil {
+	if err := tmpl.Execute(f, data); err != nil {
 		return fmt.Errorf("execute template: %w", err)
 	}
 
