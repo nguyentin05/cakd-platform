@@ -21,6 +21,7 @@ func New(cfg *config.PlatformConfig) *Engine {
 	return &Engine{cfg: cfg}
 }
 
+//nolint:gocyclo
 func (e *Engine) Generate(outDir string) error {
 	globalMappings := map[string]string{
 		"templates/gitignore.tmpl": ".gitignore",

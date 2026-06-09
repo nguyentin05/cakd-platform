@@ -41,7 +41,7 @@ func RunInit(opts Options) error {
 			commands: [][]string{
 				{cmdHelm, cmdRepo, cmdAdd, "argo", "https://argoproj.github.io/argo-helm"},
 				{cmdHelm, cmdRepo, cmdUpdate, "argo"},
-				{cmdHelm, cmdUpgrade, flagInstall, "argocd", "argo/argo-cd", flagNamespace, "argocd", flagCreateNamespace},
+				{cmdHelm, cmdUpgrade, flagInstall, providerArgoCD, "argo/argo-cd", flagNamespace, providerArgoCD, flagCreateNamespace},
 			},
 		})
 	}

@@ -11,6 +11,8 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/template"
 )
 
+const providerArgoCD = "argocd"
+
 //nolint:gocyclo
 func RunCreate(cfg *config.PlatformConfig, force bool) error {
 	fmt.Printf("Starting create for project: %s\n", cfg.Metadata.Name)
@@ -114,7 +116,7 @@ func RunCreate(cfg *config.PlatformConfig, force bool) error {
 		return fmt.Errorf("git operations failed: %w", err)
 	}
 
-	if cfg.Providers.CD == "argocd" {
+	if cfg.Providers.CD == providerArgoCD {
 		fmt.Println("Step 5/5: Registering ArgoCD application...")
 		manifestPath := filepath.Join(outDir, "deploy", "application.yaml")
 		if err := argocd.Register(manifestPath); err != nil {
