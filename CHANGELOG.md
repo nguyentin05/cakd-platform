@@ -1,3 +1,10 @@
+## [0.9.1](https://github.com/nguyentin05/cakd-platform/compare/v0.9.0...v0.9.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* rename secret actions of update registry workflow ([a98675d](https://github.com/nguyentin05/cakd-platform/commit/a98675d2b0c0505efcd03182ff03749918f605d1))
+
 # [0.9.0](https://github.com/nguyentin05/cakd-platform/compare/v0.8.4...v0.9.0) (2026-06-11)
 
 
