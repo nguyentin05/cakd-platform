@@ -1,3 +1,10 @@
+# [0.8.0](https://github.com/nguyentin05/cakd-platform/compare/v0.7.2...v0.8.0) (2026-06-11)
+
+
+### Features
+
+* extract standalone cakd-agent, optimize k8s manifests and add ci pipeline ([2e86fd1](https://github.com/nguyentin05/cakd-platform/commit/2e86fd1c5c4d9b19f676f744a1079e5bb607805c))
+
 ## [0.7.2](https://github.com/nguyentin05/cakd-platform/compare/v0.7.1...v0.7.2) (2026-06-09)
 
 
