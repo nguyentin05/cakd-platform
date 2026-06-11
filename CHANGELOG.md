@@ -1,3 +1,10 @@
+## [0.9.2](https://github.com/nguyentin05/cakd-platform/compare/v0.9.1...v0.9.2) (2026-06-11)
+
+
+### Bug Fixes
+
+* update spring boot registry versions ([#13](https://github.com/nguyentin05/cakd-platform/issues/13)) ([0f1e24f](https://github.com/nguyentin05/cakd-platform/commit/0f1e24f10cda1c47d3d32d6fdd414f497f113c25))
+
 ## [0.9.1](https://github.com/nguyentin05/cakd-platform/compare/v0.9.0...v0.9.1) (2026-06-11)
 
 
