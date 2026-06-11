@@ -1,3 +1,10 @@
+## [0.8.3](https://github.com/nguyentin05/cakd-platform/compare/v0.8.2...v0.8.3) (2026-06-11)
+
+
+### Bug Fixes
+
+* version for cakd-agent image ([71020c4](https://github.com/nguyentin05/cakd-platform/commit/71020c48ec876c3fb7995ee8a3a667f4dbddb981))
+
 ## [0.8.2](https://github.com/nguyentin05/cakd-platform/compare/v0.8.1...v0.8.2) (2026-06-11)
 
 
