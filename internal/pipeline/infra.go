@@ -3,7 +3,7 @@ package pipeline
 import (
 	"fmt"
 
-	"github.com/nguyentin05/cakd-platform/internal/iac/terraform"
+	"github.com/nguyentin05/cakd-platform/internal/iac"
 )
 
 // InfraStep provisions infrastructure using Terraform.
@@ -12,7 +12,7 @@ type InfraStep struct{}
 func (s *InfraStep) Name() string { return "Creating Infrastructure (IaC)" }
 
 func (s *InfraStep) Run(ctx *Context) error {
-	engine := terraform.New(ctx.Cfg, ctx.OutDir)
+	engine := iac.NewEngine(ctx.Cfg, ctx.OutDir)
 
 	outputs, err := engine.Apply()
 	if err != nil {

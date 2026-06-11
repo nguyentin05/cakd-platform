@@ -9,10 +9,17 @@ import (
 	"path/filepath"
 
 	"github.com/nguyentin05/cakd-platform/internal/config"
+	"github.com/nguyentin05/cakd-platform/internal/iac"
 )
 
 //go:embed modules/github
 var moduleFS embed.FS
+
+func init() {
+	iac.NewEngine = func(cfg *config.PlatformConfig, workDir string) iac.Engine {
+		return New(cfg, workDir)
+	}
+}
 
 type Bridge struct {
 	cfg     *config.PlatformConfig

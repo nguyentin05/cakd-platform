@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nguyentin05/cakd-platform/internal/iac/terraform"
+	"github.com/nguyentin05/cakd-platform/internal/iac"
 	"github.com/nguyentin05/cakd-platform/internal/provider"
 )
 
@@ -23,7 +23,7 @@ func (s *VersionControlStep) Run(ctx *Context) error {
 
 	if err := vcsProvider.InitAndPush(ctx.OutDir, ctx.TfOutputs["repo_clone_url"], ghToken); err != nil {
 		fmt.Println("   Git failed, rolling back Terraform resources...")
-		engine := terraform.New(ctx.Cfg, ctx.OutDir)
+		engine := iac.NewEngine(ctx.Cfg, ctx.OutDir)
 		if destroyErr := engine.Destroy(); destroyErr != nil {
 			fmt.Fprintf(os.Stderr, "   Rollback also failed: %v\n", destroyErr)
 		} else {
