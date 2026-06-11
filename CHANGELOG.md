@@ -1,3 +1,10 @@
+## [0.10.1](https://github.com/nguyentin05/cakd-platform/compare/v0.10.0...v0.10.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* demote go version to 1.24.0 and fix gitignore pattern ([7894f63](https://github.com/nguyentin05/cakd-platform/commit/7894f63621bb1d0fdc5f81bc892ecdbe255cc154))
+
 # [0.10.0](https://github.com/nguyentin05/cakd-platform/compare/v0.9.5...v0.10.0) (2026-06-11)
 
 
