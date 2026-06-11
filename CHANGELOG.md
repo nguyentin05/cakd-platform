@@ -1,3 +1,10 @@
+## [0.9.4](https://github.com/nguyentin05/cakd-platform/compare/v0.9.3...v0.9.4) (2026-06-11)
+
+
+### Bug Fixes
+
+* disable body and footer line length limits in commitlint ([d53d8f0](https://github.com/nguyentin05/cakd-platform/commit/d53d8f0a41e1cb361e67b546ea877a75ae8b58ff))
+
 ## [0.9.3](https://github.com/nguyentin05/cakd-platform/compare/v0.9.2...v0.9.3) (2026-06-11)
 
 
