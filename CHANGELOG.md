@@ -1,3 +1,10 @@
+## [0.9.5](https://github.com/nguyentin05/cakd-platform/compare/v0.9.4...v0.9.5) (2026-06-11)
+
+
+### Bug Fixes
+
+* bump the docs-dependencies group across 1 directory with 4 updates ([#15](https://github.com/nguyentin05/cakd-platform/issues/15)) ([6361f84](https://github.com/nguyentin05/cakd-platform/commit/6361f84f70480059499631580e5be174a3216874))
+
 ## [0.9.4](https://github.com/nguyentin05/cakd-platform/compare/v0.9.3...v0.9.4) (2026-06-11)
 
 
