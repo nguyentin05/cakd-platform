@@ -13,9 +13,9 @@ CAKD Platform is a CLI tool designed to `bootstrap` new application `project`s w
 
 **Responsibility:** Defines, parses, validates, and applies defaults to the `platform.yaml` configuration.
 
-**Components:** `config` package
+**Components:** `config` package, `internal/config/defaults`, `internal/config/validate`
 
-This layer is responsible for understanding the desired state of a `project` as defined by the user. It reads the `platform.yaml` file, unmarshals it into a structured Go object (`PlatformConfig`), applies any missing default values, and then rigorously validates the configuration against predefined rules to ensure consistency and prevent errors before any generation or provisioning begins.
+This layer is responsible for understanding the desired state of a `project` as defined by the user. It reads the `platform.yaml` file, unmarshals it into a structured Go object (`PlatformConfig`), and processes it through a strict, 3-phase pipeline: first, `Structure Validation` ensures all required fields and enum values are present; second, `Defaults Injection` recursively applies implicit default values for missing fields; and finally, `Logic/Dependency Validation` evaluates cross-field dependencies and business rules to ensure consistency and prevent errors before any generation or provisioning begins.
 
 ### Orchestration
 
@@ -69,7 +69,7 @@ This layer is responsible for the final step of integrating the `project` into a
 
 The following describes what happens when `cakd create -f platform.yaml` is run:
 
-1.  **Configuration Parsing** — The `config` package reads the `platform.yaml` file, parses its content, applies default values, and validates the configuration.
+1.  **Configuration Parsing** — The `config` package reads the `platform.yaml` file, unmarshals its content, and processes it through a 3-phase pipeline: `Structure Validation` (`internal/config/validate`), `Defaults Injection` (`internal/config/defaults`), and `Logic/Dependency Validation` (`internal/config/validate`).
 2.  **Project Directory Setup** — The `create` package prepares the output directory for the new `project`, handling existing directories if the `--force` flag is used.
 3.  **Base Project Generation** — The `initializr` package downloads and sets up a base project (e.g., Spring Boot) into the `project` directory, based on the `platform.yaml` specification.
 4.  **CAKD Template Application** — The `template engine` (`template` package) renders embedded Go templates (e.g., Dockerfile, Helm charts, CI/CD workflows, ArgoCD manifests) into the `project` directory, customizing them with values from the `PlatformConfig`.
@@ -82,8 +82,11 @@ The following describes what happens when `cakd create -f platform.yaml` is run:
 ```mermaid
 graph TD
     A[platform.yaml] --> B(CLI - cmd/cakd)
-    B --> C(config.Parse)
-    C --> D(create.Run)
+    B --> C1(config.Parse)
+    C1 --> C2[config/validate.Structure]
+    C1 --> C3[config/defaults.Apply]
+    C1 --> C4[config/validate.Logic]
+    C4 --> D(create.Run)
     D --> E(initializr.Generate)
     D --> F(template.New.Generate)
     D --> G(terraform.New.Apply)
@@ -105,7 +108,7 @@ graph TD
 ## Key Design Decisions
 
 -   **Declarative Configuration**: The use of `platform.yaml` centralizes the definition of a `project`'s desired state. This allows for consistent, repeatable `bootstrap`s and simplifies automation, as the CLI can interpret and act upon a single source of truth.
--   **Modular Architecture**: The system is broken down into distinct Go packages (`config`, `create`, `initializr`, `template`, `terraform`, `git`, `argocd`), each with a clear responsibility. This separation of concerns enhances maintainability, testability, and allows for easier extension or replacement of individual components.
--   **Leveraging External Tools**: CAKD Platform integrates with specialized external tools like Spring Initializr for base project generation and Terraform for infrastructure provisioning. This avoids reimplementing complex functionality, allowing CAKD to focus on orchestration and integration, while benefiting from the robustness and feature sets of established tools.
+-   **Modular Architecture**: The system is broken down into distinct Go packages (`config`, `create`, `initializr`, `template`, `terraform`, `git`, `argocd`), each with a clear responsibility. This separation of concerns enhances maintainability, testability, and allows for easier extension or replacement of individual components. The `config` package itself demonstrates this with dedicated sub-packages for `defaults` and `validate`.
+-   **Leveraging External Tools**: CAKD Platform integrates with specialized external tools like `gopkg.in/yaml.v3` for YAML parsing, Spring Initializr for base project generation, and Terraform for infrastructure provisioning. This avoids reimplementing complex functionality, allowing CAKD to focus on orchestration and integration, while benefiting from the robustness and feature sets of established tools.
 -   **GitOps-centric Deployment**: By provisioning a GitHub repository, pushing code, and registering with ArgoCD, CAKD Platform inherently promotes a GitOps workflow. This design decision ensures that `project` deployments are automated, auditable, and driven by version-controlled configurations.
 -   **Embedded Templates**: Utilizing Go's `embed` feature for templates simplifies distribution, as all necessary templates are bundled directly within the `cakd` binary. This ensures that the `template engine` always has access to the correct template versions without external dependencies or complex asset management.

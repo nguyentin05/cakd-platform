@@ -25,7 +25,7 @@ go install github.com/nguyentin05/cakd-platform/cmd/cakd@latest
 
 ## Step 2: Create your `platform.yaml`
 
-Create a file named `platform.yaml` with the following minimal configuration. This defines the basic properties of your new `project`.
+Create a file named `platform.yaml` with the following minimal configuration. This defines the basic properties of your new `project` and its services.
 
 ```yaml
 apiVersion: platform.cakd.dev/v1alpha1
@@ -33,9 +33,10 @@ kind: Project
 metadata:
   name: my-first-project
   owner: my-team
-spec:
-  language: java-spring-boot
-  version: 3.2.0
+services:
+  - name: my-service
+    language: java-spring-boot
+    version: 3.2.0
 ```
 
 ## Step 3: Bootstrap your project
