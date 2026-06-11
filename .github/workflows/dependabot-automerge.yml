@@ -23,3 +23,14 @@ jobs:
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on minor/major PRs to request manual review
+        if: steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-major'
+        run: |
+          SHORT_TYPE=$(echo "$UPDATE_TYPE" | sed 's/version-update:semver-//')
+          gh pr comment "$PR_URL" --body "Hey @$REPO_OWNER, this PR contains a **$SHORT_TYPE** update (non-patch). Auto-merge was skipped. Please review and merge it manually when the test checks are green."
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
