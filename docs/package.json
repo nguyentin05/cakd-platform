@@ -12,15 +12,15 @@
     "docs:autogen:force": "tsx scripts/auto-doc-agent.ts --force"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.39.3",
+    "@astrojs/starlight": "^0.40.0",
     "@google/generative-ai": "^0.24.1",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^25.9.2",
+    "@types/node": "^25.9.3",
     "astro": "^6.3.1",
     "dotenv": "^17.4.2",
     "fs-extra": "^11.3.5",
     "glob": "^13.0.6",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.0",
     "tsx": "^4.22.4"
   }
 }
