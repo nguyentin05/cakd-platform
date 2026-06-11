@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_ACTIONS_BOT_PAT }}
+          token: ${{ secrets.GH_BOT_PAT }}
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -30,7 +30,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_ACTIONS_BOT_PAT }}
+          token: ${{ secrets.GH_BOT_PAT }}
           commit-message: "fix: update spring boot registry versions"
           committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
