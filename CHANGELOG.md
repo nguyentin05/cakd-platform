@@ -1,3 +1,10 @@
+## [0.10.2](https://github.com/nguyentin05/cakd-platform/compare/v0.10.1...v0.10.2) (2026-06-11)
+
+
+### Bug Fixes
+
+* lock term and sys dependencies to compatible versions for go 1.24 ([0cbf4e3](https://github.com/nguyentin05/cakd-platform/commit/0cbf4e3ec68340cdeeb71a3b5d521f7cf13406e5))
+
 ## [0.10.1](https://github.com/nguyentin05/cakd-platform/compare/v0.10.0...v0.10.1) (2026-06-11)
 
 
