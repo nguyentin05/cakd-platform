@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/[[ $.Metadata.Owner ]]/[[ $.Metadata.Name ]]
     targetRevision: HEAD
-    path: [[ .Name ]]/helm
+    path: services/[[ .Name ]]/helm
   destination:
     server: https://kubernetes.default.svc
     namespace: [[ $.Metadata.Name ]]
