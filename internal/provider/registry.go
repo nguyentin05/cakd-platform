@@ -2,8 +2,8 @@ package provider
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/provider/app"
 	"github.com/nguyentin05/cakd-platform/internal/provider/app/springboot"
 	"github.com/nguyentin05/cakd-platform/internal/provider/cd"
@@ -34,8 +34,7 @@ var Providers = &ProviderRegistry{
 	},
 	Notifiers: map[string]func() notify.Notifier{
 		"discord": func() notify.Notifier {
-			token := os.Getenv("DISCORD_BOT_TOKEN")
-			guildID := os.Getenv("DISCORD_GUILD_ID")
+			token, guildID, _ := config.GetDiscordCredentials()
 			return discord.NewClient(token, guildID)
 		},
 	},

@@ -35,9 +35,9 @@ func New(cfg *config.PlatformConfig, workDir string) *Bridge {
 }
 
 func (b *Bridge) Apply() (map[string]string, error) {
-	b.ghToken = os.Getenv("GITHUB_TOKEN")
+	b.ghToken = config.GetGithubToken()
 	if b.ghToken == "" {
-		return nil, fmt.Errorf("GITHUB_TOKEN environment variable is required.\n" +
+		return nil, fmt.Errorf("GITHUB_TOKEN is required.\n" +
 			"Create a token at: https://github.com/settings/tokens\n" +
 			"Required scopes: repo, delete_repo")
 	}
