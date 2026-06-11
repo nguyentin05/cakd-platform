@@ -2,12 +2,14 @@
 package springboot
 
 var ValidJavaVersions = []string{
+	"26",
 	"25",
 	"21",
 	"17",
 }
 
 var ValidSpringBootVersions = []string{
+	"4.1.1.BUILD-SNAPSHOT",
 	"4.1.0.RELEASE",
 	"4.0.8.BUILD-SNAPSHOT",
 	"4.0.7.RELEASE",
@@ -15,6 +17,7 @@ var ValidSpringBootVersions = []string{
 }
 
 var ValidProjectBuilds = []string{
+	"gradle-project",
 	"gradle-project-kotlin",
 	"gradle-build",
 	"maven-project",
@@ -22,15 +25,18 @@ var ValidProjectBuilds = []string{
 }
 
 var ValidPackaging = []string{
+	"jar",
 	"war",
 }
 
 var ValidLanguages = []string{
+	"java",
 	"kotlin",
 	"groovy",
 }
 
 var ValidSpringDependencies = []string{
+	"native",
 	"dgs-codegen",
 	"devtools",
 	"lombok",
