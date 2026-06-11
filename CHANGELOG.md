@@ -1,3 +1,10 @@
+## [0.8.1](https://github.com/nguyentin05/cakd-platform/compare/v0.8.0...v0.8.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* update path helm lint and add trigger path of ci cakd agent workflows ([58b3af2](https://github.com/nguyentin05/cakd-platform/commit/58b3af2165014f7c0b94df4a3f30a105657ffd67))
+
 # [0.8.0](https://github.com/nguyentin05/cakd-platform/compare/v0.7.2...v0.8.0) (2026-06-11)
 
 
