@@ -10,17 +10,17 @@ import (
 	"time"
 
 	"github.com/nguyentin05/cakd-platform/internal/config"
-	"github.com/nguyentin05/cakd-platform/internal/provider"
 	"github.com/nguyentin05/cakd-platform/internal/provider/llm/gemini"
+	"github.com/nguyentin05/cakd-platform/internal/provider/notify"
 )
 
 type AgentServer struct {
 	DefaultWebhookURL string
-	notifier          provider.Notifier
+	notifier          notify.Notifier
 	aiMutex           sync.Mutex
 }
 
-func NewAgentServer(defaultWebhookURL string, notifier provider.Notifier) *AgentServer {
+func NewAgentServer(defaultWebhookURL string, notifier notify.Notifier) *AgentServer {
 	return &AgentServer{
 		DefaultWebhookURL: defaultWebhookURL,
 		notifier:          notifier,
@@ -50,7 +50,7 @@ func (s *AgentServer) processAlerts(payload AlertmanagerPayload) {
 
 	type AlertGroup struct {
 		WebhookURL  string
-		Items       []provider.AlertItem
+		Items       []notify.AlertItem
 		FiringDescs []string
 	}
 	groups := make(map[string]*AlertGroup)
@@ -79,7 +79,7 @@ func (s *AgentServer) processAlerts(payload AlertmanagerPayload) {
 		}
 
 		desc := fmt.Sprintf("**Severity:** %s\n**Description:** %s", alert.Labels["severity"], description)
-		item := provider.AlertItem{
+		item := notify.AlertItem{
 			Title:       fmt.Sprintf("[%s] %s", strings.ToUpper(alert.Status), alertName),
 			Description: desc,
 			Severity:    alert.Status,
@@ -89,7 +89,7 @@ func (s *AgentServer) processAlerts(payload AlertmanagerPayload) {
 
 	for _, group := range groups {
 		if len(group.Items) > 0 {
-			msg := provider.AlertPayload{Items: group.Items}
+			msg := notify.AlertPayload{Items: group.Items}
 			if err := s.notifier.SendAlert(group.WebhookURL, msg); err != nil {
 				fmt.Printf("Failed to send raw alert via notifier: %v\n", err)
 			}
@@ -130,8 +130,8 @@ Keep the response under 150 words. Do not use markdown codeblocks that wrap the 
 		return
 	}
 
-	aiMsg := provider.AlertPayload{
-		Items: []provider.AlertItem{
+	aiMsg := notify.AlertPayload{
+		Items: []notify.AlertItem{
 			{
 				Title:       "🤖 CAKD AI Diagnosis",
 				Description: diagnosis,

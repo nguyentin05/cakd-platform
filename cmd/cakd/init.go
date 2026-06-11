@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nguyentin05/cakd-platform/internal/bootstrap"
+	"github.com/nguyentin05/cakd-platform/internal/cluster"
 	"github.com/spf13/cobra"
 )
 
@@ -24,13 +24,14 @@ var initCmd = &cobra.Command{
 			optLogging = true
 		}
 
-		opts := bootstrap.Options{
-			ArgoCD:     optArgoCD,
-			Monitoring: optMonitoring,
-			Logging:    optLogging,
+		opts := cluster.Options{
+			ArgoCD:       optArgoCD,
+			Monitoring:   optMonitoring,
+			Logging:      optLogging,
+			AgentVersion: version,
 		}
 
-		if err := bootstrap.RunInit(opts); err != nil {
+		if err := cluster.RunInit(opts); err != nil {
 			fmt.Fprintf(os.Stderr, "Cluster initialization failed: %v\n", err)
 			os.Exit(1)
 		}

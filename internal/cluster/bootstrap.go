@@ -1,4 +1,4 @@
-package bootstrap
+package cluster
 
 import (
 	"fmt"
@@ -16,12 +16,14 @@ const (
 	flagInstall         = "--install"
 	flagNamespace       = "--namespace"
 	nsMonitoring        = "monitoring"
+	providerArgoCD      = "argocd"
 )
 
 type Options struct {
-	ArgoCD     bool
-	Monitoring bool
-	Logging    bool
+	ArgoCD       bool
+	Monitoring   bool
+	Logging      bool
+	AgentVersion string
 }
 
 //nolint:gocyclo,gosec // intentional wrapper around internal commands
@@ -109,7 +111,7 @@ func RunInit(opts Options) error {
 		fmt.Printf("\n[%d/%d] %s\n", i+1, len(steps), s.name)
 		for _, cmdArgs := range s.commands {
 			if len(cmdArgs) == 1 && cmdArgs[0] == "internal-agent-deploy" {
-				if err := deployAgent(); err != nil {
+				if err := deployAgent(opts.AgentVersion); err != nil {
 					return err
 				}
 				continue

@@ -35,4 +35,4 @@ report.md
 # Ignore build binaries and linters
 cakd
 .golangci.bck.yml
-golangci-lint-2.12.2-linux-amd64/
+golangci-lint-2.12.2-linux-amd64/cakd-agent

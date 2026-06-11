@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cakd-agent
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cakd-agent
+  template:
+    metadata:
+      labels:
+        app: cakd-agent
+    spec:
+      containers:
+      - name: agent
+        image: {{ .Image }}
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: cakd-agent-secret
+        volumeMounts:
+        - name: webhooks-volume
+          mountPath: /etc/cakd
+      volumes:
+      - name: webhooks-volume
+        configMap:
+          name: cakd-webhooks
