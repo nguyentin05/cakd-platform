@@ -189,8 +189,8 @@ backing:
 				if cfg == nil {
 					t.Errorf("Expected valid config object, but got nil")
 				} else {
-					if len(cfg.Services) > 0 && cfg.Services[0].Version == "" {
-						t.Errorf("Expected defaults to be applied (e.g. Service Version), but it was empty")
+					if len(cfg.Services) > 0 && cfg.Services[0].LanguageVersion == "" {
+						t.Errorf("Expected defaults to be applied (e.g. Service LanguageVersion), but it was empty")
 					}
 				}
 			}

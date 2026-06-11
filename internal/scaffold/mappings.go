@@ -44,15 +44,20 @@ func ServiceMappings(cfg *config.PlatformConfig, svc config.Service) []TemplateM
 	}
 
 	if svc.Language == "java-spring-boot" {
+		formatExt := "yml"
+		if svc.SpringConfigFormat == "properties" {
+			formatExt = "properties"
+		}
+
 		mappings = append(mappings, TemplateMapping{
-			"templates/spring-boot/src/main/resources/application.yml.tmpl",
-			"src/main/resources/application.yml",
+			"templates/spring-boot/src/main/resources/application." + formatExt + ".tmpl",
+			"src/main/resources/application." + formatExt,
 		})
 
 		if usesDB(cfg, svc) {
 			mappings = append(mappings, TemplateMapping{
-				"templates/spring-boot/src/test/resources/application.yml.tmpl",
-				"src/test/resources/application.yml",
+				"templates/spring-boot/src/test/resources/application." + formatExt + ".tmpl",
+				"src/test/resources/application." + formatExt,
 			})
 		}
 	}

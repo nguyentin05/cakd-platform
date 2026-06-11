@@ -26,12 +26,17 @@ type Providers struct {
 }
 
 type Service struct {
-	Name      string     `yaml:"name" validate:"required"`
-	Language  string     `yaml:"language" enum:"language" validate:"required"`
-	Version   string     `yaml:"version,omitempty" default:"map:LanguageVersion,key:Language"`
-	Replicas  int        `yaml:"replicas,omitempty" default:"Replicas"`
-	Resources *Resources `yaml:"resources,omitempty"`
-	Uses      []string   `yaml:"uses,omitempty"`
+	Name               string     `yaml:"name" validate:"required"`
+	Language           string     `yaml:"language" enum:"language" validate:"required"`
+	LanguageVersion    string     `yaml:"languageVersion,omitempty" default:"map:LanguageVersion,key:Language" enum:"java-version"`
+	FrameworkVersion   string     `yaml:"frameworkVersion,omitempty" enum:"spring-boot-version"`
+	ProjectBuild       string     `yaml:"projectBuild,omitempty" enum:"project-build"`
+	Packaging          string     `yaml:"packaging,omitempty" enum:"packaging"`
+	Dependencies       []string   `yaml:"dependencies,omitempty" enum:"spring-dependencies"`
+	SpringConfigFormat string     `yaml:"springConfigFormat,omitempty" enum:"spring-config-format"`
+	Replicas           int        `yaml:"replicas,omitempty" default:"Replicas"`
+	Resources          *Resources `yaml:"resources,omitempty"`
+	Uses               []string   `yaml:"uses,omitempty"`
 }
 
 type Resources struct {

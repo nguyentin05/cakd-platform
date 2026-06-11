@@ -20,14 +20,22 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '[[ .Version ]]'
+          java-version: '[[ if .LanguageVersion ]][[ .LanguageVersion ]][[ else ]]21[[ end ]]'
           distribution: 'temurin'
 
+[[ if eq .ProjectBuild "gradle-project" "gradle-project-kotlin" ]]
+      - name: Build with Gradle
+        run: cd services/[[ .Name ]] && ./gradlew clean build -x test
+
+      - name: Run Tests
+        run: cd services/[[ .Name ]] && ./gradlew test
+[[ else ]]
       - name: Build with Maven
         run: cd services/[[ .Name ]] && mvn clean package -DskipTests
 
       - name: Run Tests
         run: cd services/[[ .Name ]] && mvn test
+[[ end ]]
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3

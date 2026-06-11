@@ -1,0 +1,51 @@
+name: Update Registry Versions
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-registry:
+    name: Fetch Latest Metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_ACTIONS_BOT_PAT }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Fetch and generate registry
+        run: go run ./cmd/cakd-tools/registry-fetch
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_ACTIONS_BOT_PAT }}
+          commit-message: "fix: update spring boot registry versions"
+          committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          branch: fix/update-registry-spring-boot
+          delete-branch: true
+          title: "fix: update spring boot registry versions from initializr"
+          body: |
+            Automated Pull Request to update the CAKD Spring Boot registry versions.
+
+            This automatically pulls latest metadata from the official Spring Initializr API including:
+            - Valid Java versions
+            - Valid Spring Boot versions
+            - Valid project build tools
+            - Valid packaging types
+            - Valid Spring dependencies
+            
+            _Generated automatically by GitHub Actions._
+          labels: "automated, dependencies"

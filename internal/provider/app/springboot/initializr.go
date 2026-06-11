@@ -24,13 +24,12 @@ func NewClient() *Client {
 
 func (c *Client) Scaffold(cfg *config.PlatformConfig, svc config.Service, outDir string) error {
 	deps := []string{"web", "actuator"}
+	deps = append(deps, svc.Dependencies...)
 
-	// Monitoring dependency lookup from registry
 	if dep, ok := registry.MonitoringDeps[cfg.Providers.Monitoring]; ok {
 		deps = append(deps, dep)
 	}
 
-	// Backing resource dependency lookup from registry
 	for _, use := range svc.Uses {
 		for _, b := range cfg.Backing {
 			if b.Name == use {
@@ -47,17 +46,38 @@ func (c *Client) Scaffold(cfg *config.PlatformConfig, svc config.Service, outDir
 	}
 	groupId := "com." + safeOwner
 
-	url := fmt.Sprintf(
-		"%s?type=maven-project&language=java&javaVersion=%s&groupId=%s&artifactId=%s&name=%s&dependencies=%s",
+	projectType := svc.ProjectBuild
+	if projectType == "" {
+		projectType = "maven-project"
+	}
+
+	javaVersion := svc.LanguageVersion
+	if javaVersion == "" {
+		javaVersion = "21"
+	}
+
+	packaging := svc.Packaging
+	if packaging == "" {
+		packaging = "jar"
+	}
+
+	urlStr := fmt.Sprintf(
+		"%s?type=%s&language=java&javaVersion=%s&packaging=%s&groupId=%s&artifactId=%s&name=%s&dependencies=%s",
 		baseURL,
-		svc.Version,
+		projectType,
+		javaVersion,
+		packaging,
 		groupId,
 		svc.Name,
 		svc.Name,
 		strings.Join(deps, ","),
 	)
 
-	resp, err := http.Get(url) //nolint:gosec
+	if svc.FrameworkVersion != "" {
+		urlStr += "&bootVersion=" + svc.FrameworkVersion
+	}
+
+	resp, err := http.Get(urlStr) //nolint:gosec
 	if err != nil {
 		return fmt.Errorf("failed to connect to start.spring.io: %w", err)
 	}
@@ -105,7 +125,8 @@ func extractZip(data []byte, outDir string) error {
 			return fmt.Errorf("open zip entry %s: %w", file.Name, err)
 		}
 
-		outFile, err := os.Create(targetPath)
+		mode := file.FileInfo().Mode()
+		outFile, err := os.OpenFile(targetPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
 		if err != nil {
 			rc.Close()
 			return fmt.Errorf("create file %s: %w", targetPath, err)
@@ -119,7 +140,13 @@ func extractZip(data []byte, outDir string) error {
 
 		rc.Close()
 		outFile.Close()
+
+		if err := os.Chmod(targetPath, mode); err != nil {
+			return fmt.Errorf("chmod file %s: %w", targetPath, err)
+		}
 	}
+
+	os.Remove(filepath.Join(outDir, "src", "main", "resources", "application.properties"))
 
 	return nil
 }

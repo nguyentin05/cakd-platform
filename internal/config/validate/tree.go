@@ -106,7 +106,23 @@ func validateEnum(fieldVal reflect.Value, enumTag string) error {
 	if !exists {
 		return nil
 	}
+
+	if fieldVal.Kind() == reflect.Slice || fieldVal.Kind() == reflect.Array {
+		for i := 0; i < fieldVal.Len(); i++ {
+			elem := fieldVal.Index(i)
+			valStr := fmt.Sprintf("%v", elem.Interface())
+			if err := checkEnum(valStr, validValues, enumTag); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
 	valStr := fmt.Sprintf("%v", fieldVal.Interface())
+	return checkEnum(valStr, validValues, enumTag)
+}
+
+func checkEnum(valStr string, validValues []string, enumTag string) error {
 	for _, valid := range validValues {
 		if valStr == valid {
 			return nil

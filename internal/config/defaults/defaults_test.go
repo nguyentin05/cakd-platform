@@ -31,8 +31,8 @@ func TestApply(t *testing.T) {
 	}
 
 	svc := cfg.Services[0]
-	if svc.Version != "21" {
-		t.Errorf("Expected Service Version to be '21', got %q", svc.Version)
+	if svc.LanguageVersion != "21" {
+		t.Errorf("Expected Service LanguageVersion to be '21', got %q", svc.LanguageVersion)
 	}
 	if svc.Replicas != 1 {
 		t.Errorf("Expected Replicas to be 1, got %d", svc.Replicas)

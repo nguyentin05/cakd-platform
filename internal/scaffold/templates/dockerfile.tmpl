@@ -1,4 +1,16 @@
-FROM maven:3.9-eclipse-temurin-[[ .Service.Version ]] AS build
+[[ if eq .Service.ProjectBuild "gradle-project" "gradle-project-kotlin" ]]
+FROM gradle:jdk[[ if .Service.LanguageVersion ]][[ .Service.LanguageVersion ]][[ else ]]21[[ end ]] AS build
+WORKDIR /app
+COPY . .
+RUN ./gradlew clean build -x test
+
+FROM eclipse-temurin:[[ if .Service.LanguageVersion ]][[ .Service.LanguageVersion ]][[ else ]]21[[ end ]]-jre
+WORKDIR /app
+COPY --from=build /app/build/libs/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
+[[ else ]]
+FROM maven:3.9-eclipse-temurin-[[ if .Service.LanguageVersion ]][[ .Service.LanguageVersion ]][[ else ]]21[[ end ]] AS build
 WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline
@@ -6,8 +18,9 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:[[ .Service.Version ]]-jre
+FROM eclipse-temurin:[[ if .Service.LanguageVersion ]][[ .Service.LanguageVersion ]][[ else ]]21[[ end ]]-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
+[[ end ]]
