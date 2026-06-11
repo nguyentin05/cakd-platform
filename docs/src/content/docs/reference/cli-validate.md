@@ -26,7 +26,7 @@ cakd validate [flags]
 1.  `cakd validate` attempts to parse the `platform.yaml` file specified by the `--file` flag (or `platform.yaml` in the current directory if no flag is provided).
 2.  It unmarshals the YAML content into the internal `PlatformConfig` structure, validating the data against the expected schema.
 3.  If any structural or semantic errors are found during parsing, `cakd` prints a detailed error message to `stderr` and exits with a non-zero status code.
-4.  If the `platform.yaml` file is valid, `cakd` prints a success message to `stdout`, including the project's name, owner, and language extracted from the configuration.
+4.  If the `platform.yaml` file is valid, `cakd` prints a success message to `stdout`, including the project's name, owner, and the language of the first service extracted from the configuration.
 
 ## Examples
 
