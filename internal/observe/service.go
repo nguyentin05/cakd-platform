@@ -2,27 +2,19 @@ package observe
 
 import (
 	"fmt"
+
+	"github.com/nguyentin05/cakd-platform/internal/provider/llm"
+	"github.com/nguyentin05/cakd-platform/internal/provider/logging"
+	"github.com/nguyentin05/cakd-platform/internal/provider/monitoring"
 )
 
-type MetricsFetcher interface {
-	Fetch(namespace string) (string, error)
-}
-
-type LogFetcher interface {
-	Fetch(namespace string) (string, error)
-}
-
-type AIAnalyzer interface {
-	Analyze(prompt string) (string, error)
-}
-
 type ObserverService struct {
-	metrics MetricsFetcher
-	logs    LogFetcher
-	ai      AIAnalyzer
+	metrics monitoring.MetricsFetcher
+	logs    logging.LogFetcher
+	ai      llm.LLM
 }
 
-func NewObserverService(m MetricsFetcher, l LogFetcher, ai AIAnalyzer) *ObserverService {
+func NewObserverService(m monitoring.MetricsFetcher, l logging.LogFetcher, ai llm.LLM) *ObserverService {
 	return &ObserverService{
 		metrics: m,
 		logs:    l,

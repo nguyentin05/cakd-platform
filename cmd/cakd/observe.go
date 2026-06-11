@@ -6,6 +6,8 @@ import (
 
 	"github.com/nguyentin05/cakd-platform/internal/observe"
 	"github.com/nguyentin05/cakd-platform/internal/provider/llm/gemini"
+	"github.com/nguyentin05/cakd-platform/internal/provider/logging/loki"
+	"github.com/nguyentin05/cakd-platform/internal/provider/monitoring/prometheus"
 	"github.com/spf13/cobra"
 )
 
@@ -25,8 +27,8 @@ var observeCmd = &cobra.Command{
 
 		fmt.Printf("Starting AI Observability for project: %s\n", projectName)
 
-		metrics := observe.NewPrometheusClient()
-		logs := observe.NewLokiClient()
+		metrics := prometheus.NewClient()
+		logs := loki.NewClient()
 		ai := gemini.NewClient(apiKey)
 
 		service := observe.NewObserverService(metrics, logs, ai)

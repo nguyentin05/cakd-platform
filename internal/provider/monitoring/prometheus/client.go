@@ -1,4 +1,4 @@
-package observe
+package prometheus
 
 import (
 	"encoding/json"
@@ -6,10 +6,10 @@ import (
 	"os/exec"
 )
 
-type PrometheusClient struct{}
+type Client struct{}
 
-func NewPrometheusClient() *PrometheusClient {
-	return &PrometheusClient{}
+func NewClient() *Client {
+	return &Client{}
 }
 
 type PrometheusResponse struct {
@@ -21,7 +21,7 @@ type PrometheusResponse struct {
 	} `json:"data"`
 }
 
-func (c *PrometheusClient) Fetch(namespace string) (string, error) {
+func (c *Client) Fetch(namespace string) (string, error) {
 	query := fmt.Sprintf(`kube_pod_container_status_restarts_total{namespace="%s"}`, namespace)
 	url := fmt.Sprintf("/api/v1/namespaces/monitoring/services/prometheus-k8s:9090/proxy/api/v1/query?query=%s", query)
 
