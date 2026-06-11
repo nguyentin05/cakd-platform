@@ -1,3 +1,10 @@
+## [0.8.4](https://github.com/nguyentin05/cakd-platform/compare/v0.8.3...v0.8.4) (2026-06-11)
+
+
+### Bug Fixes
+
+* update path for ci template ([7ac7a54](https://github.com/nguyentin05/cakd-platform/commit/7ac7a54c56739ddd26c20d6f45cc9e29314b9f93))
+
 ## [0.8.3](https://github.com/nguyentin05/cakd-platform/compare/v0.8.2...v0.8.3) (2026-06-11)
 
 
