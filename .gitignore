@@ -33,8 +33,8 @@ report.md
 .cursorrules
 
 # Ignore build binaries and linters
-cakd
-cakd-agent
+/cakd
+/cakd-agent
 .golangci.bck.yml
 golangci-lint-2.12.2-linux-amd64/cakd-agent
 golangci-lint-2.12.2-linux-amd64/
