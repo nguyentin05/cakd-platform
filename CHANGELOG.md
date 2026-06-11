@@ -1,3 +1,10 @@
+# [0.9.0](https://github.com/nguyentin05/cakd-platform/compare/v0.8.4...v0.9.0) (2026-06-11)
+
+
+### Features
+
+* implement dynamic version registry and ci scheduler ([ada159f](https://github.com/nguyentin05/cakd-platform/commit/ada159fcd17056649b941a7dfb0e253df1c6d05c))
+
 ## [0.8.4](https://github.com/nguyentin05/cakd-platform/compare/v0.8.3...v0.8.4) (2026-06-11)
 
 
