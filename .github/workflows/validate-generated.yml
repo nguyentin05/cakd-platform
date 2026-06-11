@@ -51,4 +51,4 @@ jobs:
         uses: azure/setup-helm@v5
 
       - name: Helm Lint
-        run: helm lint out/*/*/helm
+        run: helm lint out/*/services/*/helm

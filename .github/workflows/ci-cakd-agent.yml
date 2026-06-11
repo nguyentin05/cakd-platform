@@ -6,6 +6,13 @@ on:
       - "v*"
     branches:
       - main
+    paths:
+      - 'cmd/cakd-agent/**'
+      - 'internal/**'
+      - 'build/cakd-agent/**'
+      - 'go.mod'
+      - 'go.sum'
+      - '.github/workflows/ci-cakd-agent.yml'
 
 jobs:
   docker:
@@ -40,6 +47,6 @@ jobs:
         with:
           context: .
           file: build/cakd-agent/Dockerfile
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
