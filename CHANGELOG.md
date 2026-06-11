@@ -1,3 +1,10 @@
+# [0.10.0](https://github.com/nguyentin05/cakd-platform/compare/v0.9.5...v0.10.0) (2026-06-11)
+
+
+### Features
+
+* implement 3-layer secret management fallback engine and auth cli commands ([#18](https://github.com/nguyentin05/cakd-platform/issues/18)) ([0e3f174](https://github.com/nguyentin05/cakd-platform/commit/0e3f1741f99b99fa473716be5250fed512f4962c))
+
 ## [0.9.5](https://github.com/nguyentin05/cakd-platform/compare/v0.9.4...v0.9.5) (2026-06-11)
 
 
