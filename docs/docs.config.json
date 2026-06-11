@@ -3,8 +3,8 @@
     {
       "id": "cli-create",
       "sources": [
-        "cmd/cakd/main.go",
-        "internal/create/create.go",
+        "cmd/cakd/create.go",
+        "internal/pipeline/pipeline.go",
         "internal/config/schema.go",
         "internal/config/parser.go"
       ],
@@ -16,10 +16,10 @@
       "sources": [
         "internal/config/schema.go",
         "internal/config/parser.go",
-        "internal/create/create.go",
-        "internal/template/engine.go",
-        "internal/terraform/bridge.go",
-        "internal/git/git.go"
+        "internal/pipeline/pipeline.go",
+        "internal/scaffold/engine.go",
+        "internal/iac/terraform/bridge.go",
+        "internal/provider/version_control/github/client.go"
       ],
       "target": "src/content/docs/explanation/architecture.md",
       "promptTemplate": "prompts/architecture.md"
@@ -27,8 +27,8 @@
     {
       "id": "tutorial-quickstart",
       "sources": [
-        "cmd/cakd/main.go",
-        "internal/create/create.go",
+        "cmd/cakd/create.go",
+        "internal/pipeline/pipeline.go",
         "internal/config/schema.go"
       ],
       "target": "src/content/docs/tutorials/quickstart.md",
@@ -44,7 +44,7 @@
       "id": "cli-init",
       "sources": [
         "cmd/cakd/init.go",
-        "internal/init/init.go"
+        "internal/cluster/bootstrap.go"
       ],
       "target": "src/content/docs/reference/cli-init.md",
       "promptTemplate": "prompts/command-reference.md"
@@ -53,10 +53,10 @@
       "id": "cli-observe",
       "sources": [
         "cmd/cakd/observe.go",
-        "internal/observe/observe.go",
-        "internal/observe/prometheus.go",
-        "internal/observe/loki.go",
-        "internal/observe/llm.go"
+        "internal/observe/service.go",
+        "internal/provider/monitoring/prometheus/client.go",
+        "internal/provider/logging/loki/client.go",
+        "internal/provider/llm/gemini/llm.go"
       ],
       "target": "src/content/docs/reference/cli-observe.md",
       "promptTemplate": "prompts/command-reference.md"
@@ -73,11 +73,21 @@
     {
       "id": "howto-discord-alert",
       "sources": [
-        "internal/discord/client.go",
-        "internal/create/create.go"
+        "internal/provider/notify/discord/client.go",
+        "internal/pipeline/notify.go"
       ],
       "target": "src/content/docs/how-to-guides/setup-discord-alerts.md",
       "promptTemplate": "prompts/howto-guide.md"
+    },
+    {
+      "id": "cli-agent",
+      "sources": [
+        "cmd/cakd-agent/main.go",
+        "internal/agent/server.go",
+        "internal/agent/alertmanager.go"
+      ],
+      "target": "src/content/docs/reference/cli-agent.md",
+      "promptTemplate": "prompts/command-reference.md"
     }
   ]
 }

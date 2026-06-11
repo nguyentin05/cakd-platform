@@ -9,72 +9,62 @@ sidebar:
 
 Before you begin, ensure you have:
 
-- [ ] [Go 1.21+](https://go.dev/dl/) installed
-- [ ] [Terraform](https://developer.hashicorp.com/terraform/install) installed  
-- [ ] [Minikube](https://minikube.sigs.k8s.io/docs/start/) installed and running
-- [ ] A [GitHub Personal Access Token](https://github.com/settings/tokens) with `repo` scope
+- [ ] [Go 1.24+](https://go.dev/dl/) installed
+- [ ] [Terraform](https://developer.hashicorp.com/terraform/install) installed
+- [ ] A Kubernetes cluster (Minikube or similar) with kubeconfig access
+- [ ] A GitHub Personal Access Token with `repo` and `delete_repo` scopes
 - [ ] `GITHUB_TOKEN` environment variable set
 
-## Step 1: Install CAKD
+## Step 1: Install the `cakd` CLI
 
-Install the `cakd` CLI binary using `go install`. This command fetches the source code, compiles it, and places the executable in your Go binary path (e.g., `~/go/bin`).
+Install the CLI into your Go bin path:
 
 ```bash
 go install github.com/nguyentin05/cakd-platform/cmd/cakd@latest
 ```
 
-## Step 2: Create your `platform.yaml`
+## Step 2: Create a minimal `platform.yaml`
 
-Create a file named `platform.yaml` with the following minimal configuration. This defines the basic properties of your new `project` and its services.
+Create `platform.yaml` in your working directory. This minimal example is valid against the schema shown in the repository.
 
 ```yaml
-apiVersion: platform.cakd.dev/v1alpha1
+apiVersion: platform.dev/v1alpha1
 kind: Project
 metadata:
   name: my-first-project
   owner: my-team
 services:
-  - name: my-service
+  - name: api
     language: java-spring-boot
-    version: 3.2.0
+    languageVersion: "21"
+    projectBuild: gradle-project
+    packaging: jar
 ```
 
 ## Step 3: Bootstrap your project
 
-Run the `cakd create` command, pointing it to your `platform.yaml` file. This command will `bootstrap` your `project` by generating code, creating a GitHub repository, pushing the code, and registering an ArgoCD application.
+Run the create pipeline to generate project files, provision a GitHub repository via Terraform, push the generated code, and register an ArgoCD application.
 
 ```bash
 cakd create -f platform.yaml
 ```
 
 :::tip Expected output
-A successful run of `cakd create` displays progress messages for each step, followed by a summary:
-
-```text
-Starting create for project: my-first-project
-Step 1/4: Generating project...
-   Downloading base project from start.spring.io...
-   Spring Boot base project generated (official)
-   Applying CAKD templates (Dockerfile, Helm, CI, ArgoCD)...
-   Project ready at: ./out/my-first-project
-Step 2/4: Creating GitHub repository via Terraform...
-Step 3/4: Pushing code to repository...
-Step 4/4: Registering ArgoCD application...
-   ArgoCD application registered successfully
-
-═══════════════════════════════════════════════
-Project created successfully!
-Repository: https://github.com/my-team/my-first-project
-Local code: ./out/my-first-project
-Deployment: Managed by ArgoCD (GitOps)
-═══════════════════════════════════════════════
-```
-(Note: The actual GitHub repository URL will vary based on your GitHub organization/user and project name.)
+You will see step progress logs (Scaffold, Infra, Notify, VersionControl, Deploy) and a final summary showing the repository URL and local output path.
 :::
 
-## Step 4: Verify the result
+## Step 4: Start the agent (optional)
 
-Verify that the `project` directory was created locally and that the ArgoCD application is registered.
+If you want real-time diagnostics, run the agent after setting a webhook receiver (Discord):
+
+```bash
+export DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/..."
+cakd-agent
+```
+
+## Step 5: Verify
+
+Confirm the project folder exists and ArgoCD has the application registered:
 
 ```bash
 ls -F out/my-first-project/
@@ -83,15 +73,11 @@ kubectl get app my-first-project -n argocd
 
 ## What was created
 
-The `cakd create` command generated the following:
+- A local project under `out/{project-name}` populated by the template engine.
+- A GitHub repository provisioned via the Terraform Bridge and pushed by the VCS provider.
+- An ArgoCD Application registered in your cluster to deploy the project.
 
--   A local `project` directory named `out/my-first-project` containing:
-    -   A base Spring Boot `project` (if `java-spring-boot` was specified).
-    -   CAKD-specific templates, including a `Dockerfile`, Helm charts, CI/CD pipeline configurations, and an ArgoCD application manifest. This was handled by the `template engine`.
--   A new GitHub repository (e.g., `https://github.com/my-team/my-first-project`) with the generated code pushed to it. This was handled by the `Terraform Bridge`.
--   An ArgoCD application registered in your Kubernetes cluster, configured to deploy your new `project` from the GitHub repository.
+## Next steps
 
-## Next Steps
-
-- [Full CLI reference](/reference/cli/)
-- [How to set up Discord alerts](/how-to-guides/setup-discord-alerts/)
+- Read the full CLI reference: [/reference/cli/](/reference/cli/)
+- Configure alerting/notifications: [/how-to-guides/setup-discord-alerts/](/how-to-guides/setup-discord-alerts/)
