@@ -4,9 +4,8 @@ import (
 	"reflect"
 )
 
-// dynamic is a recursive helper that traverses an arbitrary reflected value.
-// It dives into pointers, slices, and arrays to locate structs. Once a struct
-// is found, it delegates to dynamicStruct to inject default values.
+// dynamic recursively inspects a reflected value, dereferencing pointers and
+// iterating through slices/arrays to locate struct fields for default value injection.
 func dynamic(v reflect.Value) {
 	if v.Kind() == reflect.Pointer {
 		if v.IsNil() {
@@ -28,12 +27,9 @@ func dynamic(v reflect.Value) {
 	}
 }
 
-// dynamicStruct iterates over all exported fields of a struct.
-// It performs two critical operations:
-//  1. Pointer Initialization: If a pointer field is nil but its underlying struct
-//     contains fields with `default` tags, it instantiates the pointer to avoid nil panics.
-//  2. Value Injection: If a field is at its zero-value and has a `default` tag,
-//     it parses the tag and applies the appropriate default value.
+// dynamicStruct iterates over all exported fields of the given struct value.
+// It initializes nil pointers if their targets contain default tags, and
+// resolves default values for empty fields.
 func dynamicStruct(v reflect.Value) {
 	for i := 0; i < v.NumField(); i++ {
 		fieldVal := v.Field(i)

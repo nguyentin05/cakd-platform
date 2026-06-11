@@ -2,6 +2,7 @@ package agent
 
 import "time"
 
+// AlertmanagerPayload represents the incoming webhook payload format received from Prometheus Alertmanager.
 type AlertmanagerPayload struct {
 	Receiver string  `json:"receiver"`
 	Status   string  `json:"status"`
@@ -9,6 +10,7 @@ type AlertmanagerPayload struct {
 	GroupKey string  `json:"groupKey"`
 }
 
+// Alert represents a single alert instance within the Alertmanager webhook payload.
 type Alert struct {
 	Status       string            `json:"status"`
 	Labels       map[string]string `json:"labels"`

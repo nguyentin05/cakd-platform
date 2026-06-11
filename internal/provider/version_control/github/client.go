@@ -7,12 +7,17 @@ import (
 	"path/filepath"
 )
 
+// Client implements the [version_control.VersionControl] interface for GitHub.
+// It manages local git initialization and pushing committed code to GitHub repositories.
 type Client struct{}
 
+// NewClient initializes and returns a new GitHub VCS Client.
 func NewClient() *Client {
 	return &Client{}
 }
 
+// InitAndPush initializes a local git repository, commits the generated code files,
+// inserts the authentication token into the repository clone URL, and pushes the code to GitHub.
 func (c *Client) InitAndPush(projectDir, repoCloneURL, ghToken string) error {
 	os.RemoveAll(filepath.Join(projectDir, ".git"))
 
@@ -49,6 +54,8 @@ func (c *Client) InitAndPush(projectDir, repoCloneURL, ghToken string) error {
 	return nil
 }
 
+// insertTokenInURL embeds the personal access token directly into the HTTPS clone URL
+// to authenticate push requests.
 func insertTokenInURL(cloneURL, token string) string {
 	const prefix = "https://"
 	if len(cloneURL) > len(prefix) {
@@ -57,6 +64,8 @@ func insertTokenInURL(cloneURL, token string) string {
 	return cloneURL
 }
 
+// run is a helper that executes a git command in the specified directory,
+// redirecting standard outputs and errors.
 func run(dir string, args ...string) error {
 	cmd := exec.Command("git", args...)
 	cmd.Dir = dir

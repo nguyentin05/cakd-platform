@@ -8,15 +8,20 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/provider"
 )
 
-// NotifyStep provisions notification channels.
+// NotifyStep is an optional pipeline step responsible for provisioning notification channels
+// (such as a Discord channel and webhook) for system alerts and deployment status.
 type NotifyStep struct{}
 
+// Name returns the step description.
 func (s *NotifyStep) Name() string { return "Provisioning Notification Channels" }
 
+// ShouldRun returns true if a notification provider is configured in platform.yaml.
 func (s *NotifyStep) ShouldRun(ctx *Context) bool {
 	return ctx.Cfg.Providers.Notification != ""
 }
 
+// Run creates the notification channel/webhook through the configured provider,
+// then persists the routing webhook endpoint locally and in Kubernetes.
 func (s *NotifyStep) Run(ctx *Context) error {
 	notifier, err := provider.GetNotifyProvider(ctx.Cfg.Providers.Notification)
 	if err != nil {

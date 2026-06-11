@@ -11,11 +11,13 @@ import (
 	"golang.org/x/term"
 )
 
+// authCmd is the base command for credential management subcommands.
 var authCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Manage authentication credentials for providers (GitHub, Discord, Gemini)",
 }
 
+// loginCmd defines the 'auth login' subcommand for registering credentials securely.
 var loginCmd = &cobra.Command{
 	Use:   "login [provider]",
 	Short: "Log in to a provider (github, discord, gemini)",
@@ -96,6 +98,7 @@ var loginCmd = &cobra.Command{
 	},
 }
 
+// statusCmd defines the 'auth status' subcommand for displaying masked credential settings.
 var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Show authentication status for all providers",
@@ -117,6 +120,7 @@ var statusCmd = &cobra.Command{
 	},
 }
 
+// logoutCmd defines the 'auth logout' subcommand for removing credential records.
 var logoutCmd = &cobra.Command{
 	Use:   "logout [provider]",
 	Short: "Log out from a provider (github, discord, gemini)",
@@ -148,6 +152,7 @@ var logoutCmd = &cobra.Command{
 	},
 }
 
+// maskSecret returns a masked version of a secret token for secure display.
 func maskSecret(secret string) string {
 	if secret == "" {
 		return "❌ Not Authenticated"
@@ -158,6 +163,7 @@ func maskSecret(secret string) string {
 	return fmt.Sprintf("✅ Authenticated (ends in ...%s)", secret[len(secret)-4:])
 }
 
+// maskGuildID formats the guild ID string for secure display.
 func maskGuildID(id string) string {
 	if id == "" {
 		return "not set"

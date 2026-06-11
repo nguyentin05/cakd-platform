@@ -14,6 +14,8 @@ var (
 	optLogging    bool
 )
 
+// initCmd defines the 'init' CLI command which bootstraps the Kubernetes cluster
+// with required tools like ArgoCD, Prometheus, Loki, and the CAKD Agent.
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Bootstrap the Kubernetes cluster with Platform Infrastructure (ArgoCD, Prometheus, Loki)",

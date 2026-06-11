@@ -14,6 +14,8 @@ var (
 	forceCreate    bool
 )
 
+// createCmd defines the 'create' CLI command which parses a platform config file and
+// executes the project bootstrapping/provisioning steps.
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a new cloud-native project from platform.yaml",

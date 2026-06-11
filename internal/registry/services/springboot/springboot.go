@@ -2,7 +2,7 @@ package springboot
 
 import "github.com/nguyentin05/cakd-platform/internal/registry/backing"
 
-// ConfigFormats defines valid configuration file formats.
+// ConfigFormats defines valid configuration file formats supported for Spring Boot services.
 var ConfigFormats = []string{"yaml", "properties"}
 
 const dataJPA = "data-jpa"

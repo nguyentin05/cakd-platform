@@ -10,6 +10,8 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/provider/notify/discord"
 )
 
+// main is the entry point for the CAKD Agent server.
+// It parses the Discord webhook configurations and starts an HTTP server listening for Alertmanager webhooks.
 func main() {
 	webhookURL := os.Getenv("DISCORD_WEBHOOK_URL")
 	if webhookURL == "" {

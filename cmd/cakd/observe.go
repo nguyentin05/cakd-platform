@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/observe"
 	"github.com/nguyentin05/cakd-platform/internal/provider/llm/gemini"
 	"github.com/nguyentin05/cakd-platform/internal/provider/logging/loki"
@@ -11,6 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// observeCmd defines the 'observe' CLI command which calls the AI Diagnostic engine
+// to analyze cluster metrics and logs for a project namespace.
 var observeCmd = &cobra.Command{
 	Use:   "observe <project-name>",
 	Short: "Use AI to observe, diagnose, and troubleshoot a project",
@@ -18,10 +21,9 @@ var observeCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		projectName := args[0]
 
-		apiKey := os.Getenv("GEMINI_API_KEY")
+		apiKey := config.GetGeminiAPIKey()
 		if apiKey == "" {
-			fmt.Fprintln(os.Stderr, "Error: GEMINI_API_KEY environment variable is required")
-			fmt.Fprintln(os.Stderr, "Please set it using: export GEMINI_API_KEY=\"your_api_key\"")
+			fmt.Fprintln(os.Stderr, "Error: Gemini API Key is required")
 			os.Exit(1)
 		}
 

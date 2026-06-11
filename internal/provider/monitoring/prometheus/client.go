@@ -6,12 +6,16 @@ import (
 	"os/exec"
 )
 
+// Client implements the [monitoring.MetricsFetcher] interface for Prometheus.
+// It queries container metrics from the Prometheus server running inside the Kubernetes cluster.
 type Client struct{}
 
+// NewClient initializes and returns a new Prometheus Client.
 func NewClient() *Client {
 	return &Client{}
 }
 
+// PrometheusResponse represents the structured query response format returned by the Prometheus query API.
 type PrometheusResponse struct {
 	Data struct {
 		Result []struct {
@@ -21,6 +25,8 @@ type PrometheusResponse struct {
 	} `json:"data"`
 }
 
+// Fetch queries the Prometheus service inside the cluster (via kubectl proxy) to retrieve container status
+// metrics (such as restarts) for all pods running inside the specified namespace.
 func (c *Client) Fetch(namespace string) (string, error) {
 	query := fmt.Sprintf(`kube_pod_container_status_restarts_total{namespace="%s"}`, namespace)
 	url := fmt.Sprintf("/api/v1/namespaces/monitoring/services/prometheus-k8s:9090/proxy/api/v1/query?query=%s", query)

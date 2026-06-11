@@ -5,13 +5,13 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/registry"
 )
 
-// TemplateMapping represents a single template-to-output file mapping.
+// TemplateMapping defines the source embedded template path and its target output file path relative to the destination.
 type TemplateMapping struct {
 	Template string
 	Output   string
 }
 
-// GlobalMappings returns the list of project-level templates to render based on config.
+// GlobalMappings returns the set of project-level file mappings to generate (e.g. .gitignore, CI workflows, and ArgoCD application specs) depending on the configuration.
 func GlobalMappings(cfg *config.PlatformConfig) []TemplateMapping {
 	mappings := []TemplateMapping{
 		{"templates/gitignore.tmpl", ".gitignore"},
@@ -28,7 +28,7 @@ func GlobalMappings(cfg *config.PlatformConfig) []TemplateMapping {
 	return mappings
 }
 
-// ServiceMappings returns the list of per-service templates to render.
+// ServiceMappings returns the list of file mappings to generate specifically for an individual microservice, such as Dockerfiles, Helm charts, and Spring application configuration formats.
 func ServiceMappings(cfg *config.PlatformConfig, svc config.Service) []TemplateMapping {
 	mappings := []TemplateMapping{
 		{"templates/dockerfile.tmpl", "Dockerfile"},
@@ -65,6 +65,7 @@ func ServiceMappings(cfg *config.PlatformConfig, svc config.Service) []TemplateM
 	return mappings
 }
 
+// usesDB returns true if a service declares dependencies on relational databases like PostgreSQL or MySQL.
 func usesDB(cfg *config.PlatformConfig, svc config.Service) bool {
 	for _, use := range svc.Uses {
 		for _, b := range cfg.Backing {

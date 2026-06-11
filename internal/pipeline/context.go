@@ -8,17 +8,22 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/config"
 )
 
-// Context holds all shared state between pipeline steps.
+// Context holds all shared state and runtime properties between pipeline steps.
+// It acts as the single source of truth for step configurations and execution outputs.
 type Context struct {
-	Cfg    *config.PlatformConfig
+	// Cfg represents the parsed configuration of the platform.
+	Cfg *config.PlatformConfig
+	// OutDir is the target directory where all scaffolding files will be written.
 	OutDir string
-	Force  bool
+	// Force indicates whether to overwrite the target directory if it already exists.
+	Force bool
 
-	// TfOutputs holds Terraform outputs written by InfraStep and read by VersionControlStep.
+	// TfOutputs caches the key-value outputs produced by Terraform during the InfraStep.
+	// These values are typically consumed by downstream VCS and Deployment steps.
 	TfOutputs map[string]string
 }
 
-// NewContext creates a new pipeline context.
+// NewContext creates a new initialized pipeline Context with default output paths.
 func NewContext(cfg *config.PlatformConfig, force bool) *Context {
 	return &Context{
 		Cfg:    cfg,
@@ -27,7 +32,8 @@ func NewContext(cfg *config.PlatformConfig, force bool) *Context {
 	}
 }
 
-// Prepare sets up the output directory.
+// Prepare sets up the output directory by validating if it exists, cleaning it
+// if the force flag is active, and creating the directory path.
 func (c *Context) Prepare() error {
 	fmt.Printf("Starting create for project: %s\n", c.Cfg.Metadata.Name)
 

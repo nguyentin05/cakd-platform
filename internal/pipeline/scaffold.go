@@ -9,11 +9,15 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/scaffold"
 )
 
-// ScaffoldStep generates the project structure and applies templates.
+// ScaffoldStep is a pipeline step responsible for generating the initial codebase skeletons
+// for all defined microservices and rendering the global CAKD boilerplate templates (e.g., Dockerfile, CI/CD, Helm).
 type ScaffoldStep struct{}
 
+// Name returns the step description.
 func (s *ScaffoldStep) Name() string { return "Scaffolding project structure" }
 
+// Run triggers the scaffolding process by invoking language-specific app providers
+// for each microservice and rendering global deployment/CI configuration files.
 func (s *ScaffoldStep) Run(ctx *Context) error {
 	for _, svc := range ctx.Cfg.Services {
 		appProvider, err := provider.GetAppProvider(svc.Language)

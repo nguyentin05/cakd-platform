@@ -8,12 +8,16 @@ import (
 	"strings"
 )
 
+// Client implements the [logging.LogFetcher] interface for Grafana Loki.
+// It queries log streams from the Loki service running inside the Kubernetes cluster.
 type Client struct{}
 
+// NewClient initializes and returns a new Loki Client.
 func NewClient() *Client {
 	return &Client{}
 }
 
+// LokiResponse represents the structured query response format returned by the Grafana Loki API.
 type LokiResponse struct {
 	Data struct {
 		Result []struct {
@@ -23,6 +27,8 @@ type LokiResponse struct {
 	} `json:"data"`
 }
 
+// Fetch queries the Loki service inside the cluster (via kubectl proxy) to retrieve the recent
+// 50 logs for all containers running inside the specified namespace.
 func (c *Client) Fetch(namespace string) (string, error) {
 	query := fmt.Sprintf(`{namespace="%s"}`, namespace)
 	encodedQuery := url.QueryEscape(query)

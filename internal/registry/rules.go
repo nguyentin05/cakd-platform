@@ -1,5 +1,6 @@
 package registry
 
+// Condition specifies the operator type evaluated by the rule engine (e.g. NotEmpty, IsTrue).
 type Condition string
 
 const (
@@ -8,6 +9,8 @@ const (
 	NotNil   Condition = "NotNil"
 )
 
+// DependencyRule defines a conditional relationship between two configuration paths
+// which must be satisfied to pass business logic validation.
 type DependencyRule struct {
 	IfPath   string    // Path to the condition field (e.g., "Providers.CI")
 	IfCond   Condition // The condition that triggers the rule
@@ -16,6 +19,7 @@ type DependencyRule struct {
 	ErrorMsg string    // Error message if the rule is violated
 }
 
+// BusinessRules defines the list of cross-field constraints evaluated during validation.
 var BusinessRules = []DependencyRule{
 	{
 		IfPath:   "Providers.CD",

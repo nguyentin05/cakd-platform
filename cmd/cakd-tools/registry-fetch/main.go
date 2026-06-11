@@ -91,6 +91,8 @@ type TemplateData struct {
 	Dependencies  []string
 }
 
+// main is the entry point for the registry-fetch tool which downloads Spring Boot initializr metadata
+// and generates versions_generated.go.
 func main() {
 	body, err := fetchMetadata()
 	if err != nil {
@@ -109,6 +111,7 @@ func main() {
 	fmt.Println("Successfully generated internal/registry/services/springboot/versions_generated.go")
 }
 
+// fetchMetadata queries the start.spring.io metadata endpoint and returns the raw JSON body.
 func fetchMetadata() ([]byte, error) {
 	req, err := http.NewRequest("GET", "https://start.spring.io/metadata/client", nil)
 	if err != nil {
@@ -134,6 +137,7 @@ func fetchMetadata() ([]byte, error) {
 	return body, nil
 }
 
+// parseMetadata unmarshals the Initializr JSON metadata and extracts supported version lists.
 func parseMetadata(body []byte) (TemplateData, error) {
 	var meta InitializrMetadata
 	if err := json.Unmarshal(body, &meta); err != nil {
@@ -171,6 +175,8 @@ func parseMetadata(body []byte) (TemplateData, error) {
 	return data, nil
 }
 
+// writeGeneratedFile executes the template with the parsed metadata, formats the generated Go code,
+// and writes it to internal/registry/services/springboot/versions_generated.go.
 func writeGeneratedFile(data TemplateData) error {
 	t, err := template.New("registry").Parse(tpl)
 	if err != nil {

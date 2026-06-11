@@ -13,12 +13,15 @@ import (
 
 const discordAPIURL = "https://discord.com/api/v10"
 
+// Client implements the [notify.Notifier] interface for Discord.
+// It manages channel provisioning and dispatching alert embeds via webhooks.
 type Client struct {
 	token   string
 	guildID string
 	client  *http.Client
 }
 
+// NewClient initializes and returns a new Discord client configured with a bot token and server guild ID.
 func NewClient(token, guildID string) *Client {
 	return &Client{
 		token:   token,
@@ -27,11 +30,13 @@ func NewClient(token, guildID string) *Client {
 	}
 }
 
+// ChannelResponse represents the channel details returned by the Discord API.
 type ChannelResponse struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
+// WebhookResponse represents the webhook details returned by the Discord API.
 type WebhookResponse struct {
 	ID    string `json:"id"`
 	Token string `json:"token"`
@@ -67,6 +72,7 @@ func (c *Client) doRequest(method, url string, payload, result any) error {
 	return json.NewDecoder(resp.Body).Decode(result)
 }
 
+// CreateChannel creates a new text channel in the Discord guild for system alerts.
 func (c *Client) CreateChannel(projectName string) (string, error) {
 	url := fmt.Sprintf("%s/guilds/%s/channels", discordAPIURL, c.guildID)
 	payload := map[string]interface{}{
@@ -81,6 +87,7 @@ func (c *Client) CreateChannel(projectName string) (string, error) {
 	return resp.ID, nil
 }
 
+// CreateWebhook generates a Discord webhook URL for the specified channel.
 func (c *Client) CreateWebhook(channelID string, projectName string) (string, error) {
 	url := fmt.Sprintf("%s/channels/%s/webhooks", discordAPIURL, channelID)
 	payload := map[string]interface{}{
@@ -99,6 +106,7 @@ func (c *Client) CreateWebhook(channelID string, projectName string) (string, er
 	return webhookURL, nil
 }
 
+// ProvisionChannel creates a dedicated Discord channel for the project and provisions a webhook.
 func (c *Client) ProvisionChannel(projectName string) (string, error) {
 	fmt.Printf("   Creating Discord channel for %s...\n", projectName)
 	channelID, err := c.CreateChannel(projectName)
@@ -115,6 +123,7 @@ func (c *Client) ProvisionChannel(projectName string) (string, error) {
 	return webhookURL, nil
 }
 
+// DiscordEmbed defines the structure of a rich message embed block for Discord webhook messages.
 type DiscordEmbed struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -122,11 +131,13 @@ type DiscordEmbed struct {
 	Timestamp   string `json:"timestamp,omitempty"`
 }
 
+// DiscordWebhookPayload represents the complete payload sent to a Discord webhook URL.
 type DiscordWebhookPayload struct {
 	Content string         `json:"content,omitempty"`
 	Embeds  []DiscordEmbed `json:"embeds,omitempty"`
 }
 
+// SendAlert converts the abstract notify alert items into rich Discord embeds and posts them to the webhook.
 func (c *Client) SendAlert(webhookURL string, payload notify.AlertPayload) error {
 	embeds := make([]DiscordEmbed, 0, len(payload.Items))
 

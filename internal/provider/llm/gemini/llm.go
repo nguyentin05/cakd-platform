@@ -8,28 +8,34 @@ import (
 	"net/http"
 )
 
+// Client implements the [llm.LLM] interface for interacting with the Google Gemini API.
 type Client struct {
 	apiKey string
 }
 
+// NewClient initializes and returns a new Gemini API Client.
 func NewClient(apiKey string) *Client {
 	return &Client{
 		apiKey: apiKey,
 	}
 }
 
+// GeminiRequest represents the request body payload structure for the Gemini API.
 type GeminiRequest struct {
 	Contents []Content `json:"contents"`
 }
 
+// Content holds a list of parts inside the Gemini Request structure.
 type Content struct {
 	Parts []Part `json:"parts"`
 }
 
+// Part holds the textual chunk payload.
 type Part struct {
 	Text string `json:"text"`
 }
 
+// GeminiResponse represents the structured JSON response payload returned by the Gemini API.
 type GeminiResponse struct {
 	Candidates []struct {
 		Content struct {
@@ -38,6 +44,7 @@ type GeminiResponse struct {
 	} `json:"candidates"`
 }
 
+// Analyze queries the Gemini API with the provided prompt text and returns the generated content diagnosis response.
 func (c *Client) Analyze(prompt string) (string, error) {
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=%s", c.apiKey)
 

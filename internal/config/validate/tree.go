@@ -16,6 +16,8 @@ func Structure(cfg any) error {
 	return tree(reflect.ValueOf(cfg), "config")
 }
 
+// tree recursively traverses a reflect.Value representing the configuration tree
+// to enforce structural rules and handle slice/array elements.
 func tree(v reflect.Value, path string) error {
 	if v.Kind() == reflect.Pointer {
 		if v.IsNil() {
@@ -45,6 +47,8 @@ func tree(v reflect.Value, path string) error {
 	return nil
 }
 
+// validateStructEmptyParent verifies that if a struct pointer block is declared in the YAML
+// (e.g. observability:), it contains at least one non-zero sub-field instead of being left empty.
 func validateStructEmptyParent(elem reflect.Value, path string) error {
 	if elem.Kind() != reflect.Struct {
 		return nil
@@ -69,6 +73,8 @@ func validateStructEmptyParent(elem reflect.Value, path string) error {
 	return nil
 }
 
+// validateField checks an individual struct field's required tag constraints and enum limits,
+// then continues recursive tree traversal on the field value.
 func validateField(fieldVal reflect.Value, structField reflect.StructField, path string) error {
 	if !structField.IsExported() {
 		return nil
@@ -101,6 +107,8 @@ func validateField(fieldVal reflect.Value, structField reflect.StructField, path
 	return tree(fieldVal, newPath)
 }
 
+// validateEnum checks if a field's value (or its elements if it is a slice/array)
+// is registered as a valid option under registry.Enums.
 func validateEnum(fieldVal reflect.Value, enumTag string) error {
 	validValues, exists := registry.Enums[enumTag]
 	if !exists {
@@ -122,6 +130,7 @@ func validateEnum(fieldVal reflect.Value, enumTag string) error {
 	return checkEnum(valStr, validValues, enumTag)
 }
 
+// checkEnum evaluates if a single string matches any of the registered valid enum values.
 func checkEnum(valStr string, validValues []string, enumTag string) error {
 	for _, valid := range validValues {
 		if valStr == valid {

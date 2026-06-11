@@ -9,11 +9,16 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/provider"
 )
 
-// VersionControlStep pushes the generated code to a remote repository.
+// VersionControlStep is a pipeline step responsible for committing the generated application files,
+// initializing a git repository, and pushing it to a remote provider (e.g. GitHub).
+// It also coordinates automatic Terraform rollback in case the repository upload fails.
 type VersionControlStep struct{}
 
+// Name returns the step description.
 func (s *VersionControlStep) Name() string { return "Pushing code to repository" }
 
+// Run resolves credentials, invokes the VCS client to push code to the remote repository,
+// and runs resource rollback if git push encounters an error.
 func (s *VersionControlStep) Run(ctx *Context) error {
 	vcsProvider, err := provider.GetVersionControlProvider(ctx.Cfg.Providers.VersionControl)
 	if err != nil {

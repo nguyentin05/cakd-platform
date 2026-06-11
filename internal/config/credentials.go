@@ -10,7 +10,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Credentials represents the structured YAML config for local auth tokens.
+// Credentials represents the structured YAML configuration containing local authentication tokens
+// and keys for various integrated providers (such as GitHub, Discord, and Gemini).
 type Credentials struct {
 	Github struct {
 		Token string `yaml:"token"`
@@ -38,7 +39,8 @@ const (
 
 var credentialsPathOverride string
 
-// GetCredentialsPath returns the absolute path to ~/.cakd/credentials.yaml.
+// GetCredentialsPath returns the absolute path to the local credentials file (~/.cakd/credentials.yaml).
+// If a custom override path has been set, it returns the override path instead.
 func GetCredentialsPath() (string, error) {
 	if credentialsPathOverride != "" {
 		return credentialsPathOverride, nil
@@ -50,7 +52,8 @@ func GetCredentialsPath() (string, error) {
 	return filepath.Join(home, ".cakd", "credentials.yaml"), nil
 }
 
-// LoadCredentials reads and parses ~/.cakd/credentials.yaml.
+// LoadCredentials reads, parses, and returns the local credentials from (~/.cakd/credentials.yaml).
+// If the credentials file does not exist, it returns an empty Credentials structure without error.
 func LoadCredentials() (*Credentials, error) {
 	path, err := GetCredentialsPath()
 	if err != nil {
@@ -70,7 +73,9 @@ func LoadCredentials() (*Credentials, error) {
 	return &creds, nil
 }
 
-// SaveCredentials writes the credentials back to ~/.cakd/credentials.yaml with 0600 permissions.
+// SaveCredentials serializes the given credentials structure to YAML format and writes it
+// to the local credentials file (~/.cakd/credentials.yaml) with read/write permissions restricted
+// to the current user (0600). It creates the parent directory if it does not exist.
 func SaveCredentials(creds *Credentials) error {
 	path, err := GetCredentialsPath()
 	if err != nil {
@@ -87,12 +92,13 @@ func SaveCredentials(creds *Credentials) error {
 	return os.WriteFile(path, data, 0600)
 }
 
-// isInteractive checks if stdin is a terminal.
+// isInteractive returns true if standard input is an interactive terminal.
 func isInteractive() bool {
 	return term.IsTerminal(int(os.Stdin.Fd()))
 }
 
-// promptSecure prompts the user for a masked input on the terminal.
+// promptSecure prompts the user via terminal and reads a masked input. It is used for
+// securely entering tokens and API keys without echoing the input characters to the screen.
 func promptSecure(prompt string) (string, error) {
 	fmt.Print(prompt)
 	if !isInteractive() {
@@ -106,7 +112,7 @@ func promptSecure(prompt string) (string, error) {
 	return strings.TrimSpace(string(byteVal)), nil
 }
 
-// promptPlain prompts the user for a visible text input.
+// promptPlain prompts the user via terminal and reads a visible plain-text input line.
 func promptPlain(prompt string) (string, error) {
 	fmt.Print(prompt)
 	var val string
@@ -117,7 +123,8 @@ func promptPlain(prompt string) (string, error) {
 	return strings.TrimSpace(val), nil
 }
 
-// promptYesNo asks a Yes/No question, defaulting to Yes on empty input.
+// promptYesNo displays a prompt and reads a boolean confirmation response. It interprets
+// yes, y, or an empty input as confirmation (true), and any other inputs as denial (false).
 func promptYesNo(prompt string) bool {
 	fmt.Print(prompt)
 	var response string
@@ -126,9 +133,14 @@ func promptYesNo(prompt string) bool {
 	return response == "" || response == "y" || response == "yes"
 }
 
-// GetGithubToken returns the GitHub Token resolving through the 3 layers.
+// GetGithubToken retrieves the GitHub personal access token using a three-layer resolution order:
+//
+// 1. Checks environment variables (CAKD_GITHUB_TOKEN or GITHUB_TOKEN).
+// 2. Looks up the token in the local credentials config file (~/.cakd/credentials.yaml).
+// 3. Fallbacks to prompting the user interactively if stdin is a terminal, offering to save the token locally.
+//
+// Returns an empty string if the token cannot be resolved.
 func GetGithubToken() string {
-	// Layer 1: Env vars
 	if val := os.Getenv(cakdGithubTokenEnv); val != "" {
 		return val
 	}
@@ -136,13 +148,11 @@ func GetGithubToken() string {
 		return val
 	}
 
-	// Layer 2: Credentials file
 	creds, err := LoadCredentials()
 	if err == nil && creds.Github.Token != "" {
 		return creds.Github.Token
 	}
 
-	// Layer 3: Interactive CLI Prompt
 	if isInteractive() {
 		fmt.Println("⚠️  GitHub Token not found in environment or local settings.")
 		token, err := promptSecure("Enter GitHub Token: ")
@@ -162,9 +172,14 @@ func GetGithubToken() string {
 	return ""
 }
 
-// GetDiscordCredentials returns the Discord Token and Guild ID resolving through the 3 layers.
+// GetDiscordCredentials retrieves the Discord Bot Token and Guild ID using a three-layer resolution order:
+//
+// 1. Checks environment variables (CAKD_DISCORD_BOT_TOKEN/DISCORD_BOT_TOKEN and CAKD_DISCORD_GUILD_ID/DISCORD_GUILD_ID).
+// 2. Looks up the values in the local credentials config file (~/.cakd/credentials.yaml).
+// 3. Fallbacks to prompting the user interactively if stdin is a terminal, offering to save credentials locally.
+//
+// Returns an error if any of the required credentials cannot be resolved.
 func GetDiscordCredentials() (token string, guildID string, err error) {
-	// Layer 1: Env vars
 	tok := os.Getenv(cakdDiscordTokenEnv)
 	if tok == "" {
 		tok = os.Getenv(discordTokenEnv)
@@ -178,7 +193,6 @@ func GetDiscordCredentials() (token string, guildID string, err error) {
 		return tok, gid, nil
 	}
 
-	// Layer 2: Credentials file
 	creds, err := LoadCredentials()
 	if err == nil {
 		if tok == "" {
@@ -193,7 +207,6 @@ func GetDiscordCredentials() (token string, guildID string, err error) {
 		return tok, gid, nil
 	}
 
-	// Layer 3: Interactive CLI Prompt
 	if isInteractive() {
 		fmt.Println("⚠️  Discord Bot Token or Guild ID not found in environment or local settings.")
 		return promptDiscordCredentials(tok, gid)
@@ -202,7 +215,8 @@ func GetDiscordCredentials() (token string, guildID string, err error) {
 	return "", "", fmt.Errorf("discord credentials are not fully configured")
 }
 
-// promptDiscordCredentials handles the interactive prompt step for Discord setup.
+// promptDiscordCredentials displays interactive prompt steps to retrieve missing Discord credentials
+// (Bot Token and/or Guild ID) and optionally saves them to the local configuration file.
 func promptDiscordCredentials(tok, gid string) (string, string, error) {
 	var err error
 	if tok == "" {
@@ -230,9 +244,14 @@ func promptDiscordCredentials(tok, gid string) (string, string, error) {
 	return tok, gid, nil
 }
 
-// GetGeminiAPIKey returns the Gemini API Key resolving through the 3 layers.
+// GetGeminiAPIKey retrieves the Gemini API Key using a three-layer resolution order:
+//
+// 1. Checks environment variables (CAKD_GEMINI_API_KEY or GEMINI_API_KEY).
+// 2. Looks up the key in the local credentials config file (~/.cakd/credentials.yaml).
+// 3. Fallbacks to prompting the user interactively if stdin is a terminal, offering to save the key locally.
+//
+// Returns an empty string if the key cannot be resolved.
 func GetGeminiAPIKey() string {
-	// Layer 1: Env vars
 	if val := os.Getenv(cakdGeminiKeyEnv); val != "" {
 		return val
 	}
@@ -240,13 +259,11 @@ func GetGeminiAPIKey() string {
 		return val
 	}
 
-	// Layer 2: Credentials file
 	creds, err := LoadCredentials()
 	if err == nil && creds.Gemini.APIKey != "" {
 		return creds.Gemini.APIKey
 	}
 
-	// Layer 3: Interactive CLI Prompt
 	if isInteractive() {
 		fmt.Println("⚠️  Gemini API Key not found in environment or local settings.")
 		key, err := promptSecure("Enter Gemini API Key: ")

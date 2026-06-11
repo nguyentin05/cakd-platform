@@ -33,6 +33,7 @@ type SchemaEnums struct {
 	Backing   BackingEnums
 }
 
+// ProviderEnums holds the valid values for each provider type.
 type ProviderEnums struct {
 	VersionControl []string
 	CI             []string
@@ -43,6 +44,7 @@ type ProviderEnums struct {
 	Logging        []string
 }
 
+// ServiceEnums defines the list of supported service languages, versions, frameworks, build systems, and dependencies.
 type ServiceEnums struct {
 	Language           []string
 	LanguageVersion    []string
@@ -53,6 +55,7 @@ type ServiceEnums struct {
 	SpringConfigFormat []string
 }
 
+// BackingEnums specifies the valid options for stateful backing resources.
 type BackingEnums struct {
 	Type []string
 }
@@ -84,6 +87,7 @@ var ValidValues = SchemaEnums{
 	},
 }
 
+// Enums is a map representation of all schema enums, mapping tag names to their allowed string values.
 var Enums map[string][]string
 
 func init() {

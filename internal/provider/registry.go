@@ -14,7 +14,8 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/provider/version_control/github"
 )
 
-// ProviderRegistry acts as a factory for dynamically resolving provider implementations based on names.
+// ProviderRegistry acts as a central factory registry for mapping provider names
+// to dynamic initialization factories for application generators, VCS, CD, and notification systems.
 type ProviderRegistry struct {
 	AppFrameworks   map[string]func() app.AppFramework
 	VersionControls map[string]func() version_control.VersionControl
@@ -22,6 +23,7 @@ type ProviderRegistry struct {
 	Notifiers       map[string]func() notify.Notifier
 }
 
+// Providers is the global instance of the ProviderRegistry pre-populated with all supported integrations.
 var Providers = &ProviderRegistry{
 	AppFrameworks: map[string]func() app.AppFramework{
 		"java-spring-boot": func() app.AppFramework { return springboot.NewClient() },
@@ -40,6 +42,7 @@ var Providers = &ProviderRegistry{
 	},
 }
 
+// GetAppProvider resolves and returns an AppFramework generator implementation by name.
 func GetAppProvider(name string) (app.AppFramework, error) {
 	if factory, ok := Providers.AppFrameworks[name]; ok {
 		return factory(), nil
@@ -47,6 +50,7 @@ func GetAppProvider(name string) (app.AppFramework, error) {
 	return nil, fmt.Errorf("unsupported app provider: %s", name)
 }
 
+// GetVersionControlProvider resolves and returns a VersionControl integration client by name.
 func GetVersionControlProvider(name string) (version_control.VersionControl, error) {
 	if factory, ok := Providers.VersionControls[name]; ok {
 		return factory(), nil
@@ -54,6 +58,7 @@ func GetVersionControlProvider(name string) (version_control.VersionControl, err
 	return nil, fmt.Errorf("unsupported version control provider: %s", name)
 }
 
+// GetCDProvider resolves and returns a continuous deployment integration client by name.
 func GetCDProvider(name string) (cd.CD, error) {
 	if factory, ok := Providers.CDs[name]; ok {
 		return factory(), nil
@@ -61,6 +66,7 @@ func GetCDProvider(name string) (cd.CD, error) {
 	return nil, fmt.Errorf("unsupported CD provider: %s", name)
 }
 
+// GetNotifyProvider resolves and returns a notification integration client by name.
 func GetNotifyProvider(name string) (notify.Notifier, error) {
 	if factory, ok := Providers.Notifiers[name]; ok {
 		return factory(), nil

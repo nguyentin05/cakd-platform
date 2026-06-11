@@ -13,12 +13,15 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/provider/notify"
 )
 
+// AgentServer runs the HTTP receiver for Alertmanager webhooks.
+// It formats alerts, routes them to Discord channels, and triggers AI analysis.
 type AgentServer struct {
 	DefaultWebhookURL string
 	notifier          notify.Notifier
 	aiMutex           sync.Mutex
 }
 
+// NewAgentServer initializes and returns a new AgentServer instance.
 func NewAgentServer(defaultWebhookURL string, notifier notify.Notifier) *AgentServer {
 	return &AgentServer{
 		DefaultWebhookURL: defaultWebhookURL,
@@ -26,6 +29,8 @@ func NewAgentServer(defaultWebhookURL string, notifier notify.Notifier) *AgentSe
 	}
 }
 
+// HandleAlert accepts Alertmanager JSON webhook POST requests, sends a quick
+// acceptance response, and processes the alerts asynchronously.
 func (s *AgentServer) HandleAlert(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -44,6 +49,8 @@ func (s *AgentServer) HandleAlert(w http.ResponseWriter, r *http.Request) {
 	go s.processAlerts(payload)
 }
 
+// processAlerts groups incoming alerts by project/namespace webhook URLs, formats their severity
+// and description details, dispatches them via the notifier, and queues them for AI analysis.
 func (s *AgentServer) processAlerts(payload AlertmanagerPayload) {
 	webhooks, _ := config.LoadWebhooks()
 
@@ -100,6 +107,8 @@ func (s *AgentServer) processAlerts(payload AlertmanagerPayload) {
 	}
 }
 
+// runAIAnalysis uses the Gemini LLM client to analyze firing alert descriptions and
+// posts troubleshooting suggestions back to the project's alert channel.
 func (s *AgentServer) runAIAnalysis(targetWebhookURL string, descriptions []string) {
 	apiKey := config.GetGeminiAPIKey()
 	if apiKey == "" {

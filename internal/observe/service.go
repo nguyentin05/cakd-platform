@@ -8,12 +8,15 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/provider/monitoring"
 )
 
+// ObserverService coordinates fetching logs and metrics from cluster providers
+// and querying the AI model to perform system diagnostics.
 type ObserverService struct {
 	metrics monitoring.MetricsFetcher
 	logs    logging.LogFetcher
 	ai      llm.LLM
 }
 
+// NewObserverService initializes and returns a new ObserverService instance.
 func NewObserverService(m monitoring.MetricsFetcher, l logging.LogFetcher, ai llm.LLM) *ObserverService {
 	return &ObserverService{
 		metrics: m,
@@ -22,6 +25,8 @@ func NewObserverService(m monitoring.MetricsFetcher, l logging.LogFetcher, ai ll
 	}
 }
 
+// Diagnose queries Prometheus metrics and Loki logs for the specified namespace,
+// formats the data into a diagnostic prompt, and queries the LLM for a troubleshoot guide.
 func (s *ObserverService) Diagnose(namespace string) error {
 	fmt.Println("Fetching metrics from Prometheus...")
 	metricsData, err := s.metrics.Fetch(namespace)

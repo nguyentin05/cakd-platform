@@ -13,14 +13,18 @@ import (
 //go:embed templates
 var content embed.FS
 
+// Engine manages loading, parsing, and rendering embedded template files into the target project output directory.
 type Engine struct {
 	cfg *config.PlatformConfig
 }
 
+// New initializes and returns a new template rendering Engine.
 func New(cfg *config.PlatformConfig) *Engine {
 	return &Engine{cfg: cfg}
 }
 
+// Generate iterates over all global and service-specific template mappings, rendering
+// and writing them to their respective locations in the output directory.
 func (e *Engine) Generate(outDir string) error {
 	for _, m := range GlobalMappings(e.cfg) {
 		if err := e.renderTemplate(m.Template, filepath.Join(outDir, m.Output), e.cfg); err != nil {
@@ -50,6 +54,8 @@ func (e *Engine) Generate(outDir string) error {
 	return nil
 }
 
+// renderTemplate reads an embedded template file, parses it using double square brackets ("[[", "]]")
+// as delimiters to avoid conflict with standard Helm/Go brackets, and executes it to the outPath.
 func (e *Engine) renderTemplate(tmplPath, outPath string, data interface{}) error {
 	tmplContent, err := content.ReadFile(tmplPath)
 	if err != nil {

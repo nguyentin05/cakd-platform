@@ -14,6 +14,7 @@ import (
 //go:embed k8s/*.yaml
 var agentManifests embed.FS
 
+// agentVars holds template variables used to dynamically populate the Kubernetes manifests of the CAKD Agent.
 type agentVars struct {
 	DiscordToken   string
 	DiscordWebhook string
@@ -21,6 +22,8 @@ type agentVars struct {
 	Image          string
 }
 
+// deployAgent resolves local/environment credentials, renders the embedded Kubernetes
+// yaml manifests for the CAKD Agent with the correct configuration, and applies them to the cluster.
 func deployAgent(agentVersion string) error {
 	discordToken, _, _ := config.GetDiscordCredentials()
 	discordWebhook := os.Getenv("DISCORD_WEBHOOK_URL")

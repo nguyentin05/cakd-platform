@@ -19,6 +19,8 @@ const (
 	providerArgoCD      = "argocd"
 )
 
+// Options specifies which third-party infrastructure and observability components to provision
+// during the Kubernetes cluster bootstrap step.
 type Options struct {
 	ArgoCD       bool
 	Monitoring   bool
@@ -26,6 +28,9 @@ type Options struct {
 	AgentVersion string
 }
 
+// RunInit drives the Kubernetes cluster initialization by configuring Helm repositories
+// and deploying ArgoCD, Prometheus Stack, CAKD Agent, and Grafana Loki.
+//
 //nolint:gocyclo,gosec // intentional wrapper around internal commands
 func RunInit(opts Options) error {
 	fmt.Println("Starting CAKD Platform Initialization...")

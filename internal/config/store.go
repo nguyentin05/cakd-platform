@@ -13,6 +13,9 @@ var (
 	storeMutex sync.Mutex
 )
 
+// getWebhooksFilePath resolves the path to the webhooks.json file.
+// It prioritizes `/etc/cakd/webhooks.json` if it exists, and falls back
+// to the user's home directory under `~/.cakd/webhooks.json`.
 func getWebhooksFilePath() (string, error) {
 	if _, err := os.Stat("/etc/cakd/webhooks.json"); err == nil {
 		return "/etc/cakd/webhooks.json", nil
@@ -31,6 +34,8 @@ func getWebhooksFilePath() (string, error) {
 	return filepath.Join(cakdDir, "webhooks.json"), nil
 }
 
+// LoadWebhooks loads and returns the map of project webhooks from the webhooks.json file.
+// If the file does not exist, it returns an empty map without error.
 func LoadWebhooks() (map[string]string, error) {
 	storeMutex.Lock()
 	defer storeMutex.Unlock()
@@ -57,6 +62,9 @@ func LoadWebhooks() (map[string]string, error) {
 	return webhooks, nil
 }
 
+// SaveWebhook records a Discord webhook URL for a project/namespace.
+// It saves the webhook to the local store and attempts to synchronize it
+// with the Kubernetes cluster by patching the 'cakd-webhooks' ConfigMap.
 func SaveWebhook(projectName, webhookURL string) error {
 	storeMutex.Lock()
 	defer storeMutex.Unlock()

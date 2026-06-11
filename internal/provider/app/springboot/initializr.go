@@ -16,12 +16,17 @@ import (
 
 const baseURL = "https://start.spring.io/starter.zip"
 
+// Client implements the [app.AppFramework] interface for Spring Boot.
+// It interacts with start.spring.io (Spring Initializr API) to download zipped codebase templates.
 type Client struct{}
 
+// NewClient initializes and returns a new Spring Boot Initializr Client.
 func NewClient() *Client {
 	return &Client{}
 }
 
+// Scaffold constructs the Spring Initializr query parameters, queries start.spring.io,
+// and extracts the downloaded archive into the designated outDir.
 func (c *Client) Scaffold(cfg *config.PlatformConfig, svc config.Service, outDir string) error {
 	deps := []string{"web", "actuator"}
 	deps = append(deps, svc.Dependencies...)
@@ -96,6 +101,8 @@ func (c *Client) Scaffold(cfg *config.PlatformConfig, svc config.Service, outDir
 	return extractZip(data, outDir)
 }
 
+// extractZip parses the zip byte payload and extracts all directories and files securely,
+// preventing zip slip attacks, and applying correct permissions.
 func extractZip(data []byte, outDir string) error {
 	reader, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {

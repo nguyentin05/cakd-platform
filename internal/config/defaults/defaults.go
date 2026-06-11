@@ -5,9 +5,10 @@ import (
 )
 
 // Apply injects implicit default values into the configuration struct.
-// It uses reflection to dynamically traverse the struct tree and evaluate `default:""`
-// tags on empty fields. It is executed during Phase 2 of the Parsing Pipeline, ensuring
-// that logic validations in Phase 3 have a fully hydrated struct to work with.
+// It recursively traverses the struct tree using reflection to resolve and evaluate
+// `default` tags on empty fields.
+//
+// This operation is part of Phase 2 of the configuration parsing pipeline.
 func Apply(cfg any) {
 	dynamic(reflect.ValueOf(cfg).Elem())
 }

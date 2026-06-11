@@ -1,5 +1,7 @@
 package config
 
+// PlatformConfig represents the root configuration schema for a CAKD platform project.
+// It specifies the services, backing stores, infrastructure providers, and observability settings.
 type PlatformConfig struct {
 	APIVersion    string         `yaml:"apiVersion" enum:"APIVersion" validate:"required"`
 	Kind          string         `yaml:"kind" enum:"Kind" validate:"required"`
@@ -10,11 +12,13 @@ type PlatformConfig struct {
 	Observability *Observability `yaml:"observability,omitempty"`
 }
 
+// Metadata holds core information about the project including name and owner.
 type Metadata struct {
 	Name  string `yaml:"name" validate:"required"`
 	Owner string `yaml:"owner" validate:"required"`
 }
 
+// Providers defines the third-party integrations used for VCS, CI/CD, notifications, LLMs, and monitoring.
 type Providers struct {
 	VersionControl string `yaml:"versionControl" default:"Providers.VersionControl" enum:"vcs" validate:"required"`
 	CI             string `yaml:"ci,omitempty" enum:"ci"`
@@ -25,6 +29,7 @@ type Providers struct {
 	Logging        string `yaml:"logging,omitempty" enum:"logging"`
 }
 
+// Service represents a microservice within the platform application, detailing its language, dependencies, and sizing.
 type Service struct {
 	Name               string     `yaml:"name" validate:"required"`
 	Language           string     `yaml:"language" enum:"language" validate:"required"`
@@ -39,11 +44,13 @@ type Service struct {
 	Uses               []string   `yaml:"uses,omitempty"`
 }
 
+// Resources specifies the CPU and memory limits allocated to a Kubernetes pod.
 type Resources struct {
 	CPU    string `yaml:"cpu,omitempty" default:"CPU"`
 	Memory string `yaml:"memory,omitempty" default:"Memory"`
 }
 
+// Backing represents a stateful dependency (like a database or cache) with size and version details.
 type Backing struct {
 	Name    string `yaml:"name" validate:"required"`
 	Type    string `yaml:"type" enum:"database" validate:"required"`
@@ -51,11 +58,13 @@ type Backing struct {
 	Storage string `yaml:"storage,omitempty" default:"Storage"`
 }
 
+// Observability configures alerting rules and AI-assisted diagnostics options.
 type Observability struct {
 	Alerting bool      `yaml:"alerting,omitempty"`
 	AI       *AIConfig `yaml:"ai,omitempty"`
 }
 
+// AIConfig defines options for the AI diagnostic engine such as the selected LLM model.
 type AIConfig struct {
 	Model string `yaml:"model"`
 }

@@ -56,6 +56,7 @@ func getValueByPath(v reflect.Value, path string) (reflect.Value, bool) {
 	return curr, true
 }
 
+// checkCondition evaluates whether a reflected value satisfies a registry.Condition rule.
 func checkCondition(v reflect.Value, cond registry.Condition) bool {
 	switch cond {
 	case registry.NotEmpty:

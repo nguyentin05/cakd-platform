@@ -21,12 +21,14 @@ func init() {
 	}
 }
 
+// Bridge implements the [iac.Engine] interface using Terraform to provision infrastructure.
 type Bridge struct {
 	cfg     *config.PlatformConfig
 	workDir string
 	ghToken string
 }
 
+// New initializes and returns a new Terraform Bridge instance.
 func New(cfg *config.PlatformConfig, workDir string) *Bridge {
 	return &Bridge{
 		cfg:     cfg,
@@ -34,6 +36,8 @@ func New(cfg *config.PlatformConfig, workDir string) *Bridge {
 	}
 }
 
+// Apply copies the embedded Terraform modules, writes the input variables,
+// runs 'terraform init' and 'terraform apply', and returns the parsed outputs.
 func (b *Bridge) Apply() (map[string]string, error) {
 	b.ghToken = config.GetGithubToken()
 	if b.ghToken == "" {
@@ -68,11 +72,13 @@ func (b *Bridge) Apply() (map[string]string, error) {
 	return outputs, nil
 }
 
+// Destroy runs 'terraform destroy' to teardown all provisioned infrastructure resources.
 func (b *Bridge) Destroy() error {
 	tfDir := filepath.Join(b.workDir, ".platform", "terraform")
 	return b.runTerraform(tfDir, "destroy", "-auto-approve")
 }
 
+// copyModule copies the embedded GitHub Terraform module files to the target workspace directory.
 func (b *Bridge) copyModule(tfDir string) error {
 	if err := os.MkdirAll(tfDir, 0755); err != nil {
 		return err
@@ -102,6 +108,7 @@ func (b *Bridge) copyModule(tfDir string) error {
 	return nil
 }
 
+// writeTfVars serializes variables to JSON format and writes them to terraform.tfvars.json.
 func (b *Bridge) writeTfVars(tfDir string) error {
 	vars := map[string]string{
 		"project_name": b.cfg.Metadata.Name,
@@ -117,6 +124,7 @@ func (b *Bridge) writeTfVars(tfDir string) error {
 	return os.WriteFile(filepath.Join(tfDir, "terraform.tfvars.json"), data, 0600)
 }
 
+// runTerraform executes a Terraform command in the specified directory, appending logs to terraform.log.
 func (b *Bridge) runTerraform(tfDir string, args ...string) error {
 	logPath := filepath.Join(tfDir, "terraform.log")
 	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
@@ -138,6 +146,7 @@ func (b *Bridge) runTerraform(tfDir string, args ...string) error {
 	return nil
 }
 
+// parseOutputs queries Terraform output variables in JSON format and parses them into a map.
 func (b *Bridge) parseOutputs(tfDir string) (map[string]string, error) {
 	cmd := exec.Command("terraform", "output", "-json")
 	cmd.Dir = tfDir

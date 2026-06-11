@@ -6,19 +6,25 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/config"
 )
 
-// Step is the smallest unit of work in the create pipeline.
+// Step represents the smallest execute unit of work within the project creation pipeline.
 type Step interface {
+	// Name returns the human-readable description of the step.
 	Name() string
+	// Run executes the core logic of the step using the shared pipeline context.
 	Run(ctx *Context) error
 }
 
-// OptionalStep extends Step for steps that can be skipped based on config.
+// OptionalStep extends [Step] to support conditional execution.
+// Steps implementing this interface can be skipped dynamically depending on the user's config.
 type OptionalStep interface {
 	Step
+	// ShouldRun returns true if the step should execute, or false if it should be skipped.
 	ShouldRun(ctx *Context) bool
 }
 
-// Execute runs the full create pipeline with the given config.
+// Execute runs the full creation pipeline sequentially using the provided configuration.
+// It sets up the workspace context, registers all build/deploy steps, and triggers execution.
+// It prints a success summary upon clean completion.
 func Execute(cfg *config.PlatformConfig, force bool) error {
 	ctx := NewContext(cfg, force)
 
@@ -42,7 +48,8 @@ func Execute(cfg *config.PlatformConfig, force bool) error {
 	return nil
 }
 
-// Run executes a list of steps sequentially.
+// Run executes a sequence of pipeline steps. It coordinates logging step transitions,
+// evaluates optional steps, and halts execution immediately if any step returns an error.
 func Run(ctx *Context, steps []Step) error {
 	total := len(steps)
 	for i, step := range steps {
@@ -59,6 +66,8 @@ func Run(ctx *Context, steps []Step) error {
 	return nil
 }
 
+// printSummary displays a stylized summary block on standard output detailing the newly
+// created project's git repository location, local code path, and deployment mode.
 func printSummary(ctx *Context) {
 	fmt.Println()
 	fmt.Println("═══════════════════════════════════════════════")

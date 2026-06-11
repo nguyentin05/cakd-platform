@@ -10,6 +10,8 @@ import (
 
 var validateFilePath string
 
+// validateCmd defines the 'validate' CLI command which parses and evaluates the structural
+// and business logic rules of a platform.yaml file.
 var validateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "Validate a platform.yaml file",

@@ -7,10 +7,9 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/registry"
 )
 
-// applyValue takes a struct field and a default tag, and attempts to resolve
-// the appropriate default value from registry.Defaults.
-// It supports direct field extraction (e.g., "Providers.VersionControl") and
-// map-based resolution (e.g., "map:LanguageVersion,key:Language").
+// applyValue resolves and assigns default values to struct fields using tag definitions.
+// It supports direct field resolution (e.g. "Providers.VersionControl") and dynamic map-based
+// resolution (e.g. "map:LanguageVersion,key:Language") from the global registry defaults.
 func applyValue(parentStruct reflect.Value, fieldVal reflect.Value, tag string) {
 	defaultsVal := reflect.ValueOf(registry.Defaults)
 
