@@ -81,7 +81,7 @@ The following describes what happens when `cakd create -f platform.yaml` is run:
 
 ```mermaid
 graph TD
-    A[platform.yaml] --> B(CLI - cmd/cakd)
+    A[platform.yaml] --> B(CLI - cmd/`cakd`)
     B --> C1(config.Parse)
     C1 --> C2[config/validate.Structure]
     C1 --> C3[config/defaults.Apply]
