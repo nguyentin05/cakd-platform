@@ -5,7 +5,13 @@ import (
 	"os/exec"
 )
 
-func Register(manifestPath string) error {
+type ArgoCD struct{}
+
+func New() *ArgoCD {
+	return &ArgoCD{}
+}
+
+func (a *ArgoCD) Register(manifestPath string) error {
 	if _, err := exec.LookPath("kubectl"); err != nil {
 		return fmt.Errorf("kubectl is not installed or not in PATH. Please install it to register ArgoCD applications")
 	}

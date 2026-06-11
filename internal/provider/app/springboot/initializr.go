@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/nguyentin05/cakd-platform/internal/config"
+	"github.com/nguyentin05/cakd-platform/internal/registry"
 )
 
 const baseURL = "https://start.spring.io/starter.zip"
@@ -24,25 +25,17 @@ func NewClient() *Client {
 func (c *Client) Scaffold(cfg *config.PlatformConfig, svc config.Service, outDir string) error {
 	deps := []string{"web", "actuator"}
 
-	if cfg.Providers.Monitoring == "prometheus" {
-		deps = append(deps, "prometheus")
+	// Monitoring dependency lookup from registry
+	if dep, ok := registry.MonitoringDeps[cfg.Providers.Monitoring]; ok {
+		deps = append(deps, dep)
 	}
 
+	// Backing resource dependency lookup from registry
 	for _, use := range svc.Uses {
 		for _, b := range cfg.Backing {
 			if b.Name == use {
-				if b.Type == "postgresql" || b.Type == "mysql" {
-					deps = append(deps, "data-jpa")
-				}
-				switch b.Type {
-				case "postgresql":
-					deps = append(deps, "postgresql")
-				case "mysql":
-					deps = append(deps, "mysql")
-				case "redis":
-					deps = append(deps, "data-redis")
-				case "rabbitmq":
-					deps = append(deps, "amqp")
+				if springDeps, ok := registry.SpringBootDeps[b.Type]; ok {
+					deps = append(deps, springDeps...)
 				}
 			}
 		}

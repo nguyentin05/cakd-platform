@@ -1,4 +1,4 @@
-package observe
+package loki
 
 import (
 	"encoding/json"
@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
-type LokiClient struct{}
+type Client struct{}
 
-func NewLokiClient() *LokiClient {
-	return &LokiClient{}
+func NewClient() *Client {
+	return &Client{}
 }
 
 type LokiResponse struct {
@@ -23,7 +23,7 @@ type LokiResponse struct {
 	} `json:"data"`
 }
 
-func (c *LokiClient) Fetch(namespace string) (string, error) {
+func (c *Client) Fetch(namespace string) (string, error) {
 	query := fmt.Sprintf(`{namespace="%s"}`, namespace)
 	encodedQuery := url.QueryEscape(query)
 
