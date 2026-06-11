@@ -21,7 +21,7 @@ var Defaults = struct {
 		"java-spring-boot": "21",
 	},
 	DBVersion: map[string]string{
-		"postgresql": "16",
+		PostgreSQL: "16",
 	},
 	Storage:  "5Gi",
 	Replicas: 1,

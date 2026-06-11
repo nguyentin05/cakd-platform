@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/nguyentin05/cakd-platform/internal/provider"
+	"github.com/nguyentin05/cakd-platform/internal/provider/notify"
 )
 
 const discordAPIURL = "https://discord.com/api/v10"
@@ -38,23 +38,16 @@ type WebhookResponse struct {
 	URL   string `json:"url"`
 }
 
-func (c *Client) CreateChannel(projectName string) (string, error) {
-	channelName := "alerts-" + projectName
-	url := fmt.Sprintf("%s/guilds/%s/channels", discordAPIURL, c.guildID)
-
-	payload := map[string]interface{}{
-		"name": channelName,
-		"type": 0,
-	}
-
+// doRequest sends an authenticated HTTP request to the Discord API and decodes the response.
+func (c *Client) doRequest(method, url string, payload, result any) error {
 	body, err := json.Marshal(payload)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	req.Header.Set("Authorization", "Bot "+c.token)
@@ -62,64 +55,47 @@ func (c *Client) CreateChannel(projectName string) (string, error) {
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("failed to make request: %w", err)
+		return fmt.Errorf("failed to make request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		respBody, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("discord API error: status %d, body: %s", resp.StatusCode, string(respBody))
+		return fmt.Errorf("discord API error: status %d, body: %s", resp.StatusCode, string(respBody))
 	}
 
-	var chResp ChannelResponse
-	if err := json.NewDecoder(resp.Body).Decode(&chResp); err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
+	return json.NewDecoder(resp.Body).Decode(result)
+}
+
+func (c *Client) CreateChannel(projectName string) (string, error) {
+	url := fmt.Sprintf("%s/guilds/%s/channels", discordAPIURL, c.guildID)
+	payload := map[string]interface{}{
+		"name": "alerts-" + projectName,
+		"type": 0,
 	}
 
-	return chResp.ID, nil
+	var resp ChannelResponse
+	if err := c.doRequest("POST", url, payload, &resp); err != nil {
+		return "", err
+	}
+	return resp.ID, nil
 }
 
 func (c *Client) CreateWebhook(channelID string, projectName string) (string, error) {
 	url := fmt.Sprintf("%s/channels/%s/webhooks", discordAPIURL, channelID)
-
 	payload := map[string]interface{}{
 		"name": "CAKD Alerting - " + projectName,
 	}
 
-	body, err := json.Marshal(payload)
-	if err != nil {
+	var resp WebhookResponse
+	if err := c.doRequest("POST", url, payload, &resp); err != nil {
 		return "", err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
-	if err != nil {
-		return "", err
+	webhookURL := fmt.Sprintf("https://discord.com/api/webhooks/%s/%s", resp.ID, resp.Token)
+	if resp.URL != "" {
+		webhookURL = resp.URL
 	}
-
-	req.Header.Set("Authorization", "Bot "+c.token)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to make request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("discord API error: status %d, body: %s", resp.StatusCode, string(respBody))
-	}
-
-	var whResp WebhookResponse
-	if err := json.NewDecoder(resp.Body).Decode(&whResp); err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	webhookURL := fmt.Sprintf("https://discord.com/api/webhooks/%s/%s", whResp.ID, whResp.Token)
-	if whResp.URL != "" {
-		webhookURL = whResp.URL
-	}
-
 	return webhookURL, nil
 }
 
@@ -151,7 +127,7 @@ type DiscordWebhookPayload struct {
 	Embeds  []DiscordEmbed `json:"embeds,omitempty"`
 }
 
-func (c *Client) SendAlert(webhookURL string, payload provider.AlertPayload) error {
+func (c *Client) SendAlert(webhookURL string, payload notify.AlertPayload) error {
 	embeds := make([]DiscordEmbed, 0, len(payload.Items))
 
 	for _, item := range payload.Items {

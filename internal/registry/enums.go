@@ -10,8 +10,8 @@ var Enums = map[string][]string{
 	"cd":           {"argocd"},
 	"notification": {"discord"},
 	"llm":          {"gemini"},
-	"monitoring":   {"prometheus"},
+	"monitoring":   {Prometheus},
 	"logging":      {"loki"},
 	"language":     {"java-spring-boot"},
-	"database":     {"postgresql"},
+	"database":     {PostgreSQL},
 }
