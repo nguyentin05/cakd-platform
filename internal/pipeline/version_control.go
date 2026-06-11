@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/iac"
 	"github.com/nguyentin05/cakd-platform/internal/provider"
 )
@@ -19,7 +20,7 @@ func (s *VersionControlStep) Run(ctx *Context) error {
 		return err
 	}
 
-	ghToken := os.Getenv("GITHUB_TOKEN")
+	ghToken := config.GetGithubToken()
 
 	if err := vcsProvider.InitAndPush(ctx.OutDir, ctx.TfOutputs["repo_clone_url"], ghToken); err != nil {
 		fmt.Println("   Git failed, rolling back Terraform resources...")

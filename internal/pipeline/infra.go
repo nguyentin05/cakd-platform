@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nguyentin05/cakd-platform/internal/iac"
+	_ "github.com/nguyentin05/cakd-platform/internal/iac/terraform"
 )
 
 // InfraStep provisions infrastructure using Terraform.

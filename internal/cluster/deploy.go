@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"text/template"
+
+	"github.com/nguyentin05/cakd-platform/internal/config"
 )
 
 //go:embed k8s/*.yaml
@@ -20,9 +22,9 @@ type agentVars struct {
 }
 
 func deployAgent(agentVersion string) error {
-	discordToken := os.Getenv("DISCORD_BOT_TOKEN")
+	discordToken, _, _ := config.GetDiscordCredentials()
 	discordWebhook := os.Getenv("DISCORD_WEBHOOK_URL")
-	geminiKey := os.Getenv("GEMINI_API_KEY")
+	geminiKey := config.GetGeminiAPIKey()
 
 	if discordToken == "" || geminiKey == "" {
 		fmt.Println("Warning: DISCORD_BOT_TOKEN or GEMINI_API_KEY is not set. Agent might not work fully.")

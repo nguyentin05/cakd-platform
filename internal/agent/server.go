@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -102,7 +101,7 @@ func (s *AgentServer) processAlerts(payload AlertmanagerPayload) {
 }
 
 func (s *AgentServer) runAIAnalysis(targetWebhookURL string, descriptions []string) {
-	apiKey := os.Getenv("GEMINI_API_KEY")
+	apiKey := config.GetGeminiAPIKey()
 	if apiKey == "" {
 		fmt.Println("GEMINI_API_KEY is not set. Skipping AI analysis.")
 		return
