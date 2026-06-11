@@ -1,3 +1,10 @@
+## [0.9.3](https://github.com/nguyentin05/cakd-platform/compare/v0.9.2...v0.9.3) (2026-06-11)
+
+
+### Bug Fixes
+
+* correct commit-message configuration in dependabot ([6de6071](https://github.com/nguyentin05/cakd-platform/commit/6de60716811941e4f8e9e232cc20114a57263e4d))
+
 ## [0.9.2](https://github.com/nguyentin05/cakd-platform/compare/v0.9.1...v0.9.2) (2026-06-11)
 
 
