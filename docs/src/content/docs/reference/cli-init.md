@@ -7,7 +7,7 @@ sidebar:
 
 ## Overview
 
-The `cakd init` command bootstraps your Kubernetes cluster by installing essential platform infrastructure components: ArgoCD, Prometheus/Grafana, and Loki. Run this after you provision a cluster and before deploying `cakd` projects.
+The `cakd init` command bootstraps your Kubernetes cluster by installing essential platform infrastructure components: ArgoCD, Prometheus/Grafana, Loki, and the `cakd-agent`. Run this after you provision a cluster and before deploying `cakd` projects.
 
 ## Usage
 
@@ -25,10 +25,16 @@ cakd init [flags]
 
 ## How It Works
 
-1. If no flags are passed, the command selects all components (ArgoCD, monitoring, logging).
-2. For each selected component, it prepares helm commands and executes them sequentially.
-3. When monitoring is selected, it writes a temporary Prometheus values file to configure Alertmanager to route to the CAKD Agent webhook.
-4. The command streams output from helm and exits on failure.
+1.  The command first checks if any component flags (`--argocd`, `--monitoring`, `--logging`) are provided. If none are specified, it defaults to installing all three components.
+2.  For each selected component, `cakd init` performs the following steps:
+    *   **ArgoCD**: It adds the `argo` Helm repository, updates it, and then installs or upgrades ArgoCD into the `argocd` namespace.
+    *   **Monitoring (Prometheus Stack)**:
+        *   It creates a temporary Prometheus values file, embedding configuration for Alertmanager to route to the `cakd-agent` webhook.
+        *   It adds the `prometheus-community` Helm repository, updates it, and then installs or upgrades the `kube-prometheus-stack` into the `monitoring` namespace, using the temporary values file.
+        *   It then deploys the `cakd-agent` to the cluster.
+    *   **Logging (Loki)**: It adds the `grafana` Helm repository, updates it, and then installs or upgrades `loki-stack` into the `monitoring` namespace.
+3.  All Helm commands are executed sequentially, and their output is streamed to the console.
+4.  The command exits with an error if any step fails.
 
 ## Examples
 

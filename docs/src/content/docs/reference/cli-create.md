@@ -19,17 +19,21 @@ cakd create [flags]
 
 | Flag | Short | Type | Default | Description |
 |---|---|---|---|---|
-|`--file`|`-f`|`string`|`platform.yaml`|Path to the `platform.yaml` configuration file.|
-|`--force`|`""`|`bool`|`false`|Overwrite the existing `project` directory if it already exists.|
+|`--file`|`-f`|`string`|`platform.yaml`|Path to `platform.yaml`.|
+|`--force`|`""`|`bool`|`false`|Force overwrite existing `project` directory.|
 
 ## How It Works
 
-1. Determine output directory (e.g., `./out/{project-name}`); fail if it exists unless `--force` is set.
-2. Parse and validate `platform.yaml` using the three-phase pipeline (structure, defaults, logic).
-3. Scaffold base project and render CAKD templates into the output directory.
-4. Provision GitHub repository via the Terraform Bridge and retrieve outputs.
-5. Initialize git, commit generated files, and push to the provisioned repository.
-6. Register the ArgoCD application using the generated manifest.
+1.  The `platform.yaml` file is read from the specified path.
+2.  The configuration is parsed and validated through a three-phase pipeline: structure validation, defaults injection, and logic validation.
+3.  A project context is prepared, which includes determining the output directory (e.g., `./out/{project-name}`). If the directory already exists and `--force` is not set, the command fails.
+4.  The following sequential pipeline steps are executed:
+    *   **Scaffold**: Scaffolds the base `project` and renders CAKD templates into the output directory.
+    *   **Infra**: Provisions infrastructure (e.g., a GitHub repository via the `Terraform Bridge`) and retrieves outputs.
+    *   **Version Control**: Initializes git, commits generated files, and pushes them to the provisioned repository.
+    *   **Deploy**: Registers the ArgoCD application using the generated manifest.
+    *   **Notify**: Performs any final notification actions.
+5.  Upon successful completion, a summary is printed, detailing the newly created `project`'s git repository location, local code path, and deployment mode.
 
 ## Examples
 
@@ -47,5 +51,5 @@ cakd create -f platform.yaml --force
 
 ## Related
 
-- [`platform.yaml` reference](/reference/platform-yaml/)
-- [Quickstart tutorial](/tutorials/quickstart/)
+-   [`platform.yaml` reference](/reference/platform-yaml/)
+-   [Quickstart tutorial](/tutorials/quickstart/)

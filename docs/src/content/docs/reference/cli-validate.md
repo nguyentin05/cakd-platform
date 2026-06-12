@@ -29,6 +29,7 @@ cakd validate [flags]
 
 ## Examples
 
+### Basic usage
 ```bash
 cakd validate -f platform.yaml
 ```
@@ -36,3 +37,4 @@ cakd validate -f platform.yaml
 ## Related
 
 - [`platform.yaml` reference](/reference/platform-yaml/)
+- [Quickstart tutorial](/tutorials/quickstart/)

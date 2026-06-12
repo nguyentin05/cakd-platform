@@ -1,6 +1,6 @@
 ---
 title: Quickstart
-description: Bootstrap your first cloud-native project with CAKD Platform in under 10 minutes.
+description: Bootstrap your first cloud-native project with CAKD Platform and start monitoring in under 10 minutes.
 sidebar:
   order: 1
 ---
@@ -11,19 +11,20 @@ Before you begin, ensure you have:
 
 - [ ] [Go 1.24+](https://go.dev/dl/) installed
 - [ ] [Terraform](https://developer.hashicorp.com/terraform/install) installed
-- [ ] A Kubernetes cluster (Minikube or similar) with kubeconfig access
-- [ ] A GitHub Personal Access Token with `repo` and `delete_repo` scopes
+- [ ] [Minikube](https://minikube.sigs.k8s.io/docs/start/) installed and running
+- [ ] A [GitHub Personal Access Token](https://github.com/settings/tokens) with `repo` scope
 - [ ] `GITHUB_TOKEN` environment variable set
 
-## Step 1: Install the `cakd` CLI
+## Step 1: Install CAKD & CAKD Agent
 
-Install the CLI into your Go bin path:
+Install the `cakd` CLI and `cakd-agent` into your Go bin path:
 
 ```bash
 go install github.com/nguyentin05/cakd-platform/cmd/cakd@latest
+go install github.com/nguyentin05/cakd-platform/cmd/cakd-agent@latest
 ```
 
-## Step 2: Create a minimal `platform.yaml`
+## Step 2: Create your `platform.yaml`
 
 Create `platform.yaml` in your working directory. This minimal example is valid against the schema shown in the repository.
 
@@ -43,17 +44,32 @@ services:
 
 ## Step 3: Bootstrap your project
 
-Run the create pipeline to generate project files, provision a GitHub repository via Terraform, push the generated code, and register an ArgoCD application.
+Run the create pipeline to generate project files, provision a GitHub repository via the Terraform Bridge, push the generated code, and register an ArgoCD application.
 
 ```bash
 cakd create -f platform.yaml
 ```
 
 :::tip Expected output
-You will see step progress logs (Scaffold, Infra, Notify, VersionControl, Deploy) and a final summary showing the repository URL and local output path.
+You will see progress logs for each step of the pipeline, followed by a summary:
+
+```
+Step 1/5: Scaffold...
+Step 2/5: Infra...
+Step 3/5: VersionControl...
+Step 4/5: Deploy...
+Step 5/5: Notify...
+
+═══════════════════════════════════════════════
+Project created successfully!
+Repository: https://github.com/your-organization/my-first-project
+Local code: out/my-first-project
+Deployment: Managed by ArgoCD (GitOps)
+═══════════════════════════════════════════════
+```
 :::
 
-## Step 4: Start the agent (optional)
+## Step 4: Start the Alert & Diagnostics Agent
 
 If you want real-time diagnostics, run the agent after setting a webhook receiver (Discord):
 
@@ -62,7 +78,7 @@ export DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/..."
 cakd-agent
 ```
 
-## Step 5: Verify
+## Step 5: Verify the result
 
 Confirm the project folder exists and ArgoCD has the application registered:
 
@@ -77,7 +93,7 @@ kubectl get app my-first-project -n argocd
 - A GitHub repository provisioned via the Terraform Bridge and pushed by the VCS provider.
 - An ArgoCD Application registered in your cluster to deploy the project.
 
-## Next steps
+## Next Steps
 
-- Read the full CLI reference: [/reference/cli/](/reference/cli/)
-- Configure alerting/notifications: [/how-to-guides/setup-discord-alerts/](/how-to-guides/setup-discord-alerts/)
+- [Full CLI reference](/reference/cli/)
+- [How to set up Discord alerts](/how-to-guides/setup-discord-alerts/)
