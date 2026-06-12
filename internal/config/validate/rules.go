@@ -6,13 +6,47 @@ import (
 	"strings"
 
 	"github.com/nguyentin05/cakd-platform/internal/registry"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
+
+func init() {
+	t := reflect.TypeOf(schema.PlatformConfig{})
+	for _, rule := range registry.BusinessRules {
+		if !validatePath(t, rule.IfPath) {
+			panic(fmt.Sprintf("Business rule IfPath %q is invalid on schema.PlatformConfig", rule.IfPath))
+		}
+		if !validatePath(t, rule.ThenPath) {
+			panic(fmt.Sprintf("Business rule ThenPath %q is invalid on schema.PlatformConfig", rule.ThenPath))
+		}
+	}
+}
+
+// validatePath checks if a dot-separated string path exists structurally on a type,
+// ignoring whether its fields are nil pointers at runtime.
+func validatePath(t reflect.Type, path string) bool {
+	parts := strings.Split(path, ".")
+	curr := t
+	for _, part := range parts {
+		if curr.Kind() == reflect.Pointer {
+			curr = curr.Elem()
+		}
+		if curr.Kind() != reflect.Struct {
+			return false
+		}
+		field, ok := curr.FieldByName(part)
+		if !ok {
+			return false
+		}
+		curr = field.Type
+	}
+	return true
+}
 
 // evaluateRules processes the BusinessRules defined in the registry.
 // It acts as a dynamic rule engine that interprets conditional paths
 // (e.g., "Providers.CD") and enforces that their constraints are met.
 // This is executed during Phase 3 of the parsing pipeline.
-func evaluateRules(cfg any) error {
+func evaluateRules(cfg *schema.PlatformConfig) error {
 	v := reflect.ValueOf(cfg).Elem()
 
 	for _, rule := range registry.BusinessRules {

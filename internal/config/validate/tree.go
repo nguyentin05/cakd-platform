@@ -13,7 +13,7 @@ import (
 // are met (e.g., required tags are not zero-values, enum tags contain supported values,
 // and parent configuration blocks are not entirely empty).
 func Structure(cfg any) error {
-	return tree(reflect.ValueOf(cfg), "config")
+	return tree(reflect.ValueOf(cfg), "")
 }
 
 // tree recursively traverses a reflect.Value representing the configuration tree
@@ -89,7 +89,7 @@ func validateField(fieldVal reflect.Value, structField reflect.StructField, path
 	}
 
 	newPath := fieldName
-	if path != "" && path != "config" {
+	if path != "" {
 		newPath = path + "." + fieldName
 	}
 

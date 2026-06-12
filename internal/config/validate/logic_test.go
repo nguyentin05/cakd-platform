@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/config/validate"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 const testPostgres = "postgres-db"
@@ -13,17 +13,17 @@ const testPostgres = "postgres-db"
 func TestLogic(t *testing.T) {
 	tests := []struct {
 		name        string
-		cfg         config.PlatformConfig
+		cfg         schema.PlatformConfig
 		expectError bool
 		errContains string
 	}{
 		{
 			name: "Valid - Services match Backing",
-			cfg: config.PlatformConfig{
-				Backing: []config.Backing{
+			cfg: schema.PlatformConfig{
+				Backing: []schema.Backing{
 					{Name: testPostgres},
 				},
-				Services: []config.Service{
+				Services: []schema.Service{
 					{
 						Name: "api-service",
 						Uses: []string{testPostgres},
@@ -34,11 +34,11 @@ func TestLogic(t *testing.T) {
 		},
 		{
 			name: "Invalid - Service uses unknown Backing",
-			cfg: config.PlatformConfig{
-				Backing: []config.Backing{
+			cfg: schema.PlatformConfig{
+				Backing: []schema.Backing{
 					{Name: "postgres-db"},
 				},
-				Services: []config.Service{
+				Services: []schema.Service{
 					{
 						Name: "api-service",
 						Uses: []string{"unknown-db"},
@@ -50,11 +50,11 @@ func TestLogic(t *testing.T) {
 		},
 		{
 			name: "Invalid - Zero services",
-			cfg: config.PlatformConfig{
-				Backing: []config.Backing{
+			cfg: schema.PlatformConfig{
+				Backing: []schema.Backing{
 					{Name: "postgres-db"},
 				},
-				Services: []config.Service{},
+				Services: []schema.Service{},
 			},
 			expectError: true,
 			errContains: "at least one service must be defined",

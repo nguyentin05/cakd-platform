@@ -120,8 +120,9 @@ services:
 			expectError: true,
 			errContains: "unsupported language: \"rust\"",
 		},
+
 		{
-			name: "Error - Dependency Rule Failed (CD without CI)",
+			name: "Error - Dependency Rule Failed (Alerting without Notification)",
 			yamlContent: `
 apiVersion: platform.dev/v1alpha1
 kind: Project
@@ -130,7 +131,8 @@ metadata:
   owner: test-owner
 providers:
   versionControl: github
-  cd: argocd
+observability:
+  alerting: true
 services:
   - name: api
     language: java-spring-boot
@@ -138,7 +140,7 @@ services:
 			setupFile:   true,
 			filePath:    filepath.Join(tempDir, "dep_failed.yaml"),
 			expectError: true,
-			errContains: "providers.ci is required when providers.cd is set",
+			errContains: "providers.notification is required when observability.alerting is enabled",
 		},
 		{
 			name: "Success - Valid Config with Defaults Applied",

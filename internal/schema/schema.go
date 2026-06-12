@@ -1,4 +1,4 @@
-package config
+package schema
 
 // PlatformConfig represents the root configuration schema for a CAKD platform project.
 // It specifies the services, backing stores, infrastructure providers, and observability settings.
@@ -21,8 +21,8 @@ type Metadata struct {
 // Providers defines the third-party integrations used for VCS, CI/CD, notifications, LLMs, and monitoring.
 type Providers struct {
 	VersionControl string `yaml:"versionControl" default:"Providers.VersionControl" enum:"vcs" validate:"required"`
-	CI             string `yaml:"ci,omitempty" enum:"ci"`
-	CD             string `yaml:"cd,omitempty" enum:"cd"`
+	CI             string `yaml:"ci,omitempty" default:"Providers.CI" enum:"ci"`
+	CD             string `yaml:"cd,omitempty" default:"Providers.CD" enum:"cd"`
 	Notification   string `yaml:"notification,omitempty" enum:"notification"`
 	LLM            string `yaml:"llm,omitempty" enum:"llm"`
 	Monitoring     string `yaml:"monitoring,omitempty" enum:"monitoring"`
@@ -41,7 +41,9 @@ type Service struct {
 	SpringConfigFormat string     `yaml:"springConfigFormat,omitempty" enum:"spring-config-format"`
 	Replicas           int        `yaml:"replicas,omitempty" default:"Replicas"`
 	Resources          *Resources `yaml:"resources,omitempty"`
-	Uses               []string   `yaml:"uses,omitempty"`
+	// Uses defines service-to-service dependencies or references to backing stores (e.g., ["postgres-db", "redis-cache"]).
+	// This dictates the scaffolding logic and runtime network dependencies.
+	Uses []string `yaml:"uses,omitempty"`
 }
 
 // Resources specifies the CPU and memory limits allocated to a Kubernetes pod.

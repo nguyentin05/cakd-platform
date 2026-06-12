@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/config/validate"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 const (
@@ -21,18 +21,18 @@ const (
 func TestStructure(t *testing.T) {
 	tests := []struct {
 		name        string
-		cfg         config.PlatformConfig
+		cfg         schema.PlatformConfig
 		expectError bool
 		errContains string
 	}{
 		{
 			name: "Valid - Fully omitted optional blocks",
-			cfg: config.PlatformConfig{
+			cfg: schema.PlatformConfig{
 				APIVersion: testAPIVersion,
 				Kind:       testKind,
-				Metadata:   config.Metadata{Name: testName, Owner: testOwner},
-				Providers:  config.Providers{VersionControl: testVC},
-				Services: []config.Service{
+				Metadata:   schema.Metadata{Name: testName, Owner: testOwner},
+				Providers:  schema.Providers{VersionControl: testVC},
+				Services: []schema.Service{
 					{Name: testSvc1, Language: testLang},
 				},
 			},
@@ -40,16 +40,16 @@ func TestStructure(t *testing.T) {
 		},
 		{
 			name: "Invalid - Resources declared but empty",
-			cfg: config.PlatformConfig{
+			cfg: schema.PlatformConfig{
 				APIVersion: testAPIVersion,
 				Kind:       testKind,
-				Metadata:   config.Metadata{Name: testName, Owner: testOwner},
-				Providers:  config.Providers{VersionControl: testVC},
-				Services: []config.Service{
+				Metadata:   schema.Metadata{Name: testName, Owner: testOwner},
+				Providers:  schema.Providers{VersionControl: testVC},
+				Services: []schema.Service{
 					{
 						Name:      testSvc1,
 						Language:  testLang,
-						Resources: &config.Resources{},
+						Resources: &schema.Resources{},
 					},
 				},
 			},
@@ -58,16 +58,16 @@ func TestStructure(t *testing.T) {
 		},
 		{
 			name: "Valid - Resources with only CPU",
-			cfg: config.PlatformConfig{
+			cfg: schema.PlatformConfig{
 				APIVersion: testAPIVersion,
 				Kind:       testKind,
-				Metadata:   config.Metadata{Name: testName, Owner: testOwner},
-				Providers:  config.Providers{VersionControl: testVC},
-				Services: []config.Service{
+				Metadata:   schema.Metadata{Name: testName, Owner: testOwner},
+				Providers:  schema.Providers{VersionControl: testVC},
+				Services: []schema.Service{
 					{
 						Name:      testSvc1,
 						Language:  testLang,
-						Resources: &config.Resources{CPU: "500m"},
+						Resources: &schema.Resources{CPU: "500m"},
 					},
 				},
 			},
@@ -75,24 +75,24 @@ func TestStructure(t *testing.T) {
 		},
 		{
 			name: "Invalid - Observability declared but empty",
-			cfg: config.PlatformConfig{
+			cfg: schema.PlatformConfig{
 				APIVersion:    testAPIVersion,
 				Kind:          testKind,
-				Metadata:      config.Metadata{Name: testName, Owner: testOwner},
-				Providers:     config.Providers{VersionControl: testVC},
-				Observability: &config.Observability{},
+				Metadata:      schema.Metadata{Name: testName, Owner: testOwner},
+				Providers:     schema.Providers{VersionControl: testVC},
+				Observability: &schema.Observability{},
 			},
 			expectError: true,
 			errContains: "block 'observability' is declared but empty",
 		},
 		{
 			name: "Valid - Observability with Alerting enabled",
-			cfg: config.PlatformConfig{
+			cfg: schema.PlatformConfig{
 				APIVersion: testAPIVersion,
 				Kind:       testKind,
-				Metadata:   config.Metadata{Name: testName, Owner: testOwner},
-				Providers:  config.Providers{VersionControl: testVC},
-				Observability: &config.Observability{
+				Metadata:   schema.Metadata{Name: testName, Owner: testOwner},
+				Providers:  schema.Providers{VersionControl: testVC},
+				Observability: &schema.Observability{
 					Alerting: true,
 				},
 			},
@@ -100,13 +100,13 @@ func TestStructure(t *testing.T) {
 		},
 		{
 			name: "Invalid - AI Config declared but empty",
-			cfg: config.PlatformConfig{
+			cfg: schema.PlatformConfig{
 				APIVersion: testAPIVersion,
 				Kind:       testKind,
-				Metadata:   config.Metadata{Name: testName, Owner: testOwner},
-				Providers:  config.Providers{VersionControl: testVC},
-				Observability: &config.Observability{
-					AI: &config.AIConfig{},
+				Metadata:   schema.Metadata{Name: testName, Owner: testOwner},
+				Providers:  schema.Providers{VersionControl: testVC},
+				Observability: &schema.Observability{
+					AI: &schema.AIConfig{},
 				},
 			},
 			expectError: true,
@@ -114,16 +114,16 @@ func TestStructure(t *testing.T) {
 		},
 		{
 			name: "Valid - AI Config with Model",
-			cfg: config.PlatformConfig{
+			cfg: schema.PlatformConfig{
 				APIVersion: testAPIVersion,
 				Kind:       testKind,
-				Metadata:   config.Metadata{Name: testName, Owner: testOwner},
-				Providers:  config.Providers{VersionControl: testVC},
-				Services: []config.Service{
+				Metadata:   schema.Metadata{Name: testName, Owner: testOwner},
+				Providers:  schema.Providers{VersionControl: testVC},
+				Services: []schema.Service{
 					{Name: testSvc1, Language: testLang},
 				},
-				Observability: &config.Observability{
-					AI: &config.AIConfig{
+				Observability: &schema.Observability{
+					AI: &schema.AIConfig{
 						Model: "gemini-1.5-pro",
 					},
 				},
@@ -132,12 +132,12 @@ func TestStructure(t *testing.T) {
 		},
 		{
 			name: "Invalid - Missing Required Field (Metadata.Name)",
-			cfg: config.PlatformConfig{
+			cfg: schema.PlatformConfig{
 				APIVersion: testAPIVersion,
 				Kind:       testKind,
-				Metadata:   config.Metadata{Owner: testOwner}, // Missing Name
-				Providers:  config.Providers{VersionControl: testVC},
-				Services: []config.Service{
+				Metadata:   schema.Metadata{Owner: testOwner}, // Missing Name
+				Providers:  schema.Providers{VersionControl: testVC},
+				Services: []schema.Service{
 					{Name: testSvc1, Language: testLang},
 				},
 			},
@@ -146,12 +146,12 @@ func TestStructure(t *testing.T) {
 		},
 		{
 			name: "Invalid - Enum validation failed (Language)",
-			cfg: config.PlatformConfig{
+			cfg: schema.PlatformConfig{
 				APIVersion: testAPIVersion,
 				Kind:       testKind,
-				Metadata:   config.Metadata{Name: testName, Owner: testOwner},
-				Providers:  config.Providers{VersionControl: testVC},
-				Services: []config.Service{
+				Metadata:   schema.Metadata{Name: testName, Owner: testOwner},
+				Providers:  schema.Providers{VersionControl: testVC},
+				Services: []schema.Service{
 					{Name: testSvc1, Language: "unknown-lang"},
 				},
 			},
