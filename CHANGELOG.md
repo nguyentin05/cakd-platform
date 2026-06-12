@@ -1,3 +1,11 @@
+## [0.11.1](https://github.com/nguyentin05/cakd-platform/compare/v0.11.0...v0.11.1) (2026-06-12)
+
+
+### Bug Fixes
+
+* fix image version and update manifest ([1eb97fd](https://github.com/nguyentin05/cakd-platform/commit/1eb97fd7bc824f0a18283e078bd58a0b4dc3b8f9))
+* frontmatter yaml bug ([c6583c8](https://github.com/nguyentin05/cakd-platform/commit/c6583c8879023e65f25725db73a017232d36ead8))
+
 # [0.11.0](https://github.com/nguyentin05/cakd-platform/compare/v0.10.2...v0.11.0) (2026-06-12)
 
 
