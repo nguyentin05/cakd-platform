@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/provider/llm/gemini"
 	"github.com/nguyentin05/cakd-platform/internal/provider/notify"
 )
@@ -19,13 +18,27 @@ type AgentServer struct {
 	DefaultWebhookURL string
 	notifier          notify.Notifier
 	aiMutex           sync.Mutex
+	geminiAPIKey      string
+	geminiModel       string
+	agentSecret       string
+	llmClient         *gemini.Client
+	webhooks          map[string]string
 }
 
 // NewAgentServer initializes and returns a new AgentServer instance.
-func NewAgentServer(defaultWebhookURL string, notifier notify.Notifier) *AgentServer {
+func NewAgentServer(defaultWebhookURL string, notifier notify.Notifier, geminiAPIKey, geminiModel, agentSecret string, webhooks map[string]string) *AgentServer {
+	var llmClient *gemini.Client
+	if geminiAPIKey != "" {
+		llmClient = gemini.NewClient(geminiAPIKey, geminiModel)
+	}
 	return &AgentServer{
 		DefaultWebhookURL: defaultWebhookURL,
 		notifier:          notifier,
+		geminiAPIKey:      geminiAPIKey,
+		geminiModel:       geminiModel,
+		agentSecret:       agentSecret,
+		llmClient:         llmClient,
+		webhooks:          webhooks,
 	}
 }
 
@@ -36,6 +49,38 @@ func (s *AgentServer) HandleAlert(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	// Validate Content-Type
+	ct := r.Header.Get("Content-Type")
+	if !strings.HasPrefix(ct, "application/json") {
+		http.Error(w, "Unsupported media type", http.StatusUnsupportedMediaType)
+		return
+	}
+
+	// Validate shared secret if configured
+	if s.agentSecret != "" {
+		authHeader := r.Header.Get("Authorization")
+		querySecret := r.URL.Query().Get("secret")
+		authorized := false
+		if authHeader != "" {
+			if strings.HasPrefix(authHeader, "Bearer ") {
+				token := strings.TrimPrefix(authHeader, "Bearer ")
+				if token == s.agentSecret {
+					authorized = true
+				}
+			}
+		}
+		if querySecret == s.agentSecret {
+			authorized = true
+		}
+		if !authorized {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+	}
+
+	// Limit body size to 1MB
+	r.Body = http.MaxBytesReader(w, r.Body, 1*1024*1024)
 
 	var payload AlertmanagerPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
@@ -52,8 +97,6 @@ func (s *AgentServer) HandleAlert(w http.ResponseWriter, r *http.Request) {
 // processAlerts groups incoming alerts by project/namespace webhook URLs, formats their severity
 // and description details, dispatches them via the notifier, and queues them for AI analysis.
 func (s *AgentServer) processAlerts(payload AlertmanagerPayload) {
-	webhooks, _ := config.LoadWebhooks()
-
 	type AlertGroup struct {
 		WebhookURL  string
 		Items       []notify.AlertItem
@@ -64,8 +107,8 @@ func (s *AgentServer) processAlerts(payload AlertmanagerPayload) {
 	for _, alert := range payload.Alerts {
 		namespace := alert.Labels["namespace"]
 		targetURL := s.DefaultWebhookURL
-		if namespace != "" && webhooks != nil {
-			if url, ok := webhooks[namespace]; ok && url != "" {
+		if namespace != "" && s.webhooks != nil {
+			if url, ok := s.webhooks[namespace]; ok && url != "" {
 				targetURL = url
 			}
 		}
@@ -110,19 +153,17 @@ func (s *AgentServer) processAlerts(payload AlertmanagerPayload) {
 // runAIAnalysis uses the Gemini LLM client to analyze firing alert descriptions and
 // posts troubleshooting suggestions back to the project's alert channel.
 func (s *AgentServer) runAIAnalysis(targetWebhookURL string, descriptions []string) {
-	apiKey := config.GetGeminiAPIKey()
-	if apiKey == "" {
-		fmt.Println("GEMINI_API_KEY is not set. Skipping AI analysis.")
+	if s.llmClient == nil {
+		fmt.Println("Gemini client is not initialized. Skipping AI analysis.")
 		return
 	}
+
+	time.Sleep(3 * time.Second)
 
 	s.aiMutex.Lock()
 	defer s.aiMutex.Unlock()
 
-	time.Sleep(3 * time.Second)
-
 	fmt.Println("Running AI analysis for fired alerts...")
-	llmClient := gemini.NewClient(apiKey)
 
 	alertContext := strings.Join(descriptions, "\n- ")
 	prompt := fmt.Sprintf(`You are an expert DevOps AI assistant. 
@@ -132,7 +173,7 @@ The following Kubernetes alerts have just fired:
 Provide a very short, concise diagnosis of the likely root cause and 1-2 bullet points for immediate troubleshooting steps. 
 Keep the response under 150 words. Do not use markdown codeblocks that wrap the entire response.`, alertContext)
 
-	diagnosis, err := llmClient.Analyze(prompt)
+	diagnosis, err := s.llmClient.Analyze(prompt)
 	if err != nil {
 		fmt.Printf("Failed to generate AI diagnosis: %v\n", err)
 		return

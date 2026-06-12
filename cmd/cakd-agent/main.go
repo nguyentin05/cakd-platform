@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/nguyentin05/cakd-platform/internal/agent"
+	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/provider/notify/discord"
 )
 
@@ -24,8 +25,20 @@ func main() {
 		port = "8080"
 	}
 
+	geminiKey := os.Getenv("GEMINI_API_KEY")
+	geminiModel := os.Getenv("GEMINI_MODEL")
+	if geminiModel == "" {
+		geminiModel = "gemini-flash-latest"
+	}
+	agentSecret := os.Getenv("CAKD_AGENT_SECRET")
+
+	webhooks, err := config.LoadWebhooks()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to load webhooks: %v\n", err)
+	}
+
 	notifier := discord.NewClient("", "")
-	server := agent.NewAgentServer(webhookURL, notifier)
+	server := agent.NewAgentServer(webhookURL, notifier, geminiKey, geminiModel, agentSecret, webhooks)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v1/alerts", server.HandleAlert)
