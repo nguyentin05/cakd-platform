@@ -51,7 +51,7 @@ The VCS provider initializes a repo, commits, and pushes via authenticated clone
 
 ## Execution Flow
 
-### Project creation (`cakd create -f platform.yaml`)
+### 1. Project Creation Flow (`cakd create`)
 
 1.  Parse and validate `platform.yaml` → produce `PlatformConfig`.
 2.  Prepare output directory; honor `--force` to overwrite.
@@ -76,7 +76,7 @@ graph TD
 
 ## Key Design Decisions
 
--   Declarative `platform.yaml` centralizes `project` definition and enables repeatable `bootstrap`s.
--   Modular packages provide clear separation (config, pipeline, scaffold, iac, provider implementations).
--   Embedded templates (`go:embed`) and `[[ ]]` delimiters avoid conflicts with Helm/CI syntaxes.
--   `Terraform Bridge` isolates infrastructure provisioning and returns structured outputs used by the pipeline.
+-   **Declarative `platform.yaml`**: Centralizes `project` definition and enables repeatable `bootstrap`s.
+-   **Modular packages**: Provide clear separation (config, pipeline, scaffold, iac, provider implementations).
+-   **Embedded templates (`go:embed`) and `[[ ]]` delimiters**: Avoid conflicts with Helm/CI syntaxes.
+-   **`Terraform Bridge`**: Isolates infrastructure provisioning and returns structured outputs used by the pipeline.

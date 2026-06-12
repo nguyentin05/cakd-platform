@@ -1,5 +1,5 @@
 ---
-title: cakd observe
+title: `cakd` observe
 description: Use AI to observe, diagnose, and troubleshoot a project.
 sidebar:
   order: 100
