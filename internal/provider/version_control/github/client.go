@@ -1,10 +1,12 @@
 package github
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 // Client implements the [version_control.VersionControl] interface for GitHub.
@@ -32,23 +34,26 @@ func (c *Client) InitAndPush(projectDir, repoCloneURL, ghToken string) error {
 	}
 
 	for _, step := range steps {
-		if err := run(projectDir, step.args...); err != nil {
+		if err := runGitWithRedaction(projectDir, ghToken, step.args...); err != nil {
 			return fmt.Errorf("%s failed: %w", step.name, err)
 		}
 	}
 
 	authedURL := insertTokenInURL(repoCloneURL, ghToken)
 
-	if err := run(projectDir, "remote", "add", "origin", authedURL); err != nil {
+	if err := runGitWithRedaction(projectDir, ghToken, "remote", "add", "origin", authedURL); err != nil {
 		return fmt.Errorf("git remote add failed: %w", err)
 	}
 
-	if err := run(projectDir, "push", "-f", "-u", "origin", "main"); err != nil {
-		return fmt.Errorf("git push failed: %w", err)
-	}
+	// Always ensure remote URL is cleaned up so we never leak the token in .git/config on failure.
+	defer func() {
+		_ = runGitWithRedaction(projectDir, ghToken, "remote", "set-url", "origin", repoCloneURL)
+	}()
 
-	if err := run(projectDir, "remote", "set-url", "origin", repoCloneURL); err != nil {
-		return fmt.Errorf("git remote set-url failed: %w", err)
+	// Force push (-f) is intentional here because this is the initial bootstrap
+	// of a newly generated project repository, ensuring origin main is set cleanly.
+	if err := runGitWithRedaction(projectDir, ghToken, "push", "-f", "-u", "origin", "main"); err != nil {
+		return fmt.Errorf("git push failed: %w", err)
 	}
 
 	return nil
@@ -64,12 +69,28 @@ func insertTokenInURL(cloneURL, token string) string {
 	return cloneURL
 }
 
-// run is a helper that executes a git command in the specified directory,
-// redirecting standard outputs and errors.
-func run(dir string, args ...string) error {
+// runGitWithRedaction executes a git command in the specified directory, captures stdout/stderr,
+// redacts occurrences of the authentication token, and writes the redacted outputs to os.Stdout/os.Stderr.
+func runGitWithRedaction(dir string, token string, args ...string) error {
 	cmd := exec.Command("git", args...)
 	cmd.Dir = dir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+
+	var stdoutBuf, stderrBuf bytes.Buffer
+	cmd.Stdout = &stdoutBuf
+	cmd.Stderr = &stderrBuf
+
+	err := cmd.Run()
+
+	stdoutStr := stdoutBuf.String()
+	stderrStr := stderrBuf.String()
+
+	if token != "" {
+		stdoutStr = strings.ReplaceAll(stdoutStr, token, "******")
+		stderrStr = strings.ReplaceAll(stderrStr, token, "******")
+	}
+
+	_, _ = os.Stdout.Write([]byte(stdoutStr))
+	_, _ = os.Stderr.Write([]byte(stderrStr))
+
+	return err
 }
