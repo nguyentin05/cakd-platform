@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"text/template"
+	"time"
 )
 
 type InitializrMetadata struct {
@@ -119,7 +120,10 @@ func fetchMetadata() ([]byte, error) {
 	}
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
+	client := &http.Client{
+		Timeout: 15 * time.Second,
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
 	}

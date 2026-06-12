@@ -1,8 +1,8 @@
 package scaffold
 
 import (
-	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/registry"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 // TemplateMapping defines the source embedded template path and its target output file path relative to the destination.
@@ -12,7 +12,7 @@ type TemplateMapping struct {
 }
 
 // GlobalMappings returns the set of project-level file mappings to generate (e.g. .gitignore, CI workflows, and ArgoCD application specs) depending on the configuration.
-func GlobalMappings(cfg *config.PlatformConfig) []TemplateMapping {
+func GlobalMappings(cfg *schema.PlatformConfig) []TemplateMapping {
 	mappings := []TemplateMapping{
 		{"templates/gitignore.tmpl", ".gitignore"},
 	}
@@ -29,7 +29,7 @@ func GlobalMappings(cfg *config.PlatformConfig) []TemplateMapping {
 }
 
 // ServiceMappings returns the list of file mappings to generate specifically for an individual microservice, such as Dockerfiles, Helm charts, and Spring application configuration formats.
-func ServiceMappings(cfg *config.PlatformConfig, svc config.Service) []TemplateMapping {
+func ServiceMappings(cfg *schema.PlatformConfig, svc schema.Service) []TemplateMapping {
 	mappings := []TemplateMapping{
 		{"templates/dockerfile.tmpl", "Dockerfile"},
 	}
@@ -66,7 +66,7 @@ func ServiceMappings(cfg *config.PlatformConfig, svc config.Service) []TemplateM
 }
 
 // usesDB returns true if a service declares dependencies on relational databases like PostgreSQL or MySQL.
-func usesDB(cfg *config.PlatformConfig, svc config.Service) bool {
+func usesDB(cfg *schema.PlatformConfig, svc schema.Service) bool {
 	for _, use := range svc.Uses {
 		for _, b := range cfg.Backing {
 			if b.Name == use && (b.Type == registry.PostgreSQL || b.Type == registry.MySQL) {

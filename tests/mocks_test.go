@@ -1,18 +1,18 @@
 package tests_test
 
 import (
-	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/iac"
 	"github.com/nguyentin05/cakd-platform/internal/provider/notify"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 // MockAppFramework implements app.AppFramework
 type MockAppFramework struct {
-	ScaffoldFunc func(cfg *config.PlatformConfig, svc config.Service, outDir string) error
+	ScaffoldFunc func(cfg *schema.PlatformConfig, svc schema.Service, outDir string) error
 	Scaffolded   bool
 }
 
-func (m *MockAppFramework) Scaffold(cfg *config.PlatformConfig, svc config.Service, outDir string) error {
+func (m *MockAppFramework) Scaffold(cfg *schema.PlatformConfig, svc schema.Service, outDir string) error {
 	m.Scaffolded = true
 	if m.ScaffoldFunc != nil {
 		return m.ScaffoldFunc(cfg, svc, outDir)
@@ -100,7 +100,7 @@ func (m *MockIaCEngine) Destroy() error {
 // SetupMockIaC returns a function that overrides iac.NewEngine factory
 func SetupMockIaC(mock *MockIaCEngine) func() {
 	orig := iac.NewEngine
-	iac.NewEngine = func(cfg *config.PlatformConfig, workDir string) iac.Engine {
+	iac.NewEngine = func(cfg *schema.PlatformConfig, workDir string) iac.Engine {
 		return mock
 	}
 	return func() {

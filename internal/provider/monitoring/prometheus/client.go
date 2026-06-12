@@ -3,7 +3,12 @@ package prometheus
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
 	"os/exec"
+	"time"
 )
 
 // Client implements the [monitoring.MetricsFetcher] interface for Prometheus.
@@ -25,16 +30,42 @@ type PrometheusResponse struct {
 	} `json:"data"`
 }
 
-// Fetch queries the Prometheus service inside the cluster (via kubectl proxy) to retrieve container status
-// metrics (such as restarts) for all pods running inside the specified namespace.
+// Fetch queries the Prometheus service inside the cluster (via direct HTTP if in-cluster, or via kubectl proxy if local)
+// to retrieve container status metrics (such as restarts) for all pods running inside the specified namespace.
 func (c *Client) Fetch(namespace string) (string, error) {
 	query := fmt.Sprintf(`kube_pod_container_status_restarts_total{namespace="%s"}`, namespace)
-	url := fmt.Sprintf("/api/v1/namespaces/monitoring/services/prometheus-k8s:9090/proxy/api/v1/query?query=%s", query)
+	encodedQuery := url.QueryEscape(query)
 
-	cmd := exec.Command("kubectl", "get", "--raw", url)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("failed to query prometheus: %s", string(output))
+	var output []byte
+	var err error
+
+	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
+		// In-cluster: Direct HTTP query to the Prometheus service
+		apiURL := fmt.Sprintf("http://prometheus-k8s.monitoring.svc.cluster.local:9090/api/v1/query?query=%s", encodedQuery)
+		client := &http.Client{
+			Timeout: 5 * time.Second,
+		}
+		resp, httpErr := client.Get(apiURL)
+		if httpErr != nil {
+			return "", fmt.Errorf("failed to query prometheus directly in-cluster: %w", httpErr)
+		}
+		defer resp.Body.Close()
+
+		output, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return "", fmt.Errorf("failed to read prometheus direct response: %w", err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			return "", fmt.Errorf("prometheus returned status %d: %s", resp.StatusCode, string(output))
+		}
+	} else {
+		// Out-of-cluster (CLI local fallback): Use kubectl get --raw
+		path := fmt.Sprintf("/api/v1/namespaces/monitoring/services/prometheus-k8s:9090/proxy/api/v1/query?query=%s", encodedQuery)
+		cmd := exec.Command("kubectl", "get", "--raw", path)
+		output, err = cmd.CombinedOutput()
+		if err != nil {
+			return "", fmt.Errorf("failed to query prometheus via kubectl: %s (error: %v)", string(output), err)
+		}
 	}
 
 	var promResp PrometheusResponse

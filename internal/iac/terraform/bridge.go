@@ -10,26 +10,27 @@ import (
 
 	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/iac"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 //go:embed modules/github
 var moduleFS embed.FS
 
 func init() {
-	iac.NewEngine = func(cfg *config.PlatformConfig, workDir string) iac.Engine {
+	iac.NewEngine = func(cfg *schema.PlatformConfig, workDir string) iac.Engine {
 		return New(cfg, workDir)
 	}
 }
 
 // Bridge implements the [iac.Engine] interface using Terraform to provision infrastructure.
 type Bridge struct {
-	cfg     *config.PlatformConfig
+	cfg     *schema.PlatformConfig
 	workDir string
 	ghToken string
 }
 
 // New initializes and returns a new Terraform Bridge instance.
-func New(cfg *config.PlatformConfig, workDir string) *Bridge {
+func New(cfg *schema.PlatformConfig, workDir string) *Bridge {
 	return &Bridge{
 		cfg:     cfg,
 		workDir: workDir,

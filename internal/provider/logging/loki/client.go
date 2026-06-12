@@ -3,9 +3,13 @@ package loki
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 // Client implements the [logging.LogFetcher] interface for Grafana Loki.
@@ -27,18 +31,42 @@ type LokiResponse struct {
 	} `json:"data"`
 }
 
-// Fetch queries the Loki service inside the cluster (via kubectl proxy) to retrieve the recent
-// 50 logs for all containers running inside the specified namespace.
+// Fetch queries the Loki service inside the cluster (via direct HTTP if in-cluster, or via kubectl proxy if local)
+// to retrieve the recent 50 logs for all containers running inside the specified namespace.
 func (c *Client) Fetch(namespace string) (string, error) {
 	query := fmt.Sprintf(`{namespace="%s"}`, namespace)
 	encodedQuery := url.QueryEscape(query)
 
-	path := fmt.Sprintf("/api/v1/namespaces/monitoring/services/loki:3100/proxy/loki/api/v1/query_range?query=%s&limit=50", encodedQuery)
+	var output []byte
+	var err error
 
-	cmd := exec.Command("kubectl", "get", "--raw", path)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("failed to query loki: %s", string(output))
+	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
+		// In-cluster: Direct HTTP query to the Loki service
+		apiURL := fmt.Sprintf("http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/query_range?query=%s&limit=50", encodedQuery)
+		client := &http.Client{
+			Timeout: 5 * time.Second,
+		}
+		resp, httpErr := client.Get(apiURL)
+		if httpErr != nil {
+			return "", fmt.Errorf("failed to query loki directly in-cluster: %w", httpErr)
+		}
+		defer resp.Body.Close()
+
+		output, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return "", fmt.Errorf("failed to read loki direct response: %w", err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			return "", fmt.Errorf("loki returned status %d: %s", resp.StatusCode, string(output))
+		}
+	} else {
+		// Out-of-cluster (CLI local fallback): Use kubectl get --raw
+		path := fmt.Sprintf("/api/v1/namespaces/monitoring/services/loki:3100/proxy/loki/api/v1/query_range?query=%s&limit=50", encodedQuery)
+		cmd := exec.Command("kubectl", "get", "--raw", path)
+		output, err = cmd.CombinedOutput()
+		if err != nil {
+			return "", fmt.Errorf("failed to query loki via kubectl: %s (error: %v)", string(output), err)
+		}
 	}
 
 	var lokiResp LokiResponse

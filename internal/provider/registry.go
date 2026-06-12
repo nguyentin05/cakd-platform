@@ -36,7 +36,10 @@ var Providers = &ProviderRegistry{
 	},
 	Notifiers: map[string]func() notify.Notifier{
 		"discord": func() notify.Notifier {
-			token, guildID, _ := config.GetDiscordCredentials()
+			token, guildID, err := config.GetDiscordCredentials()
+			if err != nil {
+				fmt.Printf("Warning: Discord credentials not configured: %v. Discord notifications will not be functional.\n", err)
+			}
 			return discord.NewClient(token, guildID)
 		},
 	},

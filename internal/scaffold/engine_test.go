@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/config/defaults"
 	"github.com/nguyentin05/cakd-platform/internal/scaffold"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 func TestEngine_Generate(t *testing.T) {
@@ -16,7 +16,7 @@ func TestEngine_Generate(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		cfg          *config.PlatformConfig
+		cfg          *schema.PlatformConfig
 		expectedDocs []string // paths relative to output dir
 		expectedYml  bool     // expect application.yml for service
 		expectedProp bool     // expect application.properties for service
@@ -25,19 +25,19 @@ func TestEngine_Generate(t *testing.T) {
 	}{
 		{
 			name: "Gradle with Properties config, CI and CD enabled",
-			cfg: &config.PlatformConfig{
+			cfg: &schema.PlatformConfig{
 				APIVersion: "platform.dev/v1alpha1",
 				Kind:       "Project",
-				Metadata: config.Metadata{
+				Metadata: schema.Metadata{
 					Name:  "my-project",
 					Owner: "tin",
 				},
-				Providers: config.Providers{
+				Providers: schema.Providers{
 					VersionControl: "github",
 					CI:             "github-actions",
 					CD:             "argocd",
 				},
-				Services: []config.Service{
+				Services: []schema.Service{
 					{
 						Name:               "api-service",
 						Language:           "java-spring-boot",
@@ -62,18 +62,18 @@ func TestEngine_Generate(t *testing.T) {
 		},
 		{
 			name: "Maven with YAML config, CI enabled, CD disabled",
-			cfg: &config.PlatformConfig{
+			cfg: &schema.PlatformConfig{
 				APIVersion: "platform.dev/v1alpha1",
 				Kind:       "Project",
-				Metadata: config.Metadata{
+				Metadata: schema.Metadata{
 					Name:  "my-project",
 					Owner: "tin",
 				},
-				Providers: config.Providers{
+				Providers: schema.Providers{
 					VersionControl: "github",
 					CI:             "github-actions",
 				},
-				Services: []config.Service{
+				Services: []schema.Service{
 					{
 						Name:               "api-service",
 						Language:           "java-spring-boot",

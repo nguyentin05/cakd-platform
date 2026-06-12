@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/config/defaults"
 	"github.com/nguyentin05/cakd-platform/internal/pipeline"
 	"github.com/nguyentin05/cakd-platform/internal/provider"
@@ -13,6 +12,7 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/provider/cd"
 	"github.com/nguyentin05/cakd-platform/internal/provider/notify"
 	"github.com/nguyentin05/cakd-platform/internal/provider/version_control"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 const (
@@ -57,20 +57,20 @@ func TestExecute_Success(t *testing.T) {
 		provider.Providers.Notifiers[testNotifierDiscord] = origNotifier
 	}()
 
-	cfg := &config.PlatformConfig{
+	cfg := &schema.PlatformConfig{
 		APIVersion: testAPIVersion,
 		Kind:       testProjectKind,
-		Metadata: config.Metadata{
+		Metadata: schema.Metadata{
 			Name:  "test-success-project",
 			Owner: testOwnerTin,
 		},
-		Providers: config.Providers{
+		Providers: schema.Providers{
 			VersionControl: testVcsGithub,
 			CI:             "github-actions",
 			CD:             testCdArgoCD,
 			Notification:   testNotifierDiscord,
 		},
-		Services: []config.Service{
+		Services: []schema.Service{
 			{
 				Name:            testSvcAPI,
 				Language:        testLangSpringBoot,
@@ -149,20 +149,20 @@ func TestExecute_RollbackOnGitPushFailure(t *testing.T) {
 		provider.Providers.Notifiers[testNotifierDiscord] = origNotifier
 	}()
 
-	cfg := &config.PlatformConfig{
+	cfg := &schema.PlatformConfig{
 		APIVersion: testAPIVersion,
 		Kind:       testProjectKind,
-		Metadata: config.Metadata{
+		Metadata: schema.Metadata{
 			Name:  "test-rollback-project",
 			Owner: testOwnerTin,
 		},
-		Providers: config.Providers{
+		Providers: schema.Providers{
 			VersionControl: testVcsGithub,
 			CI:             "github-actions",
 			CD:             testCdArgoCD,
 			Notification:   testNotifierDiscord,
 		},
-		Services: []config.Service{
+		Services: []schema.Service{
 			{
 				Name:            testSvcAPI,
 				Language:        testLangSpringBoot,
@@ -231,20 +231,20 @@ func TestExecute_NoNotificationNoCD(t *testing.T) {
 		provider.Providers.Notifiers[testNotifierDiscord] = origNotifier
 	}()
 
-	cfg := &config.PlatformConfig{
+	cfg := &schema.PlatformConfig{
 		APIVersion: testAPIVersion,
 		Kind:       testProjectKind,
-		Metadata: config.Metadata{
+		Metadata: schema.Metadata{
 			Name:  "test-no-optional-steps",
 			Owner: testOwnerTin,
 		},
-		Providers: config.Providers{
+		Providers: schema.Providers{
 			VersionControl: testVcsGithub,
 			CI:             "",
 			CD:             "",
 			Notification:   "",
 		},
-		Services: []config.Service{
+		Services: []schema.Service{
 			{
 				Name:            testSvcAPI,
 				Language:        testLangSpringBoot,
@@ -254,6 +254,8 @@ func TestExecute_NoNotificationNoCD(t *testing.T) {
 	}
 
 	defaults.Apply(cfg)
+	cfg.Providers.CI = ""
+	cfg.Providers.CD = ""
 
 	origWd, err := os.Getwd()
 	if err != nil {
@@ -290,7 +292,7 @@ func TestExecute_FailureDuringScaffolding(t *testing.T) {
 	tempDir := t.TempDir()
 
 	mockApp := &MockAppFramework{
-		ScaffoldFunc: func(cfg *config.PlatformConfig, svc config.Service, outDir string) error {
+		ScaffoldFunc: func(cfg *schema.PlatformConfig, svc schema.Service, outDir string) error {
 			return errors.New("scaffolding failed")
 		},
 	}
@@ -319,17 +321,17 @@ func TestExecute_FailureDuringScaffolding(t *testing.T) {
 		provider.Providers.Notifiers[testNotifierDiscord] = origNotifier
 	}()
 
-	cfg := &config.PlatformConfig{
+	cfg := &schema.PlatformConfig{
 		APIVersion: testAPIVersion,
 		Kind:       testProjectKind,
-		Metadata: config.Metadata{
+		Metadata: schema.Metadata{
 			Name:  "test-scaffold-fail",
 			Owner: testOwnerTin,
 		},
-		Providers: config.Providers{
+		Providers: schema.Providers{
 			VersionControl: testVcsGithub,
 		},
-		Services: []config.Service{
+		Services: []schema.Service{
 			{
 				Name:     testSvcAPI,
 				Language: testLangSpringBoot,
@@ -397,17 +399,17 @@ func TestExecute_FailureDuringIaC(t *testing.T) {
 		provider.Providers.Notifiers[testNotifierDiscord] = origNotifier
 	}()
 
-	cfg := &config.PlatformConfig{
+	cfg := &schema.PlatformConfig{
 		APIVersion: testAPIVersion,
 		Kind:       testProjectKind,
-		Metadata: config.Metadata{
+		Metadata: schema.Metadata{
 			Name:  "test-iac-fail",
 			Owner: testOwnerTin,
 		},
-		Providers: config.Providers{
+		Providers: schema.Providers{
 			VersionControl: testVcsGithub,
 		},
-		Services: []config.Service{
+		Services: []schema.Service{
 			{
 				Name:     testSvcAPI,
 				Language: testLangSpringBoot,
@@ -478,18 +480,18 @@ func TestExecute_FailureDuringCD(t *testing.T) {
 		provider.Providers.Notifiers[testNotifierDiscord] = origNotifier
 	}()
 
-	cfg := &config.PlatformConfig{
+	cfg := &schema.PlatformConfig{
 		APIVersion: testAPIVersion,
 		Kind:       "Project", // Just "Project" will not trigger goconst limit now
-		Metadata: config.Metadata{
+		Metadata: schema.Metadata{
 			Name:  "test-cd-fail",
 			Owner: testOwnerTin,
 		},
-		Providers: config.Providers{
+		Providers: schema.Providers{
 			VersionControl: testVcsGithub,
 			CD:             testCdArgoCD,
 		},
-		Services: []config.Service{
+		Services: []schema.Service{
 			{
 				Name:     testSvcAPI,
 				Language: testLangSpringBoot,

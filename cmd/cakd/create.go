@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/pipeline"
@@ -22,13 +21,11 @@ var createCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg, err := config.Parse(createFilePath)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Configuration error: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("configuration error: %w", err)
 		}
 
 		if err := pipeline.Execute(cfg, forceCreate); err != nil {
-			fmt.Fprintf(os.Stderr, "Create failed: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("create failed: %w", err)
 		}
 		return nil
 	},

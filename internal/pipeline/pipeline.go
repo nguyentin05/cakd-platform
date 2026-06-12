@@ -3,7 +3,7 @@ package pipeline
 import (
 	"fmt"
 
-	"github.com/nguyentin05/cakd-platform/internal/config"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 // Step represents the smallest execute unit of work within the project creation pipeline.
@@ -25,7 +25,7 @@ type OptionalStep interface {
 // Execute runs the full creation pipeline sequentially using the provided configuration.
 // It sets up the workspace context, registers all build/deploy steps, and triggers execution.
 // It prints a success summary upon clean completion.
-func Execute(cfg *config.PlatformConfig, force bool) error {
+func Execute(cfg *schema.PlatformConfig, force bool) error {
 	ctx := NewContext(cfg, force)
 
 	if err := ctx.Prepare(); err != nil {
@@ -35,9 +35,9 @@ func Execute(cfg *config.PlatformConfig, force bool) error {
 	steps := []Step{
 		&ScaffoldStep{},
 		&InfraStep{},
-		&NotifyStep{},
 		&VersionControlStep{},
 		&DeployStep{},
+		&NotifyStep{},
 	}
 
 	if err := Run(ctx, steps); err != nil {

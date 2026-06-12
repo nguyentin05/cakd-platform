@@ -5,14 +5,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/nguyentin05/cakd-platform/internal/config"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 // Context holds all shared state and runtime properties between pipeline steps.
 // It acts as the single source of truth for step configurations and execution outputs.
 type Context struct {
 	// Cfg represents the parsed configuration of the platform.
-	Cfg *config.PlatformConfig
+	Cfg *schema.PlatformConfig
 	// OutDir is the target directory where all scaffolding files will be written.
 	OutDir string
 	// Force indicates whether to overwrite the target directory if it already exists.
@@ -24,7 +24,7 @@ type Context struct {
 }
 
 // NewContext creates a new initialized pipeline Context with default output paths.
-func NewContext(cfg *config.PlatformConfig, force bool) *Context {
+func NewContext(cfg *schema.PlatformConfig, force bool) *Context {
 	return &Context{
 		Cfg:    cfg,
 		OutDir: filepath.Join(".", "out", cfg.Metadata.Name),

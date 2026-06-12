@@ -9,9 +9,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
-	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/registry"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 const baseURL = "https://start.spring.io/starter.zip"
@@ -27,7 +28,7 @@ func NewClient() *Client {
 
 // Scaffold constructs the Spring Initializr query parameters, queries start.spring.io,
 // and extracts the downloaded archive into the designated outDir.
-func (c *Client) Scaffold(cfg *config.PlatformConfig, svc config.Service, outDir string) error {
+func (c *Client) Scaffold(cfg *schema.PlatformConfig, svc schema.Service, outDir string) error {
 	deps := []string{"web", "actuator"}
 	deps = append(deps, svc.Dependencies...)
 
@@ -58,7 +59,7 @@ func (c *Client) Scaffold(cfg *config.PlatformConfig, svc config.Service, outDir
 
 	javaVersion := svc.LanguageVersion
 	if javaVersion == "" {
-		javaVersion = "21"
+		javaVersion = registry.Defaults.LanguageVersion["java-spring-boot"]
 	}
 
 	packaging := svc.Packaging
@@ -82,7 +83,10 @@ func (c *Client) Scaffold(cfg *config.PlatformConfig, svc config.Service, outDir
 		urlStr += "&bootVersion=" + svc.FrameworkVersion
 	}
 
-	resp, err := http.Get(urlStr) //nolint:gosec
+	httpClient := &http.Client{
+		Timeout: 15 * time.Second,
+	}
+	resp, err := httpClient.Get(urlStr) //nolint:gosec
 	if err != nil {
 		return fmt.Errorf("failed to connect to start.spring.io: %w", err)
 	}

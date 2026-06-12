@@ -1,6 +1,6 @@
 package iac
 
-import "github.com/nguyentin05/cakd-platform/internal/config"
+import "github.com/nguyentin05/cakd-platform/internal/schema"
 
 // Engine defines the interface for provisioning and managing cloud infrastructure resources (IaC).
 // Implementations of this interface manage resource lifecycles (e.g. using Terraform).
@@ -13,4 +13,4 @@ type Engine interface {
 
 // NewEngine is a factory function initialized by concrete IaC implementations to instantiate
 // an [Engine] for a given configuration and working directory.
-var NewEngine func(cfg *config.PlatformConfig, workDir string) Engine
+var NewEngine func(cfg *schema.PlatformConfig, workDir string) Engine

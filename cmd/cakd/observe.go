@@ -31,7 +31,8 @@ var observeCmd = &cobra.Command{
 
 		metrics := prometheus.NewClient()
 		logs := loki.NewClient()
-		ai := gemini.NewClient(apiKey)
+		model := os.Getenv("GEMINI_MODEL")
+		ai := gemini.NewClient(apiKey, model)
 
 		service := observe.NewObserverService(metrics, logs, ai)
 		if err := service.Diagnose(projectName); err != nil {

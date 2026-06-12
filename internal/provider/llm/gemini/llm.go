@@ -6,17 +6,27 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 // Client implements the [llm.LLM] interface for interacting with the Google Gemini API.
 type Client struct {
-	apiKey string
+	apiKey     string
+	model      string
+	httpClient *http.Client
 }
 
-// NewClient initializes and returns a new Gemini API Client.
-func NewClient(apiKey string) *Client {
+// NewClient initializes and returns a new Gemini API Client with a default model if empty.
+func NewClient(apiKey, model string) *Client {
+	if model == "" {
+		model = "gemini-flash-latest"
+	}
 	return &Client{
 		apiKey: apiKey,
+		model:  model,
+		httpClient: &http.Client{
+			Timeout: 10 * time.Second,
+		},
 	}
 }
 
@@ -44,9 +54,10 @@ type GeminiResponse struct {
 	} `json:"candidates"`
 }
 
-// Analyze queries the Gemini API with the provided prompt text and returns the generated content diagnosis response.
+// Analyze queries the Gemini API with the provided prompt text using the headers authentication
+// and the configured model, and returns the generated diagnosis.
 func (c *Client) Analyze(prompt string) (string, error) {
-	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=%s", c.apiKey)
+	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent", c.model)
 
 	reqBody := GeminiRequest{
 		Contents: []Content{
@@ -63,8 +74,14 @@ func (c *Client) Analyze(prompt string) (string, error) {
 		return "", fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	/* #nosec G107 */
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", fmt.Errorf("failed to create http request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-goog-api-key", c.apiKey)
+
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to make http request: %w", err)
 	}
@@ -76,7 +93,7 @@ func (c *Client) Analyze(prompt string) (string, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("gemini api return status %d: %s", resp.StatusCode, string(body))
+		return "", fmt.Errorf("gemini api returned status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var geminiResp GeminiResponse

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/nguyentin05/cakd-platform/internal/config"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 //go:embed templates
@@ -15,11 +15,18 @@ var content embed.FS
 
 // Engine manages loading, parsing, and rendering embedded template files into the target project output directory.
 type Engine struct {
-	cfg *config.PlatformConfig
+	cfg *schema.PlatformConfig
+}
+
+// TemplateData holds the required context for rendering scaffold templates.
+// It is exposed so templates can be tested independently of the Generate execution.
+type TemplateData struct {
+	Config  *schema.PlatformConfig
+	Service schema.Service
 }
 
 // New initializes and returns a new template rendering Engine.
-func New(cfg *config.PlatformConfig) *Engine {
+func New(cfg *schema.PlatformConfig) *Engine {
 	return &Engine{cfg: cfg}
 }
 
@@ -35,10 +42,6 @@ func (e *Engine) Generate(outDir string) error {
 	for _, svc := range e.cfg.Services {
 		svcDir := filepath.Join(outDir, "services", svc.Name)
 
-		type TemplateData struct {
-			Config  *config.PlatformConfig
-			Service config.Service
-		}
 		data := TemplateData{
 			Config:  e.cfg,
 			Service: svc,
