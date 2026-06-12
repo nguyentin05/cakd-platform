@@ -1,10 +1,14 @@
 package cluster
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"os/exec"
 )
+
+//go:embed k8s/prometheus-values.yaml
+var promValuesContent string
 
 const (
 	cmdAdd              = "add"
@@ -38,6 +42,7 @@ func RunInit(opts Options) error {
 	type step struct {
 		name     string
 		commands [][]string
+		run      func() error
 	}
 
 	var steps []step
@@ -55,19 +60,6 @@ func RunInit(opts Options) error {
 
 	var promValuesFile string
 	if opts.Monitoring {
-		promValuesContent := `alertmanager:
-  config:
-    route:
-      group_by: ['namespace', 'alertname']
-      group_wait: 5s
-      group_interval: 1m
-      repeat_interval: 1h
-      receiver: 'cakd-agent'
-    receivers:
-    - name: 'cakd-agent'
-      webhook_configs:
-      - url: 'http://cakd-agent.monitoring.svc.cluster.local:8080/api/v1/alerts'
-        send_resolved: true`
 		tmpFile, err := os.CreateTemp("", "prometheus-values-*.yaml")
 		if err != nil {
 			return fmt.Errorf("failed to create temp file: %w", err)
@@ -90,8 +82,8 @@ func RunInit(opts Options) error {
 
 		steps = append(steps, step{
 			name: "Step: Deploying CAKD Agent to Cluster",
-			commands: [][]string{
-				{"internal-agent-deploy"},
+			run: func() error {
+				return deployAgent(opts.AgentVersion)
 			},
 		})
 	}
@@ -114,14 +106,13 @@ func RunInit(opts Options) error {
 
 	for i, s := range steps {
 		fmt.Printf("\n[%d/%d] %s\n", i+1, len(steps), s.name)
-		for _, cmdArgs := range s.commands {
-			if len(cmdArgs) == 1 && cmdArgs[0] == "internal-agent-deploy" {
-				if err := deployAgent(opts.AgentVersion); err != nil {
-					return err
-				}
-				continue
+		if s.run != nil {
+			if err := s.run(); err != nil {
+				return err
 			}
-
+			continue
+		}
+		for _, cmdArgs := range s.commands {
 			fmt.Printf("   > %v\n", cmdArgs)
 			//nolint:gosec // intentional wrapper around internal commands
 			cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)

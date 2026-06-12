@@ -52,6 +52,9 @@ func deployAgent(agentVersion string) error {
 
 	var buf bytes.Buffer
 	for _, entry := range entries {
+		if entry.Name() == "prometheus-values.yaml" {
+			continue
+		}
 		tmplData, err := agentManifests.ReadFile("k8s/" + entry.Name())
 		if err != nil {
 			return fmt.Errorf("failed to read embedded agent manifest %s: %w", entry.Name(), err)
