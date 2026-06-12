@@ -11,3 +11,4 @@ alertmanager:
       webhook_configs:
       - url: 'http://cakd-agent.monitoring.svc.cluster.local:8080/api/v1/alerts'
         send_resolved: true
+    - name: 'null'

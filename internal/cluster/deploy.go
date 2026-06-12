@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"text/template"
 
 	"github.com/nguyentin05/cakd-platform/internal/config"
@@ -34,7 +35,7 @@ func deployAgent(agentVersion string) error {
 	}
 
 	tag := "latest"
-	if agentVersion != "" && agentVersion != "dev" {
+	if agentVersion != "" && agentVersion != "dev" && !strings.Contains(agentVersion, "dirty") {
 		tag = agentVersion
 	}
 

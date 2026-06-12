@@ -16,6 +16,7 @@ spec:
       containers:
       - name: agent
         image: {{ .Image }}
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         envFrom:
