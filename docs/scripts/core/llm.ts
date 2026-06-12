@@ -43,6 +43,19 @@ function ensureDir(filePath: string) {
     }
 }
 
+function parseFrontmatterAndBody(content: string): { frontmatter: string; body: string } {
+    if (!content.startsWith('---')) {
+        return { frontmatter: '', body: content };
+    }
+    const parts = content.split('---');
+    if (parts.length < 3) {
+        return { frontmatter: '', body: content };
+    }
+    const frontmatter = parts[1].trim();
+    const body = parts.slice(2).join('---').trim();
+    return { frontmatter, body };
+}
+
 export async function generateDoc(moduleConfig: any, projectRoot: string): Promise<boolean> {
     const targetPath = path.join(projectRoot, 'docs', moduleConfig.target);
     const templatePath = path.join(projectRoot, 'docs', moduleConfig.promptTemplate);
@@ -96,6 +109,14 @@ CRITICAL INSTRUCTIONS:
         let text = await callWithRetry(finalPrompt);
         
         text = stripMarkdownWrapper(text);
+
+        if (existingDoc) {
+            const original = parseFrontmatterAndBody(existingDoc);
+            if (original.frontmatter) {
+                const generated = parseFrontmatterAndBody(text);
+                text = `---\n${original.frontmatter}\n---\n\n${generated.body}`;
+            }
+        }
 
         ensureDir(targetPath);
         writeFileSync(targetPath, text);
