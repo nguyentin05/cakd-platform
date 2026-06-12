@@ -3,31 +3,37 @@ package defaults_test
 import (
 	"testing"
 
-	"github.com/nguyentin05/cakd-platform/internal/config"
 	"github.com/nguyentin05/cakd-platform/internal/config/defaults"
+	"github.com/nguyentin05/cakd-platform/internal/schema"
 )
 
 func TestApply(t *testing.T) {
-	cfg := &config.PlatformConfig{
-		Services: []config.Service{
+	cfg := &schema.PlatformConfig{
+		Services: []schema.Service{
 			{
 				Name:     "web-api",
 				Language: "java-spring-boot",
 			},
 		},
-		Backing: []config.Backing{
+		Backing: []schema.Backing{
 			{
 				Name: "main-db",
 				Type: "postgresql",
 			},
 		},
-		Providers: config.Providers{},
+		Providers: schema.Providers{},
 	}
 
 	defaults.Apply(cfg)
 
 	if cfg.Providers.VersionControl != "github" {
 		t.Errorf("Expected VersionControl to be 'github', got %q", cfg.Providers.VersionControl)
+	}
+	if cfg.Providers.CI != "github-actions" {
+		t.Errorf("Expected CI to be 'github-actions', got %q", cfg.Providers.CI)
+	}
+	if cfg.Providers.CD != "argocd" {
+		t.Errorf("Expected CD to be 'argocd', got %q", cfg.Providers.CD)
 	}
 
 	svc := cfg.Services[0]

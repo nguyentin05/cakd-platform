@@ -9,6 +9,6 @@ import (
 // `default` tags on empty fields.
 //
 // This operation is part of Phase 2 of the configuration parsing pipeline.
-func Apply(cfg any) {
-	dynamic(reflect.ValueOf(cfg).Elem())
+func Apply(cfg any) error {
+	return dynamic(reflect.ValueOf(cfg).Elem())
 }
