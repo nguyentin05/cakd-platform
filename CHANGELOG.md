@@ -1,3 +1,19 @@
+# [0.11.0](https://github.com/nguyentin05/cakd-platform/compare/v0.10.2...v0.11.0) (2026-06-12)
+
+
+### Bug Fixes
+
+* add client timeouts and clean registry defaults ([1acf483](https://github.com/nguyentin05/cakd-platform/commit/1acf483e3993d66607f23c060892223d3ab3f105))
+* prevent silent failures in defaults injection ([9c4de4a](https://github.com/nguyentin05/cakd-platform/commit/9c4de4a8602a9733a20af705036a1b6568acdb7a))
+* redact git tokens and restore git remote configs ([3615a9b](https://github.com/nguyentin05/cakd-platform/commit/3615a9bf670a9bb468006994ecae1b4f0816d7e8))
+* restructure schema definitions and validation logic ([d217b19](https://github.com/nguyentin05/cakd-platform/commit/d217b195bf70671b0daf79ea37688a2abc838f1f))
+
+
+### Features
+
+* embed prometheus values and refactor init steps ([68ec426](https://github.com/nguyentin05/cakd-platform/commit/68ec4260e994ff447c81480f0827bc14e487234e))
+* inject webhooks and add security controls ([065f525](https://github.com/nguyentin05/cakd-platform/commit/065f525e701670ff840565ba62cb9a0e8b90556f))
+
 ## [0.10.2](https://github.com/nguyentin05/cakd-platform/compare/v0.10.1...v0.10.2) (2026-06-11)
 
 
