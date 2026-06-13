@@ -38,3 +38,5 @@ report.md
 .golangci.bck.yml
 golangci-lint-2.12.2-linux-amd64/cakd-agent
 golangci-lint-2.12.2-linux-amd64/
+
+platform-aws.yaml
