@@ -15,7 +15,7 @@
     "@astrojs/starlight": "^0.40.0",
     "@google/generative-ai": "^0.24.1",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^25.9.3",
+    "@types/node": "^26.0.0",
     "astro": "^6.4.8",
     "dotenv": "^17.4.2",
     "fs-extra": "^11.3.5",
