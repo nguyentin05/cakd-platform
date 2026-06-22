@@ -1,3 +1,12 @@
+## [0.11.2](https://github.com/nguyentin05/cakd-platform/compare/v0.11.1...v0.11.2) (2026-06-22)
+
+
+### Bug Fixes
+
+* bump sharp in /docs in the docs-dependencies group ([#20](https://github.com/nguyentin05/cakd-platform/issues/20)) ([0b5b762](https://github.com/nguyentin05/cakd-platform/commit/0b5b762e7a717a835f4d00b3fe2084ab86e4de03))
+* bump the docs-dependencies group in /docs with 2 updates ([#22](https://github.com/nguyentin05/cakd-platform/issues/22)) ([f3315bc](https://github.com/nguyentin05/cakd-platform/commit/f3315bc0d3c312c0b1eaabc2511a8aa66f81bbc7))
+* update spring boot registry versions ([#24](https://github.com/nguyentin05/cakd-platform/issues/24)) ([bbc54c8](https://github.com/nguyentin05/cakd-platform/commit/bbc54c8fb29b19401533ea66868c29aa53ec7136))
+
 ## [0.11.1](https://github.com/nguyentin05/cakd-platform/compare/v0.11.0...v0.11.1) (2026-06-12)
 
 
