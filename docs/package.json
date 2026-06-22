@@ -16,11 +16,11 @@
     "@google/generative-ai": "^0.24.1",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^25.9.3",
-    "astro": "^6.3.1",
+    "astro": "^6.4.8",
     "dotenv": "^17.4.2",
     "fs-extra": "^11.3.5",
     "glob": "^13.0.6",
-    "sharp": "^0.35.1",
+    "sharp": "^0.35.2",
     "tsx": "^4.22.4"
   },
   "devDependencies": {
