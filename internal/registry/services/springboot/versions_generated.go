@@ -124,6 +124,7 @@ var ValidSpringDependencies = []string{
 	"solace",
 	"batch",
 	"batch-jdbc",
+	"batch-data-mongodb",
 	"hazelcast",
 	"validation",
 	"mail",
