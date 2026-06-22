@@ -27,8 +27,8 @@ cakd observe <project-name> [flags]
 1.  Accepts a single argument: the `project` (Kubernetes namespace).
 2.  Reads the `GEMINI_API_KEY` environment variable. If unset, the command exits with an error.
 3.  Initializes clients for Prometheus (metrics), Loki (logs), and Gemini (AI). The Gemini client uses the `GEMINI_MODEL` environment variable, defaulting to `gemini-flash-latest` if not specified.
-4.  Fetches container restart metrics for the specified `project` from Prometheus. If fetching fails, a warning is printed, and "No metrics available" is used in the prompt.
-5.  Fetches the 50 most recent logs for the specified `project` from Loki. If fetching fails, a warning is printed, and "No logs available" is used in the prompt.
+4.  Fetches container restart metrics for the specified `project` from Prometheus. This is done by querying the Prometheus service directly if running in-cluster (detected by the `KUBERNETES_SERVICE_HOST` environment variable) or by using `kubectl get --raw` to proxy the request if running out-of-cluster. If fetching fails, a warning is printed, and "No metrics available" is used in the prompt.
+5.  Fetches the 50 most recent logs for the specified `project` from Loki. This is done by querying the Loki service directly if running in-cluster (detected by the `KUBERNETES_SERVICE_HOST` environment variable) or by using `kubectl get --raw` to proxy the request if running out-of-cluster. If fetching fails, a warning is printed, and "No logs available" is used in the prompt.
 6.  Constructs a detailed diagnostic prompt for the AI, including the fetched metrics and logs, and instructions to act as an expert DevOps engineer. The prompt explicitly requests the AI to "Answer in Vietnamese."
 7.  Sends the prompt to the Gemini AI model for analysis.
 8.  Prints the AI-generated diagnosis, including identification of crashing pods, root cause analysis, and actionable solutions, to standard output.

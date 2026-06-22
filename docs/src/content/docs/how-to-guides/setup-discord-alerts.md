@@ -5,7 +5,7 @@ description: This guide explains how to configure Discord as a notification prov
 
 ## Overview
 
-The CAKD Platform supports pluggable notification providers. This guide explains how to configure and deploy Discord alerting so that your project pipeline and the background diagnostics agent (`cakd-agent`) can deliver real-time notifications to your Discord channel.
+The CAKD Platform supports pluggable notification providers. This guide explains how to configure and deploy Discord alerting so that your `project` pipeline and the background diagnostics agent (`cakd-agent`) can deliver real-time notifications to your Discord channel.
 
 ## Prerequisites
 

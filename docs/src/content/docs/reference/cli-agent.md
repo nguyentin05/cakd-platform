@@ -7,7 +7,7 @@ sidebar:
 
 ## Overview
 
-The `cakd-agent` daemon is a real-time diagnostics runner. It listens for Alertmanager webhooks, processes incoming alerts, invokes Gemini to diagnose failures based on alert descriptions, and routes both raw alerts and AI-generated root-cause analyses to Discord.
+The `` `cakd-agent` `` daemon is a real-time diagnostics runner. It listens for Alertmanager webhooks, processes incoming alerts, invokes Gemini to diagnose failures based on alert descriptions, and routes both raw alerts and AI-generated root-cause analyses to Discord.
 
 ## Usage
 
@@ -27,15 +27,16 @@ cakd-agent
 
 ## How It Works
 
-1. `cakd-agent` starts an HTTP server listening on the configured `PORT`.
-2. It registers the `/api/v1/alerts` endpoint to receive webhooks forwarded by Prometheus Alertmanager.
-3. Upon receiving a POST request, it validates the `Content-Type` header and, if `CAKD_AGENT_SECRET` is configured, validates the shared secret from the `Authorization` header or `secret` query parameter.
-4. The agent decodes the incoming Alertmanager JSON payload.
-5. It then groups the received alerts by their target webhook URL, which can be the `DISCORD_WEBHOOK_URL` or a namespace-specific URL loaded from configuration.
-6. For each group, it formats the raw alert details (status, name, severity, description) and dispatches them via the configured notifier (e.g., Discord).
-7. If there are "firing" alerts and a Gemini client is initialized (i.e., `GEMINI_API_KEY` is set), the agent asynchronously sends the collected alert descriptions to the Gemini LLM service for AI analysis.
-8. The Gemini LLM generates a concise diagnosis and troubleshooting steps based on the provided alert context.
-9. The AI-generated diagnosis is then formatted as an informational alert and sent back to the relevant target webhook URL via the notifier.
+1.  `` `cakd-agent` `` starts an HTTP server listening on the configured `PORT`.
+2.  It registers the `/api/v1/alerts` endpoint to receive webhooks forwarded by Prometheus Alertmanager.
+3.  Upon receiving a POST request, it validates the `Content-Type` header and limits the request body size to 1MB. If `CAKD_AGENT_SECRET` is configured, it validates the shared secret from the `Authorization` header (expecting a `Bearer` token) or `secret` query parameter.
+4.  The agent decodes the incoming Alertmanager JSON payload.
+5.  It immediately sends an HTTP `200 OK` response and then processes the alerts asynchronously.
+6.  It groups the received alerts by their target webhook URL, which can be the `DISCORD_WEBHOOK_URL` or a namespace-specific URL loaded from configuration.
+7.  For each group, it formats the raw alert details (status, name, severity, description, defaulting to "No description provided" if empty) and dispatches them via the configured notifier (e.g., Discord).
+8.  If there are "firing" alerts and a Gemini client is initialized (i.e., `GEMINI_API_KEY` is set), the agent asynchronously sends the collected alert descriptions to the Gemini LLM service for AI analysis.
+9.  The Gemini LLM generates a concise diagnosis and troubleshooting steps based on the provided alert context.
+10. The AI-generated diagnosis, titled "🤖 CAKD AI Diagnosis", is then formatted as an informational alert and sent back to the relevant target webhook URL via the notifier.
 
 ## Examples
 

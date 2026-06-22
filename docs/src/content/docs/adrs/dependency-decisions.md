@@ -80,3 +80,5 @@ Use `gopkg.in/yaml.v3 v3.0.1`.
 **Negative/Trade-offs:**
 - Introduces an external dependency for YAML processing.
 - Potential for minor API differences compared to `yaml.v2` if a migration were ever considered.
+
+---

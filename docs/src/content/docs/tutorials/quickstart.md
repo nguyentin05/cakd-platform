@@ -78,6 +78,9 @@ export DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/..."
 cakd-agent
 ```
 
+:::tip Expected agent output
+:::
+
 ## Step 5: Verify the result
 
 Confirm the project folder exists and ArgoCD has the application registered:

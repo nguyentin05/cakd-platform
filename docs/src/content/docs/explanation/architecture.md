@@ -23,7 +23,7 @@ This layer enforces a three-phase pipeline: structure validation, defaults injec
 
 **Components:** `internal/pipeline` (Execute, Run, Step implementations)
 
-The pipeline assembles ordered steps (Scaffold, Infra, Notify, VersionControl, Deploy). Each step implements `Step` and optional `OptionalStep` for conditional execution.
+The pipeline assembles ordered steps (Scaffold, Infra, VersionControl, Deploy, Notify). Each step implements `Step` and optional `OptionalStep` for conditional execution.
 
 ### Template Engine
 
@@ -45,33 +45,48 @@ The `Terraform Bridge` copies embedded modules, writes `terraform.tfvars.json`, 
 
 **Responsibility:** Initialize local git, commit generated files, push to remote, and register with ArgoCD.
 
-**Components:** `internal/provider/version_control` (GitHub client), `internal/provider/cd/argocd`
+**Components:** `internal/provider/version_control/github` (GitHub client), `internal/provider/cd/argocd`
 
 The VCS provider initializes a repo, commits, and pushes via authenticated clone URL. After push, the pipeline registers an ArgoCD application pointing at the repository's manifest.
 
 ## Execution Flow
 
-### 1. Project Creation Flow (`cakd create`)
+The following describes what happens when a platform is bootstrapped:
 
-1.  Parse and validate `platform.yaml` → produce `PlatformConfig`.
-2.  Prepare output directory; honor `--force` to overwrite.
-3.  Scaffold base `project` (e.g., Spring Initializr) and render CAKD templates into `out/{project}`.
-4.  Run `Terraform Bridge` to create GitHub repository and retrieve outputs.
-5.  Initialize git, commit generated files, and push to GitHub (VCS provider).
-6.  Register the generated ArgoCD application manifest with ArgoCD.
-7.  Set up notifications (e.g., Discord webhooks).
-8.  Print summary with repository URL and local path.
+### 1. Project Creation Flow (`cakd create`)
+- **Pipeline Initialization** — Coordinates steps sequentially using `internal/pipeline`, including parsing `platform.yaml` and preparing the output directory.
+- **Step 1: Scaffolding** — Invokes `internal/scaffold` to generate code structures.
+- **Step 2: IaC Provisioning** — Runs Terraform via `internal/iac/terraform` to set up remote repositories and credentials.
+- **Step 3: VCS Push** — Initializes git repository and pushes code (`internal/provider/version_control/github`).
+- **Step 4: CD Registration** — Hooks up manifests into ArgoCD (`internal/provider/cd/argocd`).
+- **Step 5: Notification Setup** — Registers webhooks using notification providers (`internal/provider/notify/*`).
 
 ## Component Diagram
 
 ```mermaid
 graph TD
-  CLI[cakd CLI] --> Pipeline[internal/pipeline]
-  Pipeline --> Scaffold[internal/scaffold]
-  Pipeline --> Terraform[internal/iac/terraform]
-  Pipeline --> VCS[internal/provider/version_control]
-  Pipeline --> CD[internal/provider/cd]
-  Pipeline --> Notify[internal/provider/notify]
+    subgraph CLI Binaries
+        CLI[cakd CLI]
+    end
+
+    subgraph Core Engine
+        Pipeline[Pipeline Controller]
+        Scaffold[Scaffold Engine]
+        IaC[IaC Terraform Bridge]
+    end
+
+    subgraph Pluggable Providers
+        VCS[VCS Provider - GitHub]
+        Notify[Notify Provider - Discord]
+        CD[CD Provider - ArgoCD]
+    end
+
+    CLI --> Pipeline
+    Pipeline --> Scaffold
+    Pipeline --> IaC
+    Pipeline --> VCS
+    Pipeline --> CD
+    Pipeline --> Notify
 ```
 
 ## Key Design Decisions
