@@ -31,9 +31,9 @@ cakd init [flags]
     *   **Monitoring (Prometheus Stack)**:
         *   It creates a temporary Prometheus values file, embedding configuration for Alertmanager to route to the `cakd-agent` webhook.
         *   It adds the `prometheus-community` Helm repository, updates it, and then installs or upgrades the `kube-prometheus-stack` into the `monitoring` namespace, using the temporary values file.
-        *   It then deploys the `cakd-agent` to the cluster.
+    *   **Deploy CAKD Agent**: If monitoring is enabled, the `cakd-agent` is deployed to the cluster.
     *   **Logging (Loki)**: It adds the `grafana` Helm repository, updates it, and then installs or upgrades `loki-stack` into the `monitoring` namespace.
-3.  All Helm commands are executed sequentially, and their output is streamed to the console.
+3.  All Helm commands and agent deployment steps are executed sequentially, and their output is streamed to the console.
 4.  The command exits with an error if any step fails.
 
 ## Examples
