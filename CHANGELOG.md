@@ -1,3 +1,10 @@
+## [0.11.3](https://github.com/nguyentin05/cakd-platform/compare/v0.11.2...v0.11.3) (2026-06-28)
+
+
+### Bug Fixes
+
+* bump golang.org/x/term ([#19](https://github.com/nguyentin05/cakd-platform/issues/19)) ([8d41040](https://github.com/nguyentin05/cakd-platform/commit/8d4104067c8ebf5fcf5f3c1982767193f9ae606d))
+
 ## [0.11.2](https://github.com/nguyentin05/cakd-platform/compare/v0.11.1...v0.11.2) (2026-06-22)
 
 
