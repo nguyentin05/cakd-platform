@@ -13,7 +13,7 @@ var ValidSpringBootVersions = []string{
 	"4.1.0.RELEASE",
 	"4.0.8.BUILD-SNAPSHOT",
 	"4.0.7.RELEASE",
-	"3.5.15.RELEASE",
+	"3.5.16.RELEASE",
 }
 
 var ValidProjectBuilds = []string{
@@ -129,6 +129,7 @@ var ValidSpringDependencies = []string{
 	"validation",
 	"mail",
 	"quartz",
+	"jobrunr",
 	"cache",
 	"spring-shell",
 	"spring-grpc-server",
