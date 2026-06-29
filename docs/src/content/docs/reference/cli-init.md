@@ -52,4 +52,5 @@ cakd init --argocd --logging
 
 ## Related
 
-- [Quickstart](/tutorials/quickstart/)
+- [`platform.yaml` reference](/reference/platform-yaml/)
+- [Quickstart tutorial](/tutorials/quickstart/)

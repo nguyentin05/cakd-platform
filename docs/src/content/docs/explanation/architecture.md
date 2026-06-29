@@ -23,7 +23,7 @@ This layer enforces a three-phase pipeline: structure validation, defaults injec
 
 **Components:** `internal/pipeline` (Execute, Run, Step implementations)
 
-The pipeline assembles ordered steps (Scaffold, Infra, VersionControl, Deploy, Notify). Each step implements `Step` and optional `OptionalStep` for conditional execution.
+The pipeline assembles ordered steps (Scaffold, Infra, VersionControl, Deploy, Notify). Each step implements the `Step` interface, and some may implement `OptionalStep` to allow for conditional execution based on the `platform.yaml` configuration.
 
 ### Template Engine
 
@@ -95,3 +95,4 @@ graph TD
 -   **Modular packages**: Provide clear separation (config, pipeline, scaffold, iac, provider implementations).
 -   **Embedded templates (`go:embed`) and `[[ ]]` delimiters**: Avoid conflicts with Helm/CI syntaxes.
 -   **`Terraform Bridge`**: Isolates infrastructure provisioning and returns structured outputs used by the pipeline.
+-   **Conditional Pipeline Steps**: Steps can implement `OptionalStep` to dynamically skip execution based on configuration, allowing for flexible and configurable `bootstrap` flows without modifying the core pipeline logic.
