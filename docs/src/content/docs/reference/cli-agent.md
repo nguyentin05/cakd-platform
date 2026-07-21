@@ -34,9 +34,10 @@ cakd-agent
 5.  It immediately sends an HTTP `200 OK` response and then processes the alerts asynchronously.
 6.  It groups the received alerts by their target webhook URL, which can be the `DISCORD_WEBHOOK_URL` or a namespace-specific URL loaded from configuration.
 7.  For each group, it formats the raw alert details (status, name, severity, description, defaulting to "No description provided" if empty) and dispatches them via the configured notifier (e.g., Discord).
-8.  If there are "firing" alerts and a Gemini client is initialized (i.e., `GEMINI_API_KEY` is set), the agent asynchronously sends the collected alert descriptions to the Gemini LLM service for AI analysis.
-9.  The Gemini LLM generates a concise diagnosis and troubleshooting steps based on the provided alert context.
-10. The AI-generated diagnosis, titled "🤖 CAKD AI Diagnosis", is then formatted as an informational alert and sent back to the relevant target webhook URL via the notifier.
+8.  If there are "firing" alerts and a Gemini client is initialized (i.e., `GEMINI_API_KEY` is set), the agent asynchronously queues the collected alert descriptions for AI analysis.
+9.  When performing AI analysis, the agent waits for 3 seconds and acquires a mutex to ensure only one AI analysis runs at a time.
+10. The Gemini LLM generates a concise diagnosis and troubleshooting steps based on the provided alert context.
+11. The AI-generated diagnosis, titled "🤖 CAKD AI Diagnosis", is then formatted as an informational alert and sent back to the relevant target webhook URL via the notifier.
 
 ## Examples
 

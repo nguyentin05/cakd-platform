@@ -39,7 +39,7 @@ Templates are embedded via `go:embed` and rendered with `[[ ]]` delimiters. Engi
 
 **Components:** `internal/iac/terraform` (Bridge)
 
-The `Terraform Bridge` copies embedded modules, writes `terraform.tfvars.json`, runs `terraform init` and `terraform apply`, and parses outputs (e.g., repo URL) for subsequent steps.
+The `Terraform Bridge` copies embedded modules, writes `terraform.tfvars.json`, runs `terraform init` and `terraform apply`, and parses outputs (e.g., repo URL) for subsequent steps. It requires the `GITHUB_TOKEN` environment variable for authentication and also provides a `Destroy` method to tear down provisioned resources.
 
 ### Version Control & GitOps
 
@@ -96,3 +96,4 @@ graph TD
 -   **Embedded templates (`go:embed`) and `[[ ]]` delimiters**: Avoid conflicts with Helm/CI syntaxes.
 -   **`Terraform Bridge`**: Isolates infrastructure provisioning and returns structured outputs used by the pipeline.
 -   **Conditional Pipeline Steps**: Steps can implement `OptionalStep` to dynamically skip execution based on configuration, allowing for flexible and configurable `bootstrap` flows without modifying the core pipeline logic.
+-   **Explicit `GITHUB_TOKEN` requirement for IaC**: Ensures secure and authenticated interaction with VCS providers for resource provisioning.
