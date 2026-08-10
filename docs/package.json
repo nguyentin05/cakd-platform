@@ -12,19 +12,19 @@
     "docs:autogen:force": "tsx scripts/auto-doc-agent.ts --force"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.40.0",
+    "@astrojs/starlight": "^0.41.7",
     "@google/generative-ai": "^0.24.1",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^25.9.3",
     "astro": "^6.4.8",
     "dotenv": "^17.4.2",
-    "fs-extra": "^11.3.5",
+    "fs-extra": "^11.4.0",
     "glob": "^13.0.6",
-    "sharp": "^0.35.2",
-    "tsx": "^4.22.4"
+    "sharp": "^0.35.3",
+    "tsx": "^4.23.9"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.10",
     "typescript": "^6.0.3"
   }
 }
