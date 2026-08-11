@@ -1,3 +1,17 @@
+## [0.11.6](https://github.com/nguyentin05/cakd-platform/compare/v0.11.5...v0.11.6) (2026-08-11)
+
+
+### Bug Fixes
+
+* bump brace-expansion from 5.0.6 to 5.0.7 in /docs ([#33](https://github.com/nguyentin05/cakd-platform/issues/33)) ([6728beb](https://github.com/nguyentin05/cakd-platform/commit/6728beb6a86c92992961139dafc8b2bff99f7707))
+* bump brace-expansion from 5.0.7 to 5.0.8 in /docs ([#36](https://github.com/nguyentin05/cakd-platform/issues/36)) ([e2914a0](https://github.com/nguyentin05/cakd-platform/commit/e2914a03b66ba471dd9038b1385ce0b12a2b2755))
+* bump brace-expansion from 5.0.8 to 5.0.9 in /docs ([#39](https://github.com/nguyentin05/cakd-platform/issues/39)) ([02f2084](https://github.com/nguyentin05/cakd-platform/commit/02f2084959c8fea3ddc1f677301915e53ba6f441))
+* bump fast-uri from 3.1.2 to 3.1.4 in /docs ([#35](https://github.com/nguyentin05/cakd-platform/issues/35)) ([dee35a9](https://github.com/nguyentin05/cakd-platform/commit/dee35a918c3e4762a22b9ed5feebe92718470281))
+* bump fast-uri from 3.1.4 to 3.1.5 in /docs ([#40](https://github.com/nguyentin05/cakd-platform/issues/40)) ([7ba7383](https://github.com/nguyentin05/cakd-platform/commit/7ba73833ade7326548662d1c547befe8b6705311))
+* bump postcss from 8.5.15 to 8.5.23 in /docs ([#37](https://github.com/nguyentin05/cakd-platform/issues/37)) ([c4e844f](https://github.com/nguyentin05/cakd-platform/commit/c4e844f7679072d2ed6b4d1fd366b48fc563a4d1))
+* bump svgo from 4.0.1 to 4.0.2 in /docs ([#34](https://github.com/nguyentin05/cakd-platform/issues/34)) ([2392dad](https://github.com/nguyentin05/cakd-platform/commit/2392dad8a280f03b1d706b3d03e1e7c8b4c9474a))
+* bump the docs-dependencies group across 1 directory with 5 updates ([#38](https://github.com/nguyentin05/cakd-platform/issues/38)) ([2e70f12](https://github.com/nguyentin05/cakd-platform/commit/2e70f12de60ac2231e39de7301e258172be1e5e8))
+
 ## [0.11.5](https://github.com/nguyentin05/cakd-platform/compare/v0.11.4...v0.11.5) (2026-07-21)
 
 
