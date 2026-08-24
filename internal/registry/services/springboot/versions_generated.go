@@ -9,10 +9,12 @@ var ValidJavaVersions = []string{
 }
 
 var ValidSpringBootVersions = []string{
-	"4.1.1.BUILD-SNAPSHOT",
-	"4.1.0.RELEASE",
-	"4.0.8.BUILD-SNAPSHOT",
-	"4.0.7.RELEASE",
+	"4.2.0.BUILD-SNAPSHOT",
+	"4.2.0.M1",
+	"4.1.2.BUILD-SNAPSHOT",
+	"4.1.1.RELEASE",
+	"4.0.9.BUILD-SNAPSHOT",
+	"4.0.8.RELEASE",
 }
 
 var ValidProjectBuilds = []string{
