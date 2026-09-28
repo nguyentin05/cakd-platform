@@ -2,7 +2,7 @@
 package springboot
 
 var ValidJavaVersions = []string{
-	"26",
+	"27",
 	"25",
 	"21",
 	"17",
@@ -10,7 +10,7 @@ var ValidJavaVersions = []string{
 
 var ValidSpringBootVersions = []string{
 	"4.2.0.BUILD-SNAPSHOT",
-	"4.2.0.M1",
+	"4.2.0.M2",
 	"4.1.2.BUILD-SNAPSHOT",
 	"4.1.1.RELEASE",
 	"4.0.9.BUILD-SNAPSHOT",
@@ -111,8 +111,8 @@ var ValidSpringDependencies = []string{
 	"neo4j",
 	"data-neo4j",
 	"integration",
-	"amqp",
-	"amqp-streams",
+	"rabbitmq",
+	"rabbitmq-streams",
 	"kafka",
 	"kafka-streams",
 	"activemq",
@@ -153,8 +153,6 @@ var ValidSpringDependencies = []string{
 	"zipkin",
 	"restdocs",
 	"testcontainers",
-	"cloud-contract-verifier",
-	"cloud-contract-stub-runner",
 	"unboundid-ldap",
 	"cloud-starter",
 	"cloud-function",
@@ -209,6 +207,7 @@ var ValidSpringDependencies = []string{
 	"spring-ai-vectordb-gemfire",
 	"spring-ai-mcp-server",
 	"spring-ai-mcp-client",
+	"spring-ai-tool-search-advisor",
 	"mcp-security",
 	"spring-ai-vectordb-milvus",
 	"spring-ai-mistral",
