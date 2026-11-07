@@ -1,97 +1,43 @@
-# Cloud-Agnostic Kubernetes Developer Platform
+# CAKD — Cloud Application Kubernetes Deployment Platform
 
-A developer-centric CLI and in-cluster observability agent that scaffolds, deploys, and diagnoses cloud-native
-applications — driven by a single declarative YAML configuration file.
+A developer-centric CLI, interactive TUI wizard, Model Context Protocol (MCP) server, and in-cluster AI observability agent that scaffolds, provisions, deploys, and diagnoses cloud-native applications — built in **Go 1.27** with a strict **Hexagonal Architecture (Ports & Adapters)**.
 
 ---
 
 <div align="center">
-  <img src="docs/src/assets/header-github.png" width="900" alt="CAKD Platform"/>
+  <img src="docs/assets/header-github.png" width="900" alt="CAKD Platform"/>
 </div>
 
 ---
 
-> **TL;DR:** CAKD eliminates the cognitive load and boilerplate of bootstrapping cloud-native microservices. Define your
-> services, backing databases, and observability preferences in a YAML configuration file. CAKD generates standard
-> Go/Java
-> Spring Boot scaffolds, Dockerfiles, Helm charts, CI/CD pipelines, provisions infrastructure via Terraform, registers
-> application targets with ArgoCD, and implements an AI-powered diagnostic agent (cakd-agent) that troubleshoots your
-> workloads live.
-
 ## Core Capabilities
 
-- **Declarative Architecture** — Define your entire stack (services, databases, alerts, integrations) in a single YAML
-  configuration file.
-- **GitOps-Ready** — Generates ArgoCD Application manifests and GitHub Actions workflows automatically.
-- **Microservices Scaffolding** — Supports production-ready Java Spring Boot templates (Gradle/Maven) with built-in
-  database support.
-- **Terraform Bridge** — Provisions GitHub repositories, sets up branch protection, and handles CI/CD secrets natively.
-- **In-Cluster Agent (cakd-agent)** — Runs inside your cluster, registers with Alertmanager, gathers logs and metrics
-  directly, and alerts your team via Discord embed webhooks.
-- **AI-Powered Diagnostics** — Connects to Prometheus and Loki, analyzes system metrics/logs, and calls Google Gemini
-  for root-cause troubleshooting.
+- **Hexagonal Architecture (Ports & Adapters)** — Pure domain and application use cases decoupled from terminal I/O and infrastructure adapters, continuously verified by an automated Go AST boundary test (`internal/platform/architecture_test.go`).
+- **Three Driving Surfaces**:
+  - **CLI (`cakd`)** — Full command suite (`validate`, `init`, `create`, `observe`, `auth`, `schema`, `ui`, `mcp`, `version`) with `--json` output mode.
+  - **Interactive TUI Wizard (`cakd ui` / `cakd create -i`)** — Step-by-step guided project creation without writing YAML manually.
+  - **MCP Server (`cakd mcp` / `cakd-mcp`)** — Stdio and Streamable HTTP (`POST /mcp`) Model Context Protocol server exposing 2 MCP Resources and 7 MCP Tools for AI coding agents.
+- **Canonical `cakd.io/v1alpha1` Schema** — Unified Kubernetes-style `spec:` block (`spec.cluster`, `spec.providers`, `spec.observability`, `spec.backing`, `spec.services`) with backward-compatible normalization for legacy `platform.dev/v1alpha1` files and Draft 2020-12 JSON Schema (`schemas/platform.schema.json`).
+- **Isolated Terraform State** — Separate state directories for cluster provisioning (`.platform/terraform/cluster/`) and VCS repository provisioning (`.platform/terraform/vcs/`).
+- **In-Cluster AI Diagnostics (`cakd-agent`)** — Receives Alertmanager webhooks, routes alerts per namespace to Discord channels, and runs Google Gemini root-cause analysis on Prometheus metrics and Loki logs.
 
 ---
 
-## Supported Providers
+## Binaries
 
-CAKD adopts an integration-centric model. Below are the provider types and their currently supported integrations in the
-codebase:
-
-| Provider Type              | Supported Integrations | YAML Key       | Description                                                          |
-|:---------------------------|:-----------------------|:---------------|:---------------------------------------------------------------------|
-| **Version Control**        | github                 | versionControl | Repository creation, credentials injection, and settings management  |
-| **Continuous Integration** | github-actions         | ci             | YAML workflow generation for compilation, testing, and Docker builds |
-| **Continuous Deployment**  | argocd                 | cd             | Declarative GitOps deployment tracking and syncing                   |
-| **Notification Channel**   | discord                | notification   | Live alert dispatching with embeds for root-cause analysis           |
-| **AI / LLM**               | gemini                 | llm            | AI diagnostic chatbot engine                                         |
-| **Metrics Monitoring**     | prometheus             | monitoring     | Gathers workload resource usage and restart metrics                  |
-| **Log Aggregation**        | loki                   | logging        | Collects recent runtime application output for error tracing         |
-
----
-
-## Project Components
-
-The codebase compiles into two distinct binaries:
-
-1. **`cakd`** (CLI): The command-line developer interface for bootstrapping clusters, validating configurations,
-   scaffolding projects, and diagnosing issues manually.
-2. **`cakd-agent`** (Daemon): The in-cluster notification and monitoring agent that handles real-time alert dispatching
-   and Gemini AI analysis.
-
----
-
-## Documentation
-
-A comprehensive Astro Starlight-powered documentation site is available in the `docs/` folder:
-
-- **Tutorials**: Quickstart instructions for local setup using Minikube.
-- **How-to Guides**: Step-to-step guides (e.g., setting up Discord notification channels).
-- **Explanation**: Architectural deep dives, design choices, and design patterns.
-- **Reference**: Full CLI commands reference and configuration specifications.
-- **ADRs**: Architecture Decision Records detailing critical design updates.
-
-To build the documentation site locally:
-
-```bash
-cd docs
-npm install
-npm run build
-```
+| Binary | Path | Purpose |
+| :--- | :--- | :--- |
+| **`cakd`** | `./cmd/cakd` | Developer CLI, Interactive TUI Wizard (`cakd ui`), and embedded MCP Server (`cakd mcp`) |
+| **`cakd-agent`** | `./cmd/cakd-agent` | In-cluster Alertmanager webhook receiver & AI diagnostic dispatcher |
+| **`cakd-mcp`** | `./cmd/cakd-mcp` | Standalone Model Context Protocol (MCP) server binary (Stdio & Streamable HTTP) |
 
 ---
 
 ## Quick Start
 
-### Prerequisites
+### 1. Build from Source
 
-- **Go 1.24+**
-- **Terraform**
-- **Kubernetes Cluster** (e.g. Minikube)
-
-### 1. Installation
-
-#### Build from Source
+Requires **Go 1.27+**:
 
 ```bash
 git clone https://github.com/nguyentin05/cakd-platform.git
@@ -99,129 +45,86 @@ cd cakd-platform
 task build
 ```
 
-The compiled binaries will be output to the `bin/` directory.
+This compiles `bin/cakd`, `bin/cakd-agent`, and `bin/cakd-mcp`.
 
----
-
-### 2. Configure Credentials
-
-Instead of exporting plain-text tokens and keys into your terminal history, use the built-in interactive authentication
-manager to securely store your credentials:
+### 2. Option A: Interactive TUI Wizard (No YAML Needed)
 
 ```bash
-# Log in to GitHub (Personal Access Token)
-./bin/cakd auth login github
-
-# Log in to Google Gemini (API Key)
-./bin/cakd auth login gemini
-
-# Log in to Discord (Bot Token and Guild ID)
-./bin/cakd auth login discord
+./bin/cakd ui
 ```
 
-To verify the status of your credentials at any time:
-
-```bash
-./bin/cakd auth status
-```
-
----
-
-### 3. Declare Your Platform Configuration
-
-Create a configuration YAML file (e.g., `platform.yaml`) in the root of your workspace:
+### 3. Option B: Declarative `platform.yaml`
 
 ```yaml
-apiVersion: platform.dev/v1alpha1
+apiVersion: cakd.io/v1alpha1
 kind: Project
 metadata:
-  name: test-project
+  name: order-system
   owner: your-github-username
-
-providers:
-  versionControl: github
-  ci: github-actions
-  cd: argocd
-  notification: discord
-  llm: gemini
-  monitoring: prometheus
-  logging: loki
-
-observability:
-  alerting: true
-  ai:
-    model: gemini-flash-latest
-
-services:
-  - name: api
-    language: java-spring-boot
-    languageVersion: "21"
-    projectBuild: gradle-project
-    packaging: jar
-    springConfigFormat: properties
-    dependencies:
-      - web
+  environment: production
+spec:
+  cluster:
+    provider: local
+  providers:
+    versionControl: github
+    ci: github-actions
+    cd: argocd
+    notification: discord
+    llm: gemini
+    monitoring: prometheus
+    logging: loki
+  observability:
+    alerting: true
+    ai:
+      model: gemini-2.5-flash
+  backing:
+    - name: orders-db
+      type: postgresql
+  services:
+    - name: order-api
+      language: java-spring-boot
+      version: "21"
+      projectBuild: maven-project
+      uses:
+        - orders-db
 ```
 
----
-
-### 4. CLI Usage
-
-#### Validate Your Configuration
-
-Check your configuration schema and dependency trees:
+### 4. Validate, Init, Create & Observe
 
 ```bash
+# Validate specification & dependency DAG
 ./bin/cakd validate -f platform.yaml
-```
 
-#### Bootstrap Your Cluster
+# Export JSON Schema
+./bin/cakd schema -o schemas/platform.schema.json
 
-Initialize your Kubernetes cluster (installs ArgoCD, Prometheus Stack, Grafana Loki, and deploys the `cakd-agent`
-daemon):
+# Scaffold locally only (no cloud/VCS calls)
+./bin/cakd create -f platform.yaml --scaffold-only --force
 
-```bash
-./bin/cakd init
-```
+# Initialize cluster & install add-ons
+./bin/cakd init -f platform.yaml --all
 
-#### Provision and Scaffold
+# Full project bootstrap (GitHub Terraform + Git push + ArgoCD sync)
+./bin/cakd create -f platform.yaml --force
 
-Generate the boilerplate code, build files, Helm charts, provision git repositories via Terraform, and configure ArgoCD
-deployment pipelines:
-
-```bash
-./bin/cakd create -f platform.yaml
-```
-
-#### Troubleshoot Workloads with AI
-
-Manually trigger real-time AI diagnosis on any project namespace:
-
-```bash
-./bin/cakd observe test-project
+# Run on-demand AI workload diagnostics
+./bin/cakd observe -f platform.yaml -n order-system
 ```
 
 ---
 
-## Development & Automation
+## Documentation (MkDocs Material)
 
-This project uses `Taskfile` as its task runner:
+Pure Markdown documentation lives in `docs/` and is built with **MkDocs Material** (`mkdocs.yml` + `requirements-docs.txt`):
 
 ```bash
-task fmt       # Format Go source code
-task lint      # Run golangci-lint
-task test      # Run all unit and integration tests
-task build     # Compile both cakd and cakd-agent binaries
-task ci        # Run formatting, lint, testing, building, and security scans
+pip install -r requirements-docs.txt
+mkdocs serve
+# or strict build check:
+mkdocs build --strict
 ```
 
 ---
-
-## Contributing
-
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
-This project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification. All commits must
-follow the format `type: description`.
 
 ## License
 

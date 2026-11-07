@@ -2,6 +2,7 @@
 bin/
 dist/
 out/
+site/
 
 # Test
 coverage.out

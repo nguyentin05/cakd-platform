@@ -44,8 +44,7 @@ jobs:
               language: java-spring-boot
           EOF
         
-          export GITHUB_TOKEN=""
-          ./bin/cakd create -f platform.yaml || true
+          ./bin/cakd create -f platform.yaml --scaffold-only --force
 
       - name: Setup Helm
         uses: azure/setup-helm@v5
