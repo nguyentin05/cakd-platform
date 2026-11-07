@@ -1,3 +1,22 @@
+# [0.12.0](https://github.com/nguyentin05/cakd-platform/compare/v0.11.7...v0.12.0) (2026-11-07)
+
+
+### Bug Fixes
+
+* bump brace-expansion from 5.0.9 to 5.0.12 in /docs ([#60](https://github.com/nguyentin05/cakd-platform/issues/60)) ([12d06b3](https://github.com/nguyentin05/cakd-platform/commit/12d06b35e8e515896364da53065878577b0497df))
+* bump fast-uri from 3.1.5 to 3.1.7 in /docs ([#47](https://github.com/nguyentin05/cakd-platform/issues/47)) ([0e405eb](https://github.com/nguyentin05/cakd-platform/commit/0e405ebfea4f918122c22674f2b74c0dbf82ba9d))
+* bump fast-uri from 3.1.7 to 3.1.9 in /docs ([#64](https://github.com/nguyentin05/cakd-platform/issues/64)) ([78b396e](https://github.com/nguyentin05/cakd-platform/commit/78b396ee3e8e29df7c8f85fe8e9af239eb4f674c))
+* bump js-yaml from 4.3.1 to 4.3.2 in /docs ([#51](https://github.com/nguyentin05/cakd-platform/issues/51)) ([b145c5e](https://github.com/nguyentin05/cakd-platform/commit/b145c5e18aa798cde2ba8fc82e3ffe91adbfb38f))
+* bump nanoid from 3.3.16 to 3.3.18 in /docs ([#49](https://github.com/nguyentin05/cakd-platform/issues/49)) ([28fc114](https://github.com/nguyentin05/cakd-platform/commit/28fc1149576a2c9d9c496f2b0681aa8284f4aa4b))
+* bump source-map-js from 1.2.1 to 1.2.2 in /docs ([#59](https://github.com/nguyentin05/cakd-platform/issues/59)) ([f6a42d7](https://github.com/nguyentin05/cakd-platform/commit/f6a42d7386e54614cc57714b40970739535d37df))
+* bump vite from 7.3.5 to 7.3.7 in /docs ([#62](https://github.com/nguyentin05/cakd-platform/issues/62)) ([11b1f43](https://github.com/nguyentin05/cakd-platform/commit/11b1f431caf5b77de507faea9cf92d72501e0d00))
+* update spring boot registry versions ([#44](https://github.com/nguyentin05/cakd-platform/issues/44)) ([76dfbba](https://github.com/nguyentin05/cakd-platform/commit/76dfbba3e87ae99879bfffe2bbcec8219c8968c0))
+
+
+### Features
+
+* **platform:** refactor to hexagonal architecture, add tui & mcp server, and migrate docs to mkdocs ([#65](https://github.com/nguyentin05/cakd-platform/issues/65)) ([2d62cc2](https://github.com/nguyentin05/cakd-platform/commit/2d62cc22c19bce8ba94e77f884d4e5fca58c7703))
+
 ## [0.11.7](https://github.com/nguyentin05/cakd-platform/compare/v0.11.6...v0.11.7) (2026-08-25)
 
 
