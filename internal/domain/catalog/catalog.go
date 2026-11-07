@@ -20,6 +20,7 @@ const (
 	ClusterAWSEC2 = "aws-ec2"
 
 	LangJavaSpringBoot = "java-spring-boot"
+	depDataJPA         = "data-jpa"
 )
 
 // PlatformDefaults holds convention-over-configuration defaults for project specifications.
@@ -78,8 +79,8 @@ var (
 	BackingTypes         = []string{BackingPostgreSQL}
 	SpringConfigFormats  = []string{"yaml", "properties"}
 	SpringBackingDepsMap = map[string][]string{
-		BackingPostgreSQL: {"data-jpa", "postgresql"},
-		BackingMySQL:      {"data-jpa", "mysql"},
+		BackingPostgreSQL: {depDataJPA, "postgresql"},
+		BackingMySQL:      {depDataJPA, "mysql"},
 		BackingRedis:      {"data-redis"},
 		BackingRabbitMQ:   {"amqp"},
 	}

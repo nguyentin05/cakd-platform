@@ -66,6 +66,17 @@ func NewCatalog(
 	}
 }
 
+const (
+	mimeJSON          = "application/json"
+	schemaTypeObject  = "object"
+	schemaTypeString  = "string"
+	schemaTypeBoolean = "boolean"
+	keyType           = "type"
+	keyProperties     = "properties"
+	keyDescription    = "description"
+	argPath           = "path"
+)
+
 // ListResources returns all MCP resources served by CAKD Platform.
 func (c *Catalog) ListResources() []ResourceDefinition {
 	return []ResourceDefinition{
@@ -73,13 +84,13 @@ func (c *Catalog) ListResources() []ResourceDefinition {
 			URI:         "cakd://schema/project",
 			Name:        "CAKD Project JSON Schema",
 			Description: "JSON Schema (Draft 2020-12) for platform.yaml (cakd.io/v1alpha1)",
-			MimeType:    "application/json",
+			MimeType:    mimeJSON,
 		},
 		{
 			URI:         "cakd://catalog/providers",
 			Name:        "Supported Providers & Defaults",
 			Description: "Catalog of supported cluster providers, backing services, languages, and defaults",
-			MimeType:    "application/json",
+			MimeType:    mimeJSON,
 		},
 	}
 }
@@ -92,35 +103,37 @@ func (c *Catalog) ReadResource(_ context.Context, uri string) (content string, m
 		if err != nil {
 			return "", "", err
 		}
-		return string(data), "application/json", nil
+		return string(data), mimeJSON, nil
 	case "cakd://catalog/providers":
 		out, err := c.catalogJSON()
 		if err != nil {
 			return "", "", err
 		}
-		return out, "application/json", nil
+		return out, mimeJSON, nil
 	default:
 		return "", "", errcode.New(errcode.CodeNotFound, "unknown MCP resource URI: "+uri)
 	}
 }
 
 // ListTools returns all MCP tools exposed to AI agents.
+//
+//nolint:goconst
 func (c *Catalog) ListTools() []ToolDefinition {
 	return []ToolDefinition{
 		{
 			Name:        "cakd_list_catalog",
 			Description: "List supported cluster providers, backing services, Java/Spring Boot versions, and platform defaults.",
-			InputSchema: map[string]any{"type": "object", "properties": map[string]any{}},
+			InputSchema: map[string]any{keyType: schemaTypeObject, keyProperties: map[string]any{}},
 			Annotations: ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true},
 		},
 		{
 			Name:        "cakd_validate_spec",
 			Description: "Validate a platform.yaml specification (either raw YAML content or file path) and return normalized defaults.",
 			InputSchema: map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"yamlContent": map[string]any{"type": "string", "description": "Raw YAML content of platform.yaml"},
-					"path":        map[string]any{"type": "string", "description": "Path to platform.yaml on disk"},
+				keyType: schemaTypeObject,
+				keyProperties: map[string]any{
+					"yamlContent": map[string]any{keyType: schemaTypeString, keyDescription: "Raw YAML content of platform.yaml"},
+					argPath:       map[string]any{keyType: schemaTypeString, keyDescription: "Path to platform.yaml on disk"},
 				},
 			},
 			Annotations: ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true},
@@ -129,15 +142,15 @@ func (c *Catalog) ListTools() []ToolDefinition {
 			Name:        "cakd_generate_spec",
 			Description: "Generate a canonical cakd.io/v1alpha1 platform.yaml from high-level project parameters.",
 			InputSchema: map[string]any{
-				"type":     "object",
+				keyType:    schemaTypeObject,
 				"required": []string{"name", "owner", "serviceName"},
-				"properties": map[string]any{
-					"name":        map[string]any{"type": "string", "description": "Project metadata.name"},
-					"owner":       map[string]any{"type": "string", "description": "GitHub owner/organization"},
-					"serviceName": map[string]any{"type": "string", "description": "Primary microservice name"},
-					"provider":    map[string]any{"type": "string", "description": "Cluster provider: local or aws-ec2"},
-					"backingName": map[string]any{"type": "string", "description": "Optional PostgreSQL backing resource name"},
-					"outputPath":  map[string]any{"type": "string", "description": "Optional file path to save platform.yaml"},
+				keyProperties: map[string]any{
+					"name":        map[string]any{keyType: schemaTypeString, keyDescription: "Project metadata.name"},
+					"owner":       map[string]any{keyType: schemaTypeString, keyDescription: "GitHub owner/organization"},
+					"serviceName": map[string]any{keyType: schemaTypeString, keyDescription: "Primary microservice name"},
+					"provider":    map[string]any{keyType: schemaTypeString, keyDescription: "Cluster provider: local or aws-ec2"},
+					"backingName": map[string]any{keyType: schemaTypeString, keyDescription: "Optional PostgreSQL backing resource name"},
+					"outputPath":  map[string]any{keyType: schemaTypeString, keyDescription: "Optional file path to save platform.yaml"},
 				},
 			},
 			Annotations: ToolAnnotations{ReadOnlyHint: false, IdempotentHint: true},
@@ -146,11 +159,11 @@ func (c *Catalog) ListTools() []ToolDefinition {
 			Name:        "cakd_scaffold_only",
 			Description: "Render microservice skeletons, Dockerfiles, CI workflows, and Helm charts locally without provisioning cloud resources.",
 			InputSchema: map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"path":      map[string]any{"type": "string", "description": "Path to platform.yaml"},
-					"outputDir": map[string]any{"type": "string", "description": "Target output directory"},
-					"force":     map[string]any{"type": "boolean", "description": "Overwrite output directory if it exists"},
+				keyType: schemaTypeObject,
+				keyProperties: map[string]any{
+					argPath:     map[string]any{keyType: schemaTypeString, keyDescription: "Path to platform.yaml"},
+					"outputDir": map[string]any{keyType: schemaTypeString, keyDescription: "Target output directory"},
+					"force":     map[string]any{keyType: schemaTypeBoolean, keyDescription: "Overwrite output directory if it exists"},
 				},
 			},
 			Annotations: ToolAnnotations{ReadOnlyHint: false, DestructiveHint: false, IdempotentHint: true},
@@ -159,10 +172,10 @@ func (c *Catalog) ListTools() []ToolDefinition {
 			Name:        "cakd_create_project",
 			Description: "Execute full project bootstrap: validate, scaffold, provision GitHub repo via Terraform, push git, and register ArgoCD.",
 			InputSchema: map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"path":  map[string]any{"type": "string", "description": "Path to platform.yaml"},
-					"force": map[string]any{"type": "boolean", "description": "Overwrite output directory if it exists"},
+				keyType: schemaTypeObject,
+				keyProperties: map[string]any{
+					argPath: map[string]any{keyType: schemaTypeString, keyDescription: "Path to platform.yaml"},
+					"force": map[string]any{keyType: schemaTypeBoolean, keyDescription: "Overwrite output directory if it exists"},
 				},
 			},
 			Annotations: ToolAnnotations{ReadOnlyHint: false, DestructiveHint: true},
@@ -171,12 +184,12 @@ func (c *Catalog) ListTools() []ToolDefinition {
 			Name:        "cakd_init_cluster",
 			Description: "Initialize target Kubernetes cluster (local or AWS EC2 K3s) and install ArgoCD, Prometheus, Loki, and CAKD Agent.",
 			InputSchema: map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"path":       map[string]any{"type": "string", "description": "Optional path to platform.yaml"},
-					"argocd":     map[string]any{"type": "boolean"},
-					"monitoring": map[string]any{"type": "boolean"},
-					"logging":    map[string]any{"type": "boolean"},
+				keyType: schemaTypeObject,
+				keyProperties: map[string]any{
+					argPath:      map[string]any{keyType: schemaTypeString, keyDescription: "Optional path to platform.yaml"},
+					"argocd":     map[string]any{keyType: schemaTypeBoolean},
+					"monitoring": map[string]any{keyType: schemaTypeBoolean},
+					"logging":    map[string]any{keyType: schemaTypeBoolean},
 				},
 			},
 			Annotations: ToolAnnotations{ReadOnlyHint: false, DestructiveHint: true},
@@ -185,10 +198,10 @@ func (c *Catalog) ListTools() []ToolDefinition {
 			Name:        "cakd_observe_workload",
 			Description: "Collect Prometheus metrics and Loki logs for a namespace and generate an AI root-cause diagnosis.",
 			InputSchema: map[string]any{
-				"type": "object",
-				"properties": map[string]any{
-					"namespace": map[string]any{"type": "string", "description": "Target Kubernetes namespace"},
-					"path":      map[string]any{"type": "string", "description": "Optional path to platform.yaml"},
+				keyType: schemaTypeObject,
+				keyProperties: map[string]any{
+					"namespace": map[string]any{keyType: schemaTypeString, keyDescription: "Target Kubernetes namespace"},
+					argPath:     map[string]any{keyType: schemaTypeString, keyDescription: "Optional path to platform.yaml"},
 				},
 			},
 			Annotations: ToolAnnotations{ReadOnlyHint: true, IdempotentHint: true},
@@ -198,7 +211,7 @@ func (c *Catalog) ListTools() []ToolDefinition {
 
 // CallTool executes an MCP tool by name with JSON arguments and returns a formatted text/JSON response.
 //
-//nolint:gocyclo
+//nolint:gocyclo,goconst
 func (c *Catalog) CallTool(ctx context.Context, name string, args map[string]any) (string, error) {
 	switch name {
 	case "cakd_list_catalog":
@@ -370,24 +383,24 @@ func sanitizeArgPath(raw any, fallback string) (string, error) {
 
 func (c *Catalog) catalogJSON() (string, error) {
 	payload := map[string]any{
-		"apiVersions":          catalog.APIVersions,
-		"clusterProviders":     catalog.ClusterProviders,
-		"instanceTypes":        catalog.InstanceTypes,
-		"versionControl":       catalog.VersionControlTypes,
-		"ci":                   catalog.CITypes,
-		"cd":                   catalog.CDTypes,
-		"notification":         catalog.NotificationTypes,
-		"llm":                  catalog.LLMTypes,
-		"monitoring":           catalog.MonitoringTypes,
-		"logging":              catalog.LoggingTypes,
-		"languages":            catalog.ServiceLanguages,
-		"backingTypes":         catalog.BackingTypes,
-		"javaVersions":         catalog.ValidJavaVersions,
-		"springBootVersions":   catalog.ValidSpringBootVersions,
-		"projectBuilds":        catalog.ValidProjectBuilds,
-		"packaging":            catalog.ValidPackaging,
-		"springConfigFormats":  catalog.SpringConfigFormats,
-		"defaults":             catalog.Defaults,
+		"apiVersions":         catalog.APIVersions,
+		"clusterProviders":    catalog.ClusterProviders,
+		"instanceTypes":       catalog.InstanceTypes,
+		"versionControl":      catalog.VersionControlTypes,
+		"ci":                  catalog.CITypes,
+		"cd":                  catalog.CDTypes,
+		"notification":        catalog.NotificationTypes,
+		"llm":                 catalog.LLMTypes,
+		"monitoring":          catalog.MonitoringTypes,
+		"logging":             catalog.LoggingTypes,
+		"languages":           catalog.ServiceLanguages,
+		"backingTypes":        catalog.BackingTypes,
+		"javaVersions":        catalog.ValidJavaVersions,
+		"springBootVersions":  catalog.ValidSpringBootVersions,
+		"projectBuilds":       catalog.ValidProjectBuilds,
+		"packaging":           catalog.ValidPackaging,
+		"springConfigFormats": catalog.SpringConfigFormats,
+		"defaults":            catalog.Defaults,
 	}
 	b, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {

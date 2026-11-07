@@ -11,7 +11,13 @@ import (
 	"testing"
 )
 
-const modulePrefix = "github.com/nguyentin05/cakd-platform/"
+const (
+	modulePrefix        = "github.com/nguyentin05/cakd-platform/"
+	layerDomain         = "domain"
+	layerUsecase        = "usecase"
+	layerAdapter        = "adapter"
+	layerInfrastructure = "infrastructure"
+)
 
 func TestHexagonalArchitectureBoundaries(t *testing.T) {
 	repoRoot := findRepoRoot(t)
@@ -35,7 +41,7 @@ func TestHexagonalArchitectureBoundaries(t *testing.T) {
 
 		// Only enforce on hexagonal layers: domain, usecase, adapter, infrastructure, composition, platform
 		switch layer {
-		case "domain", "usecase", "adapter", "infrastructure", "composition", "platform":
+		case layerDomain, layerUsecase, layerAdapter, layerInfrastructure, "composition", "platform":
 		default:
 			return nil
 		}
@@ -50,7 +56,7 @@ func TestHexagonalArchitectureBoundaries(t *testing.T) {
 			checkImportBoundary(t, rel, layer, impPath)
 		}
 
-		if layer == "domain" || layer == "usecase" || layer == "infrastructure" {
+		if layer == layerDomain || layer == layerUsecase || layer == layerInfrastructure {
 			checkForbiddenCalls(t, fset, rel, layer, fileAst)
 		}
 		return nil
@@ -60,11 +66,12 @@ func TestHexagonalArchitectureBoundaries(t *testing.T) {
 	}
 }
 
+//nolint:gocyclo
 func checkImportBoundary(t *testing.T, relFile, layer, impPath string) {
 	t.Helper()
 
 	switch layer {
-	case "domain":
+	case layerDomain:
 		if strings.HasPrefix(impPath, modulePrefix) {
 			sub := strings.TrimPrefix(impPath, modulePrefix)
 			if !strings.HasPrefix(sub, "internal/domain") {
@@ -74,7 +81,7 @@ func checkImportBoundary(t *testing.T, relFile, layer, impPath string) {
 			t.Errorf("[Hexagonal Violation] %s (domain) must only import Go stdlib or internal/domain/*, found external import %s", relFile, impPath)
 		}
 
-	case "usecase":
+	case layerUsecase:
 		if strings.HasPrefix(impPath, modulePrefix) {
 			sub := strings.TrimPrefix(impPath, modulePrefix)
 			allowed := strings.HasPrefix(sub, "internal/domain") ||
@@ -85,7 +92,7 @@ func checkImportBoundary(t *testing.T, relFile, layer, impPath string) {
 			}
 		}
 
-	case "adapter":
+	case layerAdapter:
 		if strings.HasPrefix(impPath, modulePrefix) {
 			sub := strings.TrimPrefix(impPath, modulePrefix)
 			if strings.HasPrefix(sub, "internal/infrastructure") || strings.HasPrefix(sub, "cmd/") {
@@ -93,7 +100,7 @@ func checkImportBoundary(t *testing.T, relFile, layer, impPath string) {
 			}
 		}
 
-	case "infrastructure":
+	case layerInfrastructure:
 		if strings.HasPrefix(impPath, modulePrefix) {
 			sub := strings.TrimPrefix(impPath, modulePrefix)
 			if strings.HasPrefix(sub, "internal/adapter") ||
@@ -131,7 +138,7 @@ func checkForbiddenCalls(t *testing.T, fset *token.FileSet, relFile, layer strin
 						pos := fset.Position(node.Pos())
 						t.Errorf("[State Boundary Violation] %s:%d (%s) must not mutate process-wide environment via os.Setenv", relFile, pos.Line, layer)
 					}
-					if (layer == "domain" || layer == "usecase") && strings.HasPrefix(callName, "fmt.Print") {
+					if (layer == layerDomain || layer == layerUsecase) && strings.HasPrefix(callName, "fmt.Print") {
 						pos := fset.Position(node.Pos())
 						t.Errorf("[I/O Boundary Violation] %s:%d (%s) must not print directly to stdout via %s", relFile, pos.Line, layer, callName)
 					}

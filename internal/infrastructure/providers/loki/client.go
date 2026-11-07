@@ -77,9 +77,9 @@ func (c *Client) CollectLogsSummary(ctx context.Context, namespace string) (stri
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Recent Logs for namespace %s:\n", namespace))
+	_, _ = fmt.Fprintf(&sb, "Recent Logs for namespace %s:\n", namespace)
 	for _, r := range parsed.Data.Result {
-		sb.WriteString(fmt.Sprintf("--- Pod: %s | Container: %s ---\n", r.Stream["pod"], r.Stream["container"]))
+		_, _ = fmt.Fprintf(&sb, "--- Pod: %s | Container: %s ---\n", r.Stream["pod"], r.Stream["container"])
 		for i := len(r.Values) - 1; i >= 0; i-- {
 			if len(r.Values[i]) == 2 {
 				sb.WriteString(strings.TrimSpace(r.Values[i][1]) + "\n")

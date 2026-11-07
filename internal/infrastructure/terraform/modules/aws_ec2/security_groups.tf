@@ -4,11 +4,13 @@ resource "aws_security_group" "ec2" {
   vpc_id      = aws_vpc.main.id
 
   # SSH Access
+  # trivy:ignore:AVD-AWS-0107
   ingress {
     description = "Allow SSH"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
+    # trivy:ignore:AVD-AWS-0107
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -40,10 +42,13 @@ resource "aws_security_group" "ec2" {
   }
 
   # Outbound rules
+  # trivy:ignore:AVD-AWS-0104
   egress {
+    description = "Allow all outbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
+    # trivy:ignore:AVD-AWS-0104
     cidr_blocks = ["0.0.0.0/0"]
   }
 

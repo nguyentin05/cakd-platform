@@ -3,6 +3,7 @@ package validate_test
 import (
 	"testing"
 
+	"github.com/nguyentin05/cakd-platform/internal/domain/catalog"
 	"github.com/nguyentin05/cakd-platform/internal/domain/errcode"
 	"github.com/nguyentin05/cakd-platform/internal/domain/project"
 	"github.com/nguyentin05/cakd-platform/internal/usecase/validate"
@@ -25,7 +26,7 @@ func TestValidateAppliesDefaultsAndChecksRules(t *testing.T) {
 			Services: []project.ServiceSpec{
 				{
 					Name:     "order-api",
-					Language: "java-spring-boot",
+					Language: catalog.LangJavaSpringBoot,
 					Uses:     []string{"orders-db"},
 				},
 			},
@@ -48,7 +49,7 @@ func TestValidateAppliesDefaultsAndChecksRules(t *testing.T) {
 	// Unknown backing reference should fail with CodeValidation
 	badProj := *proj
 	badProj.Spec.Services = []project.ServiceSpec{
-		{Name: "order-api", Language: "java-spring-boot", Uses: []string{"non-existent"}},
+		{Name: "order-api", Language: catalog.LangJavaSpringBoot, Uses: []string{"non-existent"}},
 	}
 	if err := svc.ValidateAndDefault(&badProj); !errcode.IsCode(err, errcode.CodeValidation) {
 		t.Fatalf("expected CodeValidation for unknown backing ref, got %v", err)
@@ -63,8 +64,8 @@ func TestValidateDetectsServiceDependencyCycle(t *testing.T) {
 		Metadata:   project.Metadata{Name: "cycled", Owner: "acme"},
 		Spec: project.Spec{
 			Services: []project.ServiceSpec{
-				{Name: "svc-a", Language: "java-spring-boot", Uses: []string{"svc-b"}},
-				{Name: "svc-b", Language: "java-spring-boot", Uses: []string{"svc-a"}},
+				{Name: "svc-a", Language: catalog.LangJavaSpringBoot, Uses: []string{"svc-b"}},
+				{Name: "svc-b", Language: catalog.LangJavaSpringBoot, Uses: []string{"svc-a"}},
 			},
 		},
 	}

@@ -8,12 +8,12 @@ import (
 )
 
 func TestRedactMaskAndString(t *testing.T) {
-	masked := redact.MaskSecret("ghp_1234567890abcdef")
-	if strings.Contains(masked, "1234567890") {
+	masked := redact.MaskSecret("dummy-secret-value-0000")
+	if strings.Contains(masked, "secret-value") {
 		t.Fatalf("expected secret middle to be masked, got %q", masked)
 	}
-	sanitized := redact.Sanitize("token=ghp_1234567890abcdef", "ghp_1234567890abcdef")
-	if strings.Contains(sanitized, "ghp_1234567890abcdef") {
+	sanitized := redact.Sanitize("user=dummy-secret-value-0000", "dummy-secret-value-0000")
+	if strings.Contains(sanitized, "dummy-secret-value-0000") {
 		t.Fatalf("expected secret to be redacted from string, got %q", sanitized)
 	}
 }

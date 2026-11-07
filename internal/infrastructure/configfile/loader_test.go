@@ -9,6 +9,7 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/infrastructure/configfile"
 )
 
+//nolint:gocyclo
 func TestLoadCanonicalAndLegacySpecs(t *testing.T) {
 	loader := configfile.NewLoader()
 

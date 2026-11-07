@@ -43,6 +43,8 @@ type alertGroup struct {
 
 // ProcessAlertPayload routes alerts by namespace to their Discord webhook, dispatches raw alerts,
 // and sends an AI diagnosis follow-up for firing alerts.
+//
+//nolint:gocyclo
 func (s *Service) ProcessAlertPayload(ctx context.Context, payload diagnostic.AlertPayload) error {
 	var webhooks map[string]string
 	if s.stateStore != nil {

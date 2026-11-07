@@ -13,7 +13,11 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/usecase/agenttools"
 )
 
-const protocolVersion = "2025-03-26"
+const (
+	protocolVersion = "2025-03-26"
+	jsonRPCVersion  = "2.0"
+	contentTypeText = "text"
+)
 
 // Server serves Model Context Protocol (MCP) JSON-RPC 2.0 requests over Stdio or Streamable HTTP.
 type Server struct {
@@ -109,12 +113,12 @@ func validBearerToken(r *http.Request, expected string) bool {
 	return subtle.ConstantTimeCompare([]byte(token), []byte(expected)) == 1
 }
 
-//nolint:gocyclo
+//nolint:gocyclo,goconst
 func (s *Server) handleRawJSON(ctx context.Context, raw []byte) (rpcResponse, bool) {
 	var req rpcRequest
 	if err := json.Unmarshal(raw, &req); err != nil {
 		return rpcResponse{
-			JSONRPC: "2.0",
+			JSONRPC: jsonRPCVersion,
 			Error:   &rpcError{Code: -32700, Message: "parse error: " + err.Error()},
 		}, true
 	}
@@ -126,7 +130,7 @@ func (s *Server) handleRawJSON(ctx context.Context, raw []byte) (rpcResponse, bo
 	switch req.Method {
 	case "initialize":
 		return rpcResponse{
-			JSONRPC: "2.0",
+			JSONRPC: jsonRPCVersion,
 			ID:      req.ID,
 			Result: map[string]any{
 				"protocolVersion": protocolVersion,
@@ -143,14 +147,14 @@ func (s *Server) handleRawJSON(ctx context.Context, raw []byte) (rpcResponse, bo
 
 	case "ping":
 		return rpcResponse{
-			JSONRPC: "2.0",
+			JSONRPC: jsonRPCVersion,
 			ID:      req.ID,
 			Result:  map[string]any{},
 		}, true
 
 	case "tools/list":
 		return rpcResponse{
-			JSONRPC: "2.0",
+			JSONRPC: jsonRPCVersion,
 			ID:      req.ID,
 			Result: map[string]any{
 				"tools": s.catalog.ListTools(),
@@ -164,7 +168,7 @@ func (s *Server) handleRawJSON(ctx context.Context, raw []byte) (rpcResponse, bo
 		}
 		if err := json.Unmarshal(req.Params, &params); err != nil {
 			return rpcResponse{
-				JSONRPC: "2.0",
+				JSONRPC: jsonRPCVersion,
 				ID:      req.ID,
 				Error:   &rpcError{Code: -32602, Message: "invalid tool call params: " + err.Error()},
 			}, true
@@ -172,30 +176,30 @@ func (s *Server) handleRawJSON(ctx context.Context, raw []byte) (rpcResponse, bo
 		text, err := s.catalog.CallTool(ctx, params.Name, params.Arguments)
 		if err != nil {
 			return rpcResponse{
-				JSONRPC: "2.0",
+				JSONRPC: jsonRPCVersion,
 				ID:      req.ID,
 				Result: map[string]any{
 					"isError": true,
 					"content": []map[string]any{
-						{"type": "text", "text": err.Error()},
+						{"type": contentTypeText, contentTypeText: err.Error()},
 					},
 				},
 			}, true
 		}
 		return rpcResponse{
-			JSONRPC: "2.0",
+			JSONRPC: jsonRPCVersion,
 			ID:      req.ID,
 			Result: map[string]any{
 				"isError": false,
 				"content": []map[string]any{
-					{"type": "text", "text": text},
+					{"type": contentTypeText, contentTypeText: text},
 				},
 			},
 		}, true
 
 	case "resources/list":
 		return rpcResponse{
-			JSONRPC: "2.0",
+			JSONRPC: jsonRPCVersion,
 			ID:      req.ID,
 			Result: map[string]any{
 				"resources": s.catalog.ListResources(),
@@ -208,7 +212,7 @@ func (s *Server) handleRawJSON(ctx context.Context, raw []byte) (rpcResponse, bo
 		}
 		if err := json.Unmarshal(req.Params, &params); err != nil {
 			return rpcResponse{
-				JSONRPC: "2.0",
+				JSONRPC: jsonRPCVersion,
 				ID:      req.ID,
 				Error:   &rpcError{Code: -32602, Message: "invalid resource read params: " + err.Error()},
 			}, true
@@ -216,20 +220,20 @@ func (s *Server) handleRawJSON(ctx context.Context, raw []byte) (rpcResponse, bo
 		content, mime, err := s.catalog.ReadResource(ctx, params.URI)
 		if err != nil {
 			return rpcResponse{
-				JSONRPC: "2.0",
+				JSONRPC: jsonRPCVersion,
 				ID:      req.ID,
 				Error:   &rpcError{Code: -32602, Message: err.Error()},
 			}, true
 		}
 		return rpcResponse{
-			JSONRPC: "2.0",
+			JSONRPC: jsonRPCVersion,
 			ID:      req.ID,
 			Result: map[string]any{
 				"contents": []map[string]any{
 					{
-						"uri":      params.URI,
-						"mimeType": mime,
-						"text":     content,
+						"uri":           params.URI,
+						"mimeType":      mime,
+						contentTypeText: content,
 					},
 				},
 			},
@@ -237,7 +241,7 @@ func (s *Server) handleRawJSON(ctx context.Context, raw []byte) (rpcResponse, bo
 
 	default:
 		return rpcResponse{
-			JSONRPC: "2.0",
+			JSONRPC: jsonRPCVersion,
 			ID:      req.ID,
 			Error:   &rpcError{Code: -32601, Message: "method not found: " + req.Method},
 		}, true

@@ -77,13 +77,13 @@ func (c *Client) CollectMetricsSummary(ctx context.Context, namespace string) (s
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Metrics for namespace %s:\n", namespace))
+	_, _ = fmt.Fprintf(&sb, "Metrics for namespace %s:\n", namespace)
 	for _, r := range parsed.Data.Result {
 		pod := r.Metric["pod"]
 		container := r.Metric["container"]
 		if len(r.Value) == 2 {
 			restarts, _ := r.Value[1].(string)
-			sb.WriteString(fmt.Sprintf("- Pod: %s, Container: %s, Restarts: %s\n", pod, container, restarts))
+			_, _ = fmt.Fprintf(&sb, "- Pod: %s, Container: %s, Restarts: %s\n", pod, container, restarts)
 		}
 	}
 	return sb.String(), nil

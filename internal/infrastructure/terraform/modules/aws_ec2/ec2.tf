@@ -60,9 +60,15 @@ resource "aws_instance" "k8s_node" {
   key_name             = aws_key_pair.kp.key_name
   iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "required"
+  }
+
   root_block_device {
     volume_size           = var.disk_size
     volume_type           = "gp3"
+    encrypted             = true
     delete_on_termination = true
   }
 

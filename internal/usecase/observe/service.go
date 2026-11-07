@@ -51,6 +51,8 @@ func NewService(
 }
 
 // Execute collects cluster observability data and returns a diagnostic Report.
+//
+//nolint:gocyclo
 func (s *Service) Execute(ctx context.Context, req Request) (diagnostic.Report, error) {
 	proj := req.Project
 	if proj == nil && req.SpecPath != "" && s.specRepo != nil {

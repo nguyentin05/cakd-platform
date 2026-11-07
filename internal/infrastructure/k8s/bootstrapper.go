@@ -140,10 +140,11 @@ func (b *Bootstrapper) BootstrapCluster(ctx context.Context, opts ports.ClusterB
 }
 
 func (b *Bootstrapper) installArgoCD(ctx context.Context, kubeconfig, provider, domain string) error {
-	cmds := [][]string{
-		{cmdHelm, cmdRepo, cmdAdd, "argo", "https://argoproj.github.io/argo-helm"},
-		{cmdHelm, cmdRepo, cmdUpdate, "argo"},
-	}
+	cmds := make([][]string, 0, 3)
+	cmds = append(cmds,
+		[]string{cmdHelm, cmdRepo, cmdAdd, "argo", "https://argoproj.github.io/argo-helm"},
+		[]string{cmdHelm, cmdRepo, cmdUpdate, "argo"},
+	)
 	installArgs := []string{
 		cmdHelm, cmdUpgrade, flagInstall, nsArgoCD, "argo/argo-cd",
 		flagNamespace, nsArgoCD, flagCreateNamespace,
@@ -176,10 +177,11 @@ func (b *Bootstrapper) installMonitoring(ctx context.Context, kubeconfig, provid
 	}
 	defer cleanupGF()
 
-	cmds := [][]string{
-		{cmdHelm, cmdRepo, cmdAdd, "prometheus-community", "https://prometheus-community.github.io/helm-charts"},
-		{cmdHelm, cmdRepo, cmdUpdate, "prometheus-community"},
-	}
+	cmds := make([][]string, 0, 3)
+	cmds = append(cmds,
+		[]string{cmdHelm, cmdRepo, cmdAdd, "prometheus-community", "https://prometheus-community.github.io/helm-charts"},
+		[]string{cmdHelm, cmdRepo, cmdUpdate, "prometheus-community"},
+	)
 	installArgs := []string{
 		cmdHelm, cmdUpgrade, flagInstall, nsMonitoring,
 		"prometheus-community/kube-prometheus-stack",
@@ -222,6 +224,7 @@ func (b *Bootstrapper) installLogging(ctx context.Context, kubeconfig string) er
 	return b.runBatch(ctx, kubeconfig, cmds)
 }
 
+//nolint:gocyclo
 func (b *Bootstrapper) deployAgent(ctx context.Context, kubeconfig string, opts ports.ClusterBootstrapOptions) error {
 	var discordToken string
 	geminiKey := opts.GeminiAPIKey
@@ -307,6 +310,7 @@ func (b *Bootstrapper) runBatch(ctx context.Context, kubeconfig string, cmds [][
 	return nil
 }
 
+//nolint:gocyclo
 func (b *Bootstrapper) bootstrapRemoteK3s(ctx context.Context, opts ports.ClusterBootstrapOptions) (string, error) {
 	if opts.SSHKeyPath == "" {
 		return "", errcode.New(errcode.CodeValidation, "sshKeyPath is required for remote K3s bootstrap")

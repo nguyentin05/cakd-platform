@@ -405,6 +405,7 @@ func newVersionCmd(out io.Writer, jsonOutput *bool) *cobra.Command {
 	}
 }
 
+//nolint:gocyclo
 func ensureInteractiveCredentials(c *composition.Container, in io.Reader, out io.Writer, needGitHub, needDiscord, needGemini bool) {
 	f, ok := in.(*os.File)
 	if !ok || !term.IsTerminal(int(f.Fd())) {

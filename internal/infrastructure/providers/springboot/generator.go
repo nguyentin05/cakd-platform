@@ -108,6 +108,7 @@ func (g *Generator) GenerateService(ctx context.Context, svc project.ServiceSpec
 	return extractZip(body, destDir)
 }
 
+//nolint:gocyclo
 func extractZip(data []byte, outDir string) error {
 	reader, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {

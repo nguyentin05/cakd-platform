@@ -16,10 +16,10 @@ func TestStoreSaveGetDeleteAndEnvPrecedence(t *testing.T) {
 	t.Setenv("GITHUB_TOKEN", "")
 
 	err := store.Save(ports.CredentialSet{
-		GitHubToken:     "ghp_filetoken123456",
-		DiscordBotToken: "disc_bottoken123456",
+		GitHubToken:     "file-val-111111",
+		DiscordBotToken: "disc-val-111111",
 		DiscordGuildID:  "123456789",
-		GeminiAPIKey:    "AIzaSyTestKey123456",
+		GeminiAPIKey:    "gem-val-111111",
 	})
 	if err != nil {
 		t.Fatalf("Save failed: %v", err)
@@ -29,16 +29,16 @@ func TestStoreSaveGetDeleteAndEnvPrecedence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Get failed: %v", err)
 	}
-	if got.GitHubToken != "ghp_filetoken123456" {
+	if got.GitHubToken != "file-val-111111" {
 		t.Fatalf("expected file token, got %q", got.GitHubToken)
 	}
 
-	t.Setenv("GITHUB_TOKEN", "ghp_envtoken999999")
+	t.Setenv("GITHUB_TOKEN", "env-val-999999")
 	gotEnv, err := store.Get()
 	if err != nil {
 		t.Fatalf("Get with env failed: %v", err)
 	}
-	if gotEnv.GitHubToken != "ghp_envtoken999999" {
+	if gotEnv.GitHubToken != "env-val-999999" {
 		t.Fatalf("expected env var to take precedence, got %q", gotEnv.GitHubToken)
 	}
 
