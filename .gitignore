@@ -3,6 +3,9 @@ bin/
 dist/
 out/
 site/
+/cakd
+/cakd-agent
+/cakd-mcp
 
 # Test
 coverage.out
@@ -15,6 +18,10 @@ terraform.tfvars.json
 terraform.log
 .platform/
 
+# Tooling
+.task/
+.env
+
 # IDE
 .idea/
 .vscode/
@@ -24,20 +31,3 @@ terraform.log
 # OS
 .DS_Store
 Thumbs.db
-out/
-platform.yaml
-
-report.md
-.task/
-.env
-
-.cursorrules
-
-# Ignore build binaries and linters
-/cakd
-/cakd-agent
-.golangci.bck.yml
-golangci-lint-2.12.2-linux-amd64/cakd-agent
-golangci-lint-2.12.2-linux-amd64/
-
-platform-aws.yaml
