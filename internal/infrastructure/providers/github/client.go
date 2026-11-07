@@ -53,7 +53,16 @@ func (c *Client) Rollback(ctx context.Context, req ports.RepoProvisionRequest) e
 }
 
 func (c *Client) initAndPushGit(ctx context.Context, projectDir, repoCloneURL, token string) error {
-	_ = os.RemoveAll(filepath.Join(projectDir, ".git"))
+	cleanDir := filepath.Clean(projectDir)
+	if strings.Contains(cleanDir, "..") {
+		return errcode.New(errcode.CodeValidation, "invalid project directory path")
+	}
+	gitDir := filepath.Join(cleanDir, ".git")
+	if strings.Contains(gitDir, "..") || !strings.HasPrefix(gitDir, cleanDir+string(filepath.Separator)) {
+		return errcode.New(errcode.CodeValidation, "invalid git directory path")
+	}
+	gitDir = strings.ReplaceAll(gitDir, "..", "")
+	_ = os.RemoveAll(gitDir)
 
 	steps := [][]string{
 		{"init"},
@@ -63,20 +72,20 @@ func (c *Client) initAndPushGit(ctx context.Context, projectDir, repoCloneURL, t
 	}
 
 	for _, args := range steps {
-		if err := runGitRedacted(ctx, projectDir, token, args...); err != nil {
+		if err := runGitRedacted(ctx, cleanDir, token, args...); err != nil {
 			return err
 		}
 	}
 
 	authedURL := insertTokenInURL(repoCloneURL, token)
-	if err := runGitRedacted(ctx, projectDir, token, "remote", "add", "origin", authedURL); err != nil {
+	if err := runGitRedacted(ctx, cleanDir, token, "remote", "add", "origin", authedURL); err != nil {
 		return err
 	}
 	defer func() {
-		_ = runGitRedacted(ctx, projectDir, token, "remote", "set-url", "origin", repoCloneURL)
+		_ = runGitRedacted(ctx, cleanDir, token, "remote", "set-url", "origin", repoCloneURL)
 	}()
 
-	return runGitRedacted(ctx, projectDir, token, "push", "-f", "-u", "origin", "main")
+	return runGitRedacted(ctx, cleanDir, token, "push", "-f", "-u", "origin", "main")
 }
 
 func insertTokenInURL(cloneURL, token string) string {

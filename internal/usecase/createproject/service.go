@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/nguyentin05/cakd-platform/internal/domain/errcode"
 	"github.com/nguyentin05/cakd-platform/internal/domain/project"
@@ -95,8 +96,13 @@ func (s *Service) Execute(ctx context.Context, req Request) (Result, error) {
 
 	outDir := req.OutputDir
 	if outDir == "" {
-		outDir = filepath.Join("out", proj.Metadata.Name)
+		outDir = filepath.Join("out", filepath.Base(proj.Metadata.Name))
 	}
+	outDir = filepath.Clean(outDir)
+	if strings.Contains(outDir, "..") {
+		return Result{}, errcode.New(errcode.CodeValidation, "invalid output directory: path traversal is not allowed")
+	}
+	outDir = strings.ReplaceAll(outDir, "..", "")
 
 	if err := prepareOutputDir(outDir, req.Force); err != nil {
 		return Result{}, err
@@ -107,7 +113,11 @@ func (s *Service) Execute(ctx context.Context, req Request) (Result, error) {
 	progress.Emit(ctx, "scaffold", progress.StatusRunning, "generating microservice skeletons for "+proj.Metadata.Name)
 	if s.frameworkGen != nil {
 		for _, svc := range proj.Spec.Services {
-			svcDir := filepath.Join(outDir, "services", svc.Name)
+			svcDir := filepath.Clean(filepath.Join(outDir, "services", filepath.Base(svc.Name)))
+			if strings.Contains(svcDir, "..") || !strings.HasPrefix(svcDir, outDir+string(filepath.Separator)) {
+				return Result{}, errcode.New(errcode.CodeValidation, "invalid service directory "+svc.Name)
+			}
+			svcDir = strings.ReplaceAll(svcDir, "..", "")
 			if err := os.MkdirAll(svcDir, 0o750); err != nil {
 				return Result{}, errcode.Wrap(errcode.CodeProvision, "create service directory "+svc.Name, err)
 			}
@@ -217,15 +227,20 @@ func (s *Service) resolveClusterContext(proj *project.Project) (domain string, k
 }
 
 func prepareOutputDir(outDir string, force bool) error {
-	if _, err := os.Stat(outDir); err == nil {
+	cleanDir := filepath.Clean(outDir)
+	if strings.Contains(cleanDir, "..") || cleanDir == "." || cleanDir == string(filepath.Separator) {
+		return errcode.New(errcode.CodeValidation, "invalid output directory path")
+	}
+	cleanDir = strings.ReplaceAll(cleanDir, "..", "")
+	if _, err := os.Stat(cleanDir); err == nil {
 		if !force {
-			return errcode.New(errcode.CodeValidation, fmt.Sprintf("directory %s already exists; use --force to overwrite", outDir))
+			return errcode.New(errcode.CodeValidation, fmt.Sprintf("directory %s already exists; use --force to overwrite", cleanDir))
 		}
-		if err := os.RemoveAll(outDir); err != nil {
+		if err := os.RemoveAll(cleanDir); err != nil {
 			return errcode.Wrap(errcode.CodeProvision, "failed to clean existing output directory", err)
 		}
 	}
-	if err := os.MkdirAll(outDir, 0o750); err != nil {
+	if err := os.MkdirAll(cleanDir, 0o750); err != nil {
 		return errcode.Wrap(errcode.CodeProvision, "failed to create output directory", err)
 	}
 	return nil

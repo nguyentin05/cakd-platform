@@ -3,6 +3,8 @@ package agenttools
 import (
 	"context"
 	"encoding/json"
+	"path/filepath"
+	"strings"
 
 	"github.com/nguyentin05/cakd-platform/internal/domain/catalog"
 	"github.com/nguyentin05/cakd-platform/internal/domain/errcode"
@@ -204,15 +206,14 @@ func (c *Catalog) CallTool(ctx context.Context, name string, args map[string]any
 
 	case "cakd_validate_spec":
 		yamlContent, _ := args["yamlContent"].(string)
-		path, _ := args["path"].(string)
+		path, err := sanitizeArgPath(args["path"], "platform.yaml")
+		if err != nil {
+			return "", err
+		}
 		var proj *project.Project
-		var err error
 		if yamlContent != "" {
 			proj, err = c.specRepo.LoadBytes([]byte(yamlContent))
 		} else {
-			if path == "" {
-				path = "platform.yaml"
-			}
 			proj, err = c.specRepo.LoadFile(path)
 		}
 		if err != nil {
@@ -234,7 +235,10 @@ func (c *Catalog) CallTool(ctx context.Context, name string, args map[string]any
 		svcName, _ := args["serviceName"].(string)
 		provider, _ := args["provider"].(string)
 		backingName, _ := args["backingName"].(string)
-		outPath, _ := args["outputPath"].(string)
+		outPath, err := sanitizeArgPath(args["outputPath"], "")
+		if err != nil {
+			return "", err
+		}
 
 		if provider == "" {
 			provider = catalog.ClusterLocal
@@ -243,13 +247,13 @@ func (c *Catalog) CallTool(ctx context.Context, name string, args map[string]any
 			APIVersion: project.CanonicalAPIVersion,
 			Kind:       project.KindProject,
 			Metadata: project.Metadata{
-				Name:  projName,
+				Name:  strings.ReplaceAll(projName, "..", ""),
 				Owner: owner,
 			},
 			Spec: project.Spec{
 				Cluster: &project.ClusterSpec{Provider: provider},
 				Services: []project.ServiceSpec{
-					{Name: svcName, Language: catalog.LangJavaSpringBoot},
+					{Name: strings.ReplaceAll(svcName, "..", ""), Language: catalog.LangJavaSpringBoot},
 				},
 			},
 		}
@@ -274,11 +278,14 @@ func (c *Catalog) CallTool(ctx context.Context, name string, args map[string]any
 		return string(b), nil
 
 	case "cakd_scaffold_only":
-		path, _ := args["path"].(string)
-		if path == "" {
-			path = "platform.yaml"
+		path, err := sanitizeArgPath(args["path"], "platform.yaml")
+		if err != nil {
+			return "", err
 		}
-		outDir, _ := args["outputDir"].(string)
+		outDir, err := sanitizeArgPath(args["outputDir"], "")
+		if err != nil {
+			return "", err
+		}
 		force, _ := args["force"].(bool)
 		res, err := c.createUC.Execute(ctx, createproject.Request{
 			SpecPath:     path,
@@ -293,9 +300,9 @@ func (c *Catalog) CallTool(ctx context.Context, name string, args map[string]any
 		return string(b), nil
 
 	case "cakd_create_project":
-		path, _ := args["path"].(string)
-		if path == "" {
-			path = "platform.yaml"
+		path, err := sanitizeArgPath(args["path"], "platform.yaml")
+		if err != nil {
+			return "", err
 		}
 		force, _ := args["force"].(bool)
 		res, err := c.createUC.Execute(ctx, createproject.Request{
@@ -309,7 +316,10 @@ func (c *Catalog) CallTool(ctx context.Context, name string, args map[string]any
 		return string(b), nil
 
 	case "cakd_init_cluster":
-		path, _ := args["path"].(string)
+		path, err := sanitizeArgPath(args["path"], "")
+		if err != nil {
+			return "", err
+		}
 		argocd, _ := args["argocd"].(bool)
 		monitoring, _ := args["monitoring"].(bool)
 		logging, _ := args["logging"].(bool)
@@ -327,7 +337,10 @@ func (c *Catalog) CallTool(ctx context.Context, name string, args map[string]any
 
 	case "cakd_observe_workload":
 		ns, _ := args["namespace"].(string)
-		path, _ := args["path"].(string)
+		path, err := sanitizeArgPath(args["path"], "")
+		if err != nil {
+			return "", err
+		}
 		rep, err := c.observeUC.Execute(ctx, observe.Request{
 			SpecPath:  path,
 			Namespace: ns,
@@ -341,6 +354,18 @@ func (c *Catalog) CallTool(ctx context.Context, name string, args map[string]any
 	default:
 		return "", errcode.New(errcode.CodeNotFound, "unknown MCP tool: "+name)
 	}
+}
+
+func sanitizeArgPath(raw any, fallback string) (string, error) {
+	s, _ := raw.(string)
+	if s == "" {
+		return fallback, nil
+	}
+	clean := filepath.Clean(s)
+	if strings.Contains(clean, "..") {
+		return "", errcode.New(errcode.CodeValidation, "invalid path argument: path traversal is not allowed")
+	}
+	return strings.ReplaceAll(clean, "..", ""), nil
 }
 
 func (c *Catalog) catalogJSON() (string, error) {

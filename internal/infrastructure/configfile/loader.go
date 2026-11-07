@@ -3,6 +3,7 @@ package configfile
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 
@@ -33,7 +34,12 @@ func NewLoader() *Loader {
 
 // LoadFile reads a YAML file from disk and normalizes it into a domain Project.
 func (l *Loader) LoadFile(path string) (*project.Project, error) {
-	data, err := os.ReadFile(path)
+	cleanPath := filepath.Clean(path)
+	if strings.Contains(cleanPath, "..") {
+		return nil, errcode.New(errcode.CodeValidation, "invalid configuration file path: path traversal is not allowed")
+	}
+	cleanPath = strings.ReplaceAll(cleanPath, "..", "")
+	data, err := os.ReadFile(cleanPath)
 	if err != nil {
 		return nil, errcode.Wrap(errcode.CodeNotFound, "cannot read configuration file", err)
 	}
@@ -97,16 +103,25 @@ func (l *Loader) MarshalCanonical(proj *project.Project) ([]byte, error) {
 
 // SaveFile writes a Project in canonical YAML format to path.
 func (l *Loader) SaveFile(path string, proj *project.Project) error {
+	cleanPath := filepath.Clean(path)
+	if strings.Contains(cleanPath, "..") {
+		return errcode.New(errcode.CodeValidation, "invalid configuration file path: path traversal is not allowed")
+	}
+	cleanPath = strings.ReplaceAll(cleanPath, "..", "")
 	data, err := l.MarshalCanonical(proj)
 	if err != nil {
 		return err
 	}
-	if dir := filepath.Dir(path); dir != "" && dir != "." {
+	if dir := filepath.Dir(cleanPath); dir != "" && dir != "." {
+		if strings.Contains(dir, "..") {
+			return errcode.New(errcode.CodeValidation, "invalid parent directory path")
+		}
+		dir = strings.ReplaceAll(dir, "..", "")
 		if err := os.MkdirAll(dir, 0o750); err != nil {
 			return errcode.Wrap(errcode.CodeExternal, "failed to create parent directory", err)
 		}
 	}
-	if err := os.WriteFile(path, data, 0o600); err != nil {
+	if err := os.WriteFile(cleanPath, data, 0o600); err != nil {
 		return errcode.Wrap(errcode.CodeExternal, "failed to write configuration file", err)
 	}
 	return nil

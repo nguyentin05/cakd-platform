@@ -5,6 +5,7 @@ import (
 	"embed"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/nguyentin05/cakd-platform/internal/domain/catalog"
@@ -63,6 +64,10 @@ func (r *Renderer) RenderProject(_ context.Context, req ports.ScaffoldRequest) e
 	if req.Project == nil {
 		return errcode.New(errcode.CodeValidation, "project is required for template rendering")
 	}
+	baseOut := filepath.Clean(req.OutputDir)
+	if strings.Contains(baseOut, "..") {
+		return errcode.New(errcode.CodeValidation, "invalid scaffold output directory")
+	}
 	domain := req.BaseDomain
 	if domain == "" {
 		domain = "127.0.0.1.nip.io"
@@ -71,14 +76,14 @@ func (r *Renderer) RenderProject(_ context.Context, req ports.ScaffoldRequest) e
 	gView := toGlobalView(req.Project)
 
 	for _, m := range globalMappings(req.Project) {
-		dest := filepath.Join(req.OutputDir, m.outputPath)
-		if err := renderFile(m.templatePath, dest, gView); err != nil {
+		dest := filepath.Join(baseOut, m.outputPath)
+		if err := renderFile(m.templatePath, dest, baseOut, gView); err != nil {
 			return err
 		}
 	}
 
 	for i, svc := range req.Project.Spec.Services {
-		svcDir := filepath.Join(req.OutputDir, "services", svc.Name)
+		svcDir := filepath.Join(baseOut, "services", filepath.Base(svc.Name))
 		ctxData := serviceRenderContext{
 			Config:  gView,
 			Service: gView.Services[i],
@@ -86,7 +91,7 @@ func (r *Renderer) RenderProject(_ context.Context, req ports.ScaffoldRequest) e
 		}
 		for _, m := range serviceMappings(req.Project, svc) {
 			dest := filepath.Join(svcDir, m.outputPath)
-			if err := renderFile(m.templatePath, dest, ctxData); err != nil {
+			if err := renderFile(m.templatePath, dest, baseOut, ctxData); err != nil {
 				return err
 			}
 		}
@@ -195,21 +200,31 @@ func usesRelationalDB(proj *project.Project, svc project.ServiceSpec) bool {
 	return false
 }
 
-func renderFile(tmplPath, outPath string, data any) error {
+func renderFile(tmplPath, outPath, baseOut string, data any) error {
+	cleanOut := filepath.Clean(outPath)
+	if strings.Contains(cleanOut, "..") || !strings.HasPrefix(cleanOut, baseOut+string(filepath.Separator)) {
+		return errcode.New(errcode.CodeValidation, "invalid template output path")
+	}
+	cleanOut = strings.ReplaceAll(cleanOut, "..", "")
+	parentDir := filepath.Dir(cleanOut)
+	if strings.Contains(parentDir, "..") || !strings.HasPrefix(parentDir, baseOut) {
+		return errcode.New(errcode.CodeValidation, "invalid template directory path")
+	}
+	parentDir = strings.ReplaceAll(parentDir, "..", "")
 	raw, err := templateFS.ReadFile(tmplPath)
 	if err != nil {
 		return errcode.Wrap(errcode.CodeProvision, "read embedded template "+tmplPath, err)
 	}
-	if err := os.MkdirAll(filepath.Dir(outPath), 0o750); err != nil {
+	if err := os.MkdirAll(parentDir, 0o750); err != nil {
 		return errcode.Wrap(errcode.CodeProvision, "create template directory", err)
 	}
 	tmpl, err := template.New(filepath.Base(tmplPath)).Delims("[[", "]]").Parse(string(raw))
 	if err != nil {
 		return errcode.Wrap(errcode.CodeProvision, "parse template "+tmplPath, err)
 	}
-	f, err := os.Create(outPath)
+	f, err := os.OpenFile(cleanOut, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o600)
 	if err != nil {
-		return errcode.Wrap(errcode.CodeProvision, "create output file "+outPath, err)
+		return errcode.Wrap(errcode.CodeProvision, "create output file "+cleanOut, err)
 	}
 	defer f.Close()
 	if err := tmpl.Execute(f, data); err != nil {

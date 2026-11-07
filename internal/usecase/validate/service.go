@@ -42,6 +42,9 @@ func (s *Service) ValidateAndDefault(proj *project.Project) error {
 	if strings.TrimSpace(proj.Metadata.Name) == "" {
 		return errcode.New(errcode.CodeValidation, "field 'metadata.name' is required")
 	}
+	if strings.Contains(proj.Metadata.Name, "..") || strings.ContainsAny(proj.Metadata.Name, `/\`) {
+		return errcode.New(errcode.CodeValidation, "field 'metadata.name' must not contain path separators or '..'")
+	}
 	if strings.TrimSpace(proj.Metadata.Owner) == "" {
 		return errcode.New(errcode.CodeValidation, "field 'metadata.owner' is required")
 	}
@@ -212,6 +215,9 @@ func validateAndDefaultServices(proj *project.Project) error {
 		svc := &proj.Spec.Services[i]
 		if strings.TrimSpace(svc.Name) == "" {
 			return errcode.New(errcode.CodeValidation, fmt.Sprintf("services[%d].name is required", i))
+		}
+		if strings.Contains(svc.Name, "..") || strings.ContainsAny(svc.Name, `/\`) {
+			return errcode.New(errcode.CodeValidation, fmt.Sprintf("services[%d].name must not contain path separators or '..'", i))
 		}
 		if strings.TrimSpace(svc.Language) == "" {
 			return errcode.New(errcode.CodeValidation, fmt.Sprintf("services[%d].language is required", i))

@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"embed"
+	"errors"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,6 +15,7 @@ import (
 	"time"
 
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/knownhosts"
 
 	"github.com/nguyentin05/cakd-platform/internal/domain/catalog"
 	"github.com/nguyentin05/cakd-platform/internal/domain/errcode"
@@ -308,7 +311,11 @@ func (b *Bootstrapper) bootstrapRemoteK3s(ctx context.Context, opts ports.Cluste
 	if opts.SSHKeyPath == "" {
 		return "", errcode.New(errcode.CodeValidation, "sshKeyPath is required for remote K3s bootstrap")
 	}
-	pemBytes, err := os.ReadFile(opts.SSHKeyPath)
+	cleanKeyPath := filepath.Clean(opts.SSHKeyPath)
+	if strings.Contains(cleanKeyPath, "..") {
+		return "", errcode.New(errcode.CodeValidation, "invalid sshKeyPath")
+	}
+	pemBytes, err := os.ReadFile(cleanKeyPath)
 	if err != nil {
 		return "", errcode.Wrap(errcode.CodeProvision, "read SSH private key", err)
 	}
@@ -317,15 +324,20 @@ func (b *Bootstrapper) bootstrapRemoteK3s(ctx context.Context, opts ports.Cluste
 		return "", errcode.Wrap(errcode.CodeProvision, "parse SSH private key", err)
 	}
 
+	knownHostsPath := filepath.Join(filepath.Dir(cleanKeyPath), "known_hosts")
+	hostKeyCallback, err := tofuHostKeyCallback(knownHostsPath)
+	if err != nil {
+		return "", errcode.Wrap(errcode.CodeProvision, "configure SSH known_hosts callback", err)
+	}
+
 	user := opts.SSHUser
 	if user == "" {
 		user = "ubuntu"
 	}
-	//nolint:gosec
 	sshCfg := &ssh.ClientConfig{
 		User:            user,
 		Auth:            []ssh.AuthMethod{ssh.PublicKeys(signer)},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: hostKeyCallback,
 		Timeout:         15 * time.Second,
 	}
 
@@ -379,6 +391,47 @@ func (b *Bootstrapper) bootstrapRemoteK3s(ctx context.Context, opts ports.Cluste
 		return "", errcode.Wrap(errcode.CodeProvision, "write local kubeconfig", err)
 	}
 	return kubeconfigPath, nil
+}
+
+func tofuHostKeyCallback(knownHostsPath string) (ssh.HostKeyCallback, error) {
+	cleanPath := filepath.Clean(knownHostsPath)
+	if strings.Contains(cleanPath, "..") {
+		return nil, errcode.New(errcode.CodeValidation, "invalid known_hosts file path")
+	}
+	parentDir := filepath.Dir(cleanPath)
+	if strings.Contains(parentDir, "..") {
+		return nil, errcode.New(errcode.CodeValidation, "invalid known_hosts directory")
+	}
+	if err := os.MkdirAll(parentDir, 0o700); err != nil {
+		return nil, err
+	}
+	if _, err := os.Stat(cleanPath); os.IsNotExist(err) {
+		if err := os.WriteFile(cleanPath, nil, 0o600); err != nil {
+			return nil, err
+		}
+	}
+	return func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+		cb, err := knownhosts.New(cleanPath)
+		if err != nil {
+			return err
+		}
+		err = cb(hostname, remote, key)
+		if err == nil {
+			return nil
+		}
+		var keyErr *knownhosts.KeyError
+		if errors.As(err, &keyErr) && len(keyErr.Want) == 0 {
+			f, openErr := os.OpenFile(cleanPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+			if openErr != nil {
+				return openErr
+			}
+			defer f.Close()
+			line := knownhosts.Line([]string{knownhosts.Normalize(hostname)}, key)
+			_, writeErr := fmt.Fprintln(f, line)
+			return writeErr
+		}
+		return err
+	}, nil
 }
 
 func runSSHCommand(client *ssh.Client, cmd string) error {

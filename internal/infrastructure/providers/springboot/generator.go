@@ -115,12 +115,17 @@ func extractZip(data []byte, outDir string) error {
 	}
 
 	cleanOut := filepath.Clean(outDir)
+	if strings.Contains(cleanOut, "..") {
+		return errcode.New(errcode.CodeValidation, "invalid output directory")
+	}
+	cleanOut = strings.ReplaceAll(cleanOut, "..", "")
 	for _, file := range reader.File {
 		//nolint:gosec
-		targetPath := filepath.Join(outDir, file.Name)
-		if !strings.HasPrefix(filepath.Clean(targetPath), cleanOut) {
+		targetPath := filepath.Clean(filepath.Join(cleanOut, file.Name))
+		if strings.Contains(targetPath, "..") || (!strings.HasPrefix(targetPath, cleanOut+string(filepath.Separator)) && targetPath != cleanOut) {
 			return errcode.New(errcode.CodeValidation, "illegal file path in zip: "+file.Name)
 		}
+		targetPath = strings.ReplaceAll(targetPath, "..", "")
 
 		if file.FileInfo().IsDir() {
 			if err := os.MkdirAll(targetPath, 0o750); err != nil {
@@ -129,7 +134,12 @@ func extractZip(data []byte, outDir string) error {
 			continue
 		}
 
-		if err := os.MkdirAll(filepath.Dir(targetPath), 0o750); err != nil {
+		parentDir := filepath.Dir(targetPath)
+		if strings.Contains(parentDir, "..") || !strings.HasPrefix(parentDir, cleanOut) {
+			return errcode.New(errcode.CodeValidation, "illegal parent directory in zip: "+file.Name)
+		}
+		parentDir = strings.ReplaceAll(parentDir, "..", "")
+		if err := os.MkdirAll(parentDir, 0o750); err != nil {
 			return err
 		}
 		rc, err := file.Open()
@@ -151,6 +161,10 @@ func extractZip(data []byte, outDir string) error {
 		_ = outFile.Close()
 	}
 
-	_ = os.Remove(filepath.Join(outDir, "src", "main", "resources", "application.properties"))
+	propsPath := filepath.Join(cleanOut, "src", "main", "resources", "application.properties")
+	if !strings.Contains(propsPath, "..") && strings.HasPrefix(propsPath, cleanOut+string(filepath.Separator)) {
+		propsPath = strings.ReplaceAll(propsPath, "..", "")
+		_ = os.Remove(propsPath)
+	}
 	return nil
 }

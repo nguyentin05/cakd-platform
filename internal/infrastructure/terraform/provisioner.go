@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/nguyentin05/cakd-platform/internal/domain/errcode"
 	"github.com/nguyentin05/cakd-platform/internal/platform/progress"
@@ -200,7 +201,12 @@ func (p *Provisioner) readOutputs(ctx context.Context, tfDir string) (map[string
 }
 
 func copyEmbeddedModule(modulePath, tfDir string) error {
-	if err := os.MkdirAll(tfDir, 0o750); err != nil {
+	cleanDir := filepath.Clean(tfDir)
+	if strings.Contains(cleanDir, "..") {
+		return errcode.New(errcode.CodeValidation, "invalid terraform state directory")
+	}
+	cleanDir = strings.ReplaceAll(cleanDir, "..", "")
+	if err := os.MkdirAll(cleanDir, 0o750); err != nil {
 		return err
 	}
 	entries, err := moduleFS.ReadDir(modulePath)
@@ -215,7 +221,12 @@ func copyEmbeddedModule(modulePath, tfDir string) error {
 		if err != nil {
 			return err
 		}
-		if err := os.WriteFile(filepath.Join(tfDir, entry.Name()), data, 0o600); err != nil {
+		destFile := filepath.Join(cleanDir, filepath.Base(entry.Name()))
+		if strings.Contains(destFile, "..") || !strings.HasPrefix(destFile, cleanDir+string(filepath.Separator)) {
+			return errcode.New(errcode.CodeValidation, "invalid terraform module file path")
+		}
+		destFile = strings.ReplaceAll(destFile, "..", "")
+		if err := os.WriteFile(destFile, data, 0o600); err != nil {
 			return err
 		}
 	}
@@ -223,9 +234,19 @@ func copyEmbeddedModule(modulePath, tfDir string) error {
 }
 
 func writeTFVars(tfDir string, vars map[string]any) error {
+	cleanDir := filepath.Clean(tfDir)
+	if strings.Contains(cleanDir, "..") {
+		return errcode.New(errcode.CodeValidation, "invalid terraform state directory")
+	}
+	cleanDir = strings.ReplaceAll(cleanDir, "..", "")
 	data, err := json.MarshalIndent(vars, "", "  ")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(tfDir, "terraform.tfvars.json"), data, 0o600)
+	varsFile := filepath.Join(cleanDir, "terraform.tfvars.json")
+	if strings.Contains(varsFile, "..") || !strings.HasPrefix(varsFile, cleanDir+string(filepath.Separator)) {
+		return errcode.New(errcode.CodeValidation, "invalid tfvars file path")
+	}
+	varsFile = strings.ReplaceAll(varsFile, "..", "")
+	return os.WriteFile(varsFile, data, 0o600)
 }
