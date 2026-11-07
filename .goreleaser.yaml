@@ -5,7 +5,6 @@ project_name: cakd
 before:
   hooks:
     - go mod tidy
-    - go generate ./...
 
 builds:
   - id: cakd
@@ -22,9 +21,38 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X main.version={{.Version}}
-      - -X main.commit={{.Commit}}
-      - -X main.date={{.Date}}
+      - -X github.com/nguyentin05/cakd-platform/internal/platform/buildinfo.Version={{.Version}}
+
+  - id: cakd-agent
+    main: ./cmd/cakd-agent
+    binary: cakd-agent
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/nguyentin05/cakd-platform/internal/platform/buildinfo.Version={{.Version}}
+
+  - id: cakd-mcp
+    main: ./cmd/cakd-mcp
+    binary: cakd-mcp
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/nguyentin05/cakd-platform/internal/platform/buildinfo.Version={{.Version}}
 
 archives:
   - id: default

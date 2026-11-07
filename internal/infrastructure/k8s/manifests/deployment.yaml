@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cakd-agent
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cakd-agent
+  template:
+    metadata:
+      labels:
+        app: cakd-agent
+    spec:
+      containers:
+        - name: agent
+          image: {{ .Image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: cakd-agent-secret
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "192Mi"
+              cpu: "200m"
+          volumeMounts:
+            - name: webhooks-volume
+              mountPath: /etc/cakd
+      volumes:
+        - name: webhooks-volume
+          configMap:
+            name: cakd-webhooks

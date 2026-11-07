@@ -6,13 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/nguyentin05/cakd-platform/internal/agent"
-	"github.com/nguyentin05/cakd-platform/internal/config"
-	"github.com/nguyentin05/cakd-platform/internal/provider/notify/discord"
+	"github.com/nguyentin05/cakd-platform/internal/adapter/webhook"
+	"github.com/nguyentin05/cakd-platform/internal/composition"
 )
 
-// main is the entry point for the CAKD Agent server.
-// It parses the Discord webhook configurations and starts an HTTP server listening for Alertmanager webhooks.
 func main() {
 	webhookURL := os.Getenv("DISCORD_WEBHOOK_URL")
 	if webhookURL == "" {
@@ -28,30 +25,22 @@ func main() {
 	geminiKey := os.Getenv("GEMINI_API_KEY")
 	geminiModel := os.Getenv("GEMINI_MODEL")
 	if geminiModel == "" {
-		geminiModel = "gemini-flash-latest"
+		geminiModel = "gemini-2.5-flash"
 	}
 	agentSecret := os.Getenv("CAKD_AGENT_SECRET")
+	discordToken := os.Getenv("DISCORD_BOT_TOKEN")
+	discordGuild := os.Getenv("DISCORD_GUILD_ID")
 
-	webhooks, err := config.LoadWebhooks()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: failed to load webhooks: %v\n", err)
-	}
-
-	notifier := discord.NewClient("", "")
-	server := agent.NewAgentServer(webhookURL, notifier, geminiKey, geminiModel, agentSecret, webhooks)
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/api/v1/alerts", server.HandleAlert)
+	dispatcher := composition.NewAlertDispatcher(webhookURL, discordToken, discordGuild, geminiKey, geminiModel)
+	handler := webhook.NewHandler(dispatcher, agentSecret)
 
 	addr := ":" + port
 	fmt.Printf("CAKD Agent running on %s\n", addr)
-	fmt.Printf("Listening for Alertmanager webhooks at http://localhost%s/api/v1/alerts\n", addr)
-	fmt.Println("Waiting for alerts...")
 
 	srv := &http.Server{
 		Addr:              addr,
-		ReadHeaderTimeout: 3 * time.Second,
-		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+		Handler:           handler.Routes(),
 	}
 	if err := srv.ListenAndServe(); err != nil {
 		fmt.Fprintf(os.Stderr, "Server error: %v\n", err)

@@ -1,52 +1,47 @@
-# CAKD Platform - AI Assistant Context
+# CAKD Platform — AI Assistant Working Guide
 
-## 1. Project Overview
-CAKD Platform (Cloud-Agnostic Kubernetes Developer Platform) is a developer platform designed to bootstrap cloud-native microservices for small teams. It follows "Convention over Configuration", GitOps workflows, and includes a real-time agent for log and metrics diagnostic reporting.
+CAKD Platform (Cloud-Agnostic Kubernetes Developer Platform) bootstraps cloud-native microservices, GitOps CI/CD pipelines, Kubernetes observability stacks, and AI-powered root-cause diagnostics from a single declarative configuration (`platform.yaml`) or interactive/agentic workflows.
 
-## 2. Architecture
-- **CLI Commands**:
-  - `cakd` (`cmd/cakd/`): Main CLI tool for initializing, validating, creating, and diagnosing platforms.
-  - `cakd-agent` (`cmd/cakd-agent/`): Background agent listening for Alertmanager webhooks to forward diagnostics.
-- **Pipeline Pattern**: Coordinates the bootstrap flow in sequential steps (`internal/pipeline/`).
-- **Scaffold**: Renders template engines (`internal/scaffold/`) and applies language frameworks (e.g. Spring Boot under `internal/provider/app/`).
-- **IaC Engine**: `internal/iac/` and `internal/iac/terraform/` (Terraform Bridge) managing infrastructure provision.
-- **Providers (`internal/provider/`)**:
-  - CD (`provider/cd/argocd/`)
-  - Version Control (`provider/version_control/github/`)
-  - Notify (`provider/notify/discord/`)
-  - LLM (`provider/llm/gemini/`)
-  - Monitoring (`provider/monitoring/prometheus/`)
-  - Logging (`provider/logging/loki/`)
-- **Cluster Bootstrap**: Initializing kubernetes environments and installing agent workloads (`internal/cluster/`).
-- **Agent Server**: Handles alert webhooks, queries loki/prometheus, and diagnoses failures using LLMs (`internal/agent/`).
+---
 
-## 3. Tech Stack
-- Go 1.24.0 (strictly locked to ensure compatibility with CI)
-- Cobra (CLI)
-- Terraform (IaC)
-- Helm & ArgoCD (GitOps & manifest deployments)
-- Spring Boot (target application frameworks)
-- Astro Starlight & TS (Documentation hub)
+## 1. Read by Task (Rules & Skills in `.claude/`)
 
-## 4. Coding & Documentation Conventions
-- **Formatting**: Standard Go formatting (`gofmt`, `goimports` via `task fmt`).
-- **Standardized Comments**: Follow Go Doc / CNCF commenting guidelines:
-  - Comments on exported types, functions, and variables must start with their name (e.g. `// Engine defines...`).
-  - Do not use `@author` tags.
-  - Remove all scattered inline comments inside function bodies to keep code clean.
-- **Error Handling**: Wrap errors with context (`fmt.Errorf("context: %w", err)`).
-- **Linters**: Run `task lint` which executes `golangci-lint` (using configuration in `.golangci.yml`).
-- **Commits**: Strictly follow Conventional Commits format (e.g., `feat: ...`, `fix: ...`, `docs: ...`).
+Always read the relevant rules and skills in [`.claude/`](./.claude/) before modifying code:
 
-## 5. Automation & Tooling
-- **Taskfile (`Taskfile.yml`)**:
-  - `task build` - Compiles the CLI binary into `bin/cakd`.
-  - `task test` - Runs Go unit tests with race detection and generates coverage reports.
-  - `task fmt` - Formats all Go files and orders imports.
-  - `task vet` - Checks Go source code for structural errors.
-  - `task lint` - Runs local `golangci-lint`.
-  - `task ci` - Sequentially runs format, vet, lint, test, and build.
-  - `task docs:generate` - Updates the Astro Starlight documentation workspace using `docs/scripts/auto-doc-agent.ts`.
-- **Semantic Release**: Handles automated versioning, CHANGELOG generation, and GitHub Releases.
-- **Trivy & Gitleaks**: Scanners for dependencies, secrets, and IaC vulnerability detection.
+| Task involves | Applicable Rule (`.claude/rules/`) | Practical Skill (`.claude/skills/`) |
+| :--- | :--- | :--- |
+| Architecture, package imports, layer boundaries, I/O | [01-hexagonal-boundaries.md](.claude/rules/01-hexagonal-boundaries.md) | [verify-platform](.claude/skills/verify-platform/SKILL.md) |
+| `platform.yaml` schema, defaults, legacy migration, Terraform state | [02-schema-and-state.md](.claude/rules/02-schema-and-state.md) | [verify-platform](.claude/skills/verify-platform/SKILL.md) |
+| Adding a new provider plugin (Cloud, VCS, CD, App, DB, LLM, Telemetry, Notify) | [01-hexagonal-boundaries.md](.claude/rules/01-hexagonal-boundaries.md), [03-go127-and-coding.md](.claude/rules/03-go127-and-coding.md) | [add-provider-plugin](.claude/skills/add-provider-plugin/SKILL.md) |
+| Adding/modifying a Use Case across CLI (`--json`), TUI, and MCP Server | [01-hexagonal-boundaries.md](.claude/rules/01-hexagonal-boundaries.md) | [add-surface-capability](.claude/skills/add-surface-capability/SKILL.md) |
+| Go 1.27 style, CNCF comments, error codes, secret redaction, commits | [03-go127-and-coding.md](.claude/rules/03-go127-and-coding.md) | [verify-platform](.claude/skills/verify-platform/SKILL.md) |
 
+---
+
+## 2. Hexagonal Architecture & Repository Map
+
+Dependency direction is strictly inward:
+
+```text
+domain  <--  usecase (and usecase/ports)  <--  adapter (Driving) / infrastructure (Driven)  <--  composition  <--  cmd/*
+```
+
+- **`cmd/cakd/`**: Developer entrypoint (CLI with `--json`, interactive TUI wizard via `cakd ui`, and stdio MCP via `cakd mcp`).
+- **`cmd/cakd-agent/`**: In-cluster daemon listening for Alertmanager webhooks, querying Prometheus/Loki, running Gemini RCA, and dispatching Discord alerts.
+- **`cmd/cakd-mcp/`**: Standalone MCP Server supporting both Stdio and Streamable HTTP (`POST /mcp` with Bearer token auth).
+- **`cmd/cakd-tools/`**: Internal maintainer utilities (`registry-fetch`, `schema-gen`).
+- **`internal/domain/`**: Pure Go entities (`project`, `catalog`, `diagnostic`, `errcode`). Zero external dependencies.
+- **`internal/platform/`**: Technical primitives (`buildinfo`, `progress`, `logging`, `redact`) and AST architecture guard (`architecture_test.go`).
+- **`internal/usecase/` & `internal/usecase/ports/`**: Application workflows (`validate`, `initcluster`, `createproject`, `observe`, `alertdispatch`, `auth`, `agenttools`, `schema`) and Outbound Port interfaces.
+- **`internal/adapter/`**: Driving adapters (`cli`, `tui`, `mcpserver`, `webhook`).
+- **`internal/infrastructure/`**: Driven adapters (`configfile`, `credstore`, `statestore`, `terraform`, `k8s`, `scaffold`, `providers/*`).
+- **`internal/composition/`**: Shared Dependency Injection container and provider registry wiring.
+
+---
+
+## 3. Core Commands & Verification
+
+- `GOTOOLCHAIN=auto go test ./... -race` — Run unit tests and AST architecture guard (`TestArchitecture`).
+- `task build` — Compile binaries into `bin/`.
+- `task lint` — Run `golangci-lint`.
+- `task fmt` / `task vet` — Format and vet Go source code.

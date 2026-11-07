@@ -10,9 +10,11 @@ tasks:
       - task --list
 
   build:
-    desc: Build CLI binary
+    desc: Build all platform binaries (cakd, cakd-agent, cakd-mcp)
     cmds:
-      - go build -ldflags "-s -w -X main.version={{.VERSION}}" -o {{.OUT_DIR}}/{{.BINARY}} {{.CMD_PATH}}
+      - go build -ldflags "-s -w -X github.com/nguyentin05/cakd-platform/internal/platform/buildinfo.Version={{.VERSION}}" -o {{.OUT_DIR}}/cakd ./cmd/cakd
+      - go build -ldflags "-s -w -X github.com/nguyentin05/cakd-platform/internal/platform/buildinfo.Version={{.VERSION}}" -o {{.OUT_DIR}}/cakd-agent ./cmd/cakd-agent
+      - go build -ldflags "-s -w -X github.com/nguyentin05/cakd-platform/internal/platform/buildinfo.Version={{.VERSION}}" -o {{.OUT_DIR}}/cakd-mcp ./cmd/cakd-mcp
     vars:
       VERSION:
         sh: git describe --tags --always --dirty 2>/dev/null || echo "dev"
@@ -21,7 +23,9 @@ tasks:
       - go.mod
       - go.sum
     generates:
-      - "{{.OUT_DIR}}/{{.BINARY}}"
+      - "{{.OUT_DIR}}/cakd"
+      - "{{.OUT_DIR}}/cakd-agent"
+      - "{{.OUT_DIR}}/cakd-mcp"
 
   lint:
     desc: Run golangci-lint
@@ -49,6 +53,21 @@ tasks:
     desc: Run go vet
     cmds:
       - go vet ./...
+
+  schema:gen:
+    desc: Generate platform.yaml JSON Schema
+    cmds:
+      - go run ./cmd/cakd-tools/schema-gen -o schemas/platform.schema.json
+
+  docs:build:
+    desc: Build MkDocs documentation strictly
+    cmds:
+      - mkdocs build --strict
+
+  docs:serve:
+    desc: Serve MkDocs documentation locally
+    cmds:
+      - mkdocs serve
 
   trivy:fs:
     desc: Scan filesystem for vulnerabilities
@@ -86,7 +105,7 @@ tasks:
   clean:
     desc: Remove build artifacts
     cmds:
-      - rm -rf bin/ out/ dist/ coverage.out
+      - rm -rf bin/ out/ dist/ site/ coverage.out
 
   ci:
     desc: Run all CI checks locally
@@ -107,13 +126,3 @@ tasks:
     desc: Run code generation (bootstrap) with sample config
     cmds:
       - go run {{.CMD_PATH}} create -f platform.yaml
-
-  docs:generate:
-    desc: Generate all docs from source code (incremental)
-    cmds:
-      - cd docs && npm run docs:autogen
-
-  docs:generate:force:
-    desc: Force regenerate ALL docs from scratch
-    cmds:
-      - cd docs && npm run docs:autogen:force

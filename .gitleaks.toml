@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ignore unit test fixtures"
+paths = [
+  '''_test\.go$''',
+]

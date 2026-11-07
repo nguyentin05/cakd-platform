@@ -1,0 +1,82 @@
+site_name: CAKD Platform
+site_description: Cloud Application Kubernetes Deployment Platform — CLI, Interactive TUI & MCP Server
+site_url: https://nguyentin05.github.io/cakd-platform/
+repo_url: https://github.com/nguyentin05/cakd-platform
+repo_name: nguyentin05/cakd-platform
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Tutorials:
+      - Overview: tutorials/index.md
+      - Quickstart: tutorials/quickstart.md
+  - How-to Guides:
+      - Overview: how-to-guides/index.md
+      - AWS EC2 K3s Cluster: how-to-guides/aws-ec2-cluster.md
+      - Setup Discord Alerts: how-to-guides/setup-discord-alerts.md
+      - MCP Agent Integration: how-to-guides/mcp-integration.md
+  - Explanation:
+      - Overview: explanation/index.md
+      - Hexagonal Architecture: explanation/architecture.md
+  - Reference:
+      - Overview: reference/index.md
+      - platform.yaml Schema: reference/platform-yaml.md
+      - CLI Overview: reference/cli.md
+      - cakd validate: reference/cli-validate.md
+      - cakd init: reference/cli-init.md
+      - cakd create: reference/cli-create.md
+      - cakd observe: reference/cli-observe.md
+      - cakd-agent Daemon: reference/cli-agent.md
+      - MCP Tools & Resources: reference/mcp-tools.md
+  - ADRs:
+      - Overview: adrs/index.md
+      - 001. Hexagonal Architecture: adrs/001-hexagonal-architecture.md
+      - 002. Unified Spec Schema: adrs/002-unified-spec-schema.md
+      - 003. Multi-Surface CLI, TUI & MCP: adrs/003-multi-surface-cli-tui-mcp.md
+      - Dependency Decisions: adrs/dependency-decisions.md
+      - ADR Template: adrs/template.md

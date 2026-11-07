@@ -24,4 +24,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Build
-        run: go build -o bin/cakd ./cmd/cakd
+        run: |
+          go build -o bin/cakd ./cmd/cakd
+          go build -o bin/cakd-agent ./cmd/cakd-agent
+          go build -o bin/cakd-mcp ./cmd/cakd-mcp
