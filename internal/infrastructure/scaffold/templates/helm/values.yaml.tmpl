@@ -1,0 +1,24 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/[[ .Config.Metadata.Owner ]]/[[ .Service.Name ]]
+  pullPolicy: Always
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  requests:
+    cpu: [[ .Service.Resources.CPU ]]
+    memory: [[ .Service.Resources.Memory ]]
+  limits:
+    cpu: [[ .Service.Resources.CPU ]]
+    memory: [[ .Service.Resources.Memory ]]
+
+ingress:
+  enabled: true
+  domain: "[[ .Domain ]]"
+
+# Database connection details will be provided via ConfigMap/Secret from IaC
