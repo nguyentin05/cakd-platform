@@ -2,6 +2,7 @@
 package catalog
 
 var ValidJavaVersions = []string{
+	"27",
 	"26",
 	"25",
 	"21",
@@ -9,8 +10,14 @@ var ValidJavaVersions = []string{
 }
 
 var ValidSpringBootVersions = []string{
+	"4.2.0.BUILD-SNAPSHOT",
+	"4.2.0.RC1",
+	"4.1.3.BUILD-SNAPSHOT",
+	"4.1.2.RELEASE",
 	"4.1.1.BUILD-SNAPSHOT",
 	"4.1.0.RELEASE",
+	"4.0.10.BUILD-SNAPSHOT",
+	"4.0.9.RELEASE",
 	"4.0.8.BUILD-SNAPSHOT",
 	"4.0.7.RELEASE",
 	"3.5.15.RELEASE",

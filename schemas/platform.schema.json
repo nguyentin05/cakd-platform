@@ -1,0 +1,549 @@
+{
+  "$id": "https://cakd.io/schemas/platform.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Declarative schema for CAKD Platform (cakd.io/v1alpha1)",
+  "properties": {
+    "apiVersion": {
+      "default": "cakd.io/v1alpha1",
+      "enum": [
+        "cakd.io/v1alpha1",
+        "platform.dev/v1alpha1"
+      ],
+      "type": "string"
+    },
+    "kind": {
+      "default": "Project",
+      "enum": [
+        "Project"
+      ],
+      "type": "string"
+    },
+    "metadata": {
+      "additionalProperties": false,
+      "properties": {
+        "environment": {
+          "default": "production",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "owner": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "owner"
+      ],
+      "type": "object"
+    },
+    "spec": {
+      "additionalProperties": false,
+      "properties": {
+        "backing": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "storage": {
+                "default": "5Gi",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "postgresql"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "type"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "cluster": {
+          "additionalProperties": false,
+          "properties": {
+            "addons": {
+              "additionalProperties": false,
+              "properties": {
+                "agent": {
+                  "type": "boolean"
+                },
+                "argocd": {
+                  "type": "boolean"
+                },
+                "logging": {
+                  "type": "boolean"
+                },
+                "monitoring": {
+                  "type": "boolean"
+                }
+              },
+              "type": "object"
+            },
+            "diskSize": {
+              "default": 30,
+              "type": "integer"
+            },
+            "domain": {
+              "type": "string"
+            },
+            "host": {
+              "type": "string"
+            },
+            "instanceType": {
+              "default": "t3.medium",
+              "enum": [
+                "t3.micro",
+                "t3.small",
+                "t3.medium",
+                "t3.large"
+              ],
+              "type": "string"
+            },
+            "provider": {
+              "default": "local",
+              "enum": [
+                "local",
+                "aws-ec2"
+              ],
+              "type": "string"
+            },
+            "region": {
+              "default": "ap-southeast-1",
+              "type": "string"
+            },
+            "sshKeyPath": {
+              "type": "string"
+            },
+            "sshUser": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "observability": {
+          "additionalProperties": false,
+          "properties": {
+            "ai": {
+              "additionalProperties": false,
+              "properties": {
+                "model": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "model"
+              ],
+              "type": "object"
+            },
+            "alerting": {
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        },
+        "providers": {
+          "additionalProperties": false,
+          "properties": {
+            "cd": {
+              "default": "argocd",
+              "enum": [
+                "argocd"
+              ],
+              "type": "string"
+            },
+            "ci": {
+              "default": "github-actions",
+              "enum": [
+                "github-actions"
+              ],
+              "type": "string"
+            },
+            "llm": {
+              "enum": [
+                "gemini"
+              ],
+              "type": "string"
+            },
+            "logging": {
+              "enum": [
+                "loki"
+              ],
+              "type": "string"
+            },
+            "monitoring": {
+              "enum": [
+                "prometheus"
+              ],
+              "type": "string"
+            },
+            "notification": {
+              "enum": [
+                "discord"
+              ],
+              "type": "string"
+            },
+            "versionControl": {
+              "default": "github",
+              "enum": [
+                "github"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "services": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "artifactId": {
+                "type": "string"
+              },
+              "configuration": {
+                "enum": [
+                  "yaml",
+                  "properties"
+                ],
+                "type": "string"
+              },
+              "dependencies": {
+                "items": {
+                  "enum": [
+                    "native",
+                    "dgs-codegen",
+                    "devtools",
+                    "lombok",
+                    "configuration-processor",
+                    "docker-compose",
+                    "modulith",
+                    "web",
+                    "webflux",
+                    "spring-restclient",
+                    "spring-webclient",
+                    "graphql",
+                    "data-rest",
+                    "session-data-mongodb",
+                    "session-data-redis",
+                    "session-hazelcast",
+                    "session-jdbc",
+                    "data-rest-explorer",
+                    "hateoas",
+                    "web-services",
+                    "jersey",
+                    "vaadin",
+                    "netflix-dgs",
+                    "htmx",
+                    "springdoc-openapi",
+                    "thymeleaf",
+                    "freemarker",
+                    "mustache",
+                    "groovy-templates",
+                    "jte",
+                    "security",
+                    "oauth2-client",
+                    "oauth2-authorization-server",
+                    "oauth2-resource-server",
+                    "security-saml2",
+                    "spring-security-webauthn",
+                    "ldap",
+                    "data-ldap",
+                    "okta",
+                    "jdbc",
+                    "r2dbc",
+                    "data-jpa",
+                    "data-jdbc",
+                    "data-r2dbc",
+                    "mybatis",
+                    "liquibase",
+                    "flyway",
+                    "jooq",
+                    "db2",
+                    "derby",
+                    "h2",
+                    "hsql",
+                    "mariadb",
+                    "sqlserver",
+                    "mysql",
+                    "oracle",
+                    "postgresql",
+                    "sqlite",
+                    "data-redis",
+                    "data-redis-reactive",
+                    "mongodb",
+                    "data-mongodb",
+                    "data-mongodb-reactive",
+                    "elasticsearch",
+                    "data-elasticsearch",
+                    "cassandra",
+                    "data-cassandra",
+                    "data-cassandra-reactive",
+                    "couchbase",
+                    "data-couchbase",
+                    "data-couchbase-reactive",
+                    "neo4j",
+                    "data-neo4j",
+                    "integration",
+                    "amqp",
+                    "amqp-streams",
+                    "kafka",
+                    "kafka-streams",
+                    "activemq",
+                    "artemis",
+                    "pulsar",
+                    "pulsar-reactive",
+                    "websocket",
+                    "rsocket",
+                    "camel",
+                    "solace",
+                    "batch",
+                    "batch-jdbc",
+                    "hazelcast",
+                    "validation",
+                    "mail",
+                    "quartz",
+                    "cache",
+                    "spring-shell",
+                    "spring-grpc-server",
+                    "spring-grpc-client",
+                    "actuator",
+                    "sbom-cyclone-dx",
+                    "codecentric-spring-boot-admin-client",
+                    "codecentric-spring-boot-admin-server",
+                    "sentry",
+                    "cloudfoundry",
+                    "datadog",
+                    "dynatrace",
+                    "influx",
+                    "graphite",
+                    "new-relic",
+                    "otlp-metrics",
+                    "prometheus",
+                    "datasource-micrometer",
+                    "distributed-tracing",
+                    "opentelemetry",
+                    "wavefront",
+                    "zipkin",
+                    "restdocs",
+                    "testcontainers",
+                    "cloud-contract-verifier",
+                    "cloud-contract-stub-runner",
+                    "unboundid-ldap",
+                    "cloud-starter",
+                    "cloud-function",
+                    "cloud-task",
+                    "cloud-config-client",
+                    "cloud-config-server",
+                    "cloud-starter-vault-config",
+                    "cloud-starter-zookeeper-config",
+                    "cloud-starter-consul-config",
+                    "cloud-eureka",
+                    "cloud-eureka-server",
+                    "cloud-starter-zookeeper-discovery",
+                    "cloud-starter-consul-discovery",
+                    "cloud-gateway",
+                    "cloud-gateway-reactive",
+                    "cloud-feign",
+                    "cloud-loadbalancer",
+                    "cloud-resilience4j",
+                    "cloud-bus",
+                    "cloud-stream",
+                    "scs-config-client",
+                    "scs-service-registry",
+                    "tanzu-governance-starter",
+                    "tanzu-scg-access-control",
+                    "tanzu-scg-custom",
+                    "tanzu-scg-graphql",
+                    "tanzu-scg-sso",
+                    "tanzu-scg-traffic-control",
+                    "tanzu-scg-transformation",
+                    "tanzu-spring-sdk",
+                    "azure-support",
+                    "azure-active-directory",
+                    "azure-cosmos-db",
+                    "azure-keyvault",
+                    "azure-storage",
+                    "cloud-gcp",
+                    "cloud-gcp-pubsub",
+                    "cloud-gcp-storage",
+                    "spring-ai-anthropic",
+                    "spring-ai-azure-openai",
+                    "spring-ai-vectordb-azure",
+                    "spring-ai-bedrock",
+                    "spring-ai-bedrock-converse",
+                    "spring-ai-vectordb-bedrock-knowledgebase",
+                    "spring-ai-deepseek",
+                    "spring-ai-elevenlabs",
+                    "spring-ai-google-genai",
+                    "spring-ai-google-genai-embedding",
+                    "spring-ai-huggingface",
+                    "spring-ai-minimax",
+                    "spring-ai-oci-genai",
+                    "spring-ai-zhipuai",
+                    "spring-ai-vectordb-cassandra",
+                    "spring-ai-vectordb-chroma",
+                    "spring-ai-vectordb-couchbase",
+                    "spring-ai-vectordb-elasticsearch",
+                    "spring-ai-vectordb-gemfire",
+                    "spring-ai-mcp-server",
+                    "spring-ai-mcp-client",
+                    "mcp-security",
+                    "spring-ai-vectordb-milvus",
+                    "spring-ai-mistral",
+                    "spring-ai-vectordb-mongodb-atlas",
+                    "spring-ai-vectordb-neo4j",
+                    "spring-ai-vectordb-opensearch",
+                    "spring-ai-vectordb-aws-opensearch",
+                    "spring-ai-ollama",
+                    "spring-ai-openai",
+                    "spring-ai-openai-sdk",
+                    "spring-ai-chat-memory-repository-in-memory",
+                    "spring-ai-chat-memory-repository-jdbc",
+                    "spring-ai-chat-memory-repository-cassandra",
+                    "spring-ai-chat-memory-repository-mongodb",
+                    "spring-ai-chat-memory-repository-neo4j",
+                    "spring-ai-chat-memory-repository-cosmos-db",
+                    "spring-ai-chat-memory-repository-redis",
+                    "spring-ai-vectordb-oracle",
+                    "spring-ai-vectordb-pgvector",
+                    "spring-ai-vectordb-pinecone",
+                    "spring-ai-postgresml",
+                    "spring-ai-vectordb-redis",
+                    "spring-ai-vectordb-s3",
+                    "spring-ai-vectordb-mariadb",
+                    "spring-ai-vectordb-azurecosmosdb",
+                    "spring-ai-stabilityai",
+                    "spring-ai-transformers",
+                    "spring-ai-vertexai-gemini",
+                    "spring-ai-vertexai-embeddings",
+                    "spring-ai-vectordb-qdrant",
+                    "spring-ai-vectordb-typesense",
+                    "spring-ai-vectordb-weaviate",
+                    "spring-ai-markdown-document-reader",
+                    "spring-ai-tika-document-reader",
+                    "spring-ai-pdf-document-reader",
+                    "spring-ai-jsoup-document-reader",
+                    "timefold-solver"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "description": {
+                "type": "string"
+              },
+              "groupId": {
+                "type": "string"
+              },
+              "language": {
+                "enum": [
+                  "java-spring-boot"
+                ],
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "packageName": {
+                "type": "string"
+              },
+              "packaging": {
+                "enum": [
+                  "jar",
+                  "war"
+                ],
+                "type": "string"
+              },
+              "projectBuild": {
+                "enum": [
+                  "gradle-project",
+                  "gradle-project-kotlin",
+                  "gradle-build",
+                  "maven-project",
+                  "maven-build"
+                ],
+                "type": "string"
+              },
+              "replicas": {
+                "default": 1,
+                "type": "integer"
+              },
+              "resources": {
+                "additionalProperties": false,
+                "properties": {
+                  "cpu": {
+                    "default": "500m",
+                    "type": "string"
+                  },
+                  "memory": {
+                    "default": "512Mi",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "springBootVersion": {
+                "enum": [
+                  "4.1.1.BUILD-SNAPSHOT",
+                  "4.1.0.RELEASE",
+                  "4.0.8.BUILD-SNAPSHOT",
+                  "4.0.7.RELEASE",
+                  "3.5.15.RELEASE"
+                ],
+                "type": "string"
+              },
+              "uses": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "version": {
+                "enum": [
+                  "26",
+                  "25",
+                  "21",
+                  "17"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "language"
+            ],
+            "type": "object"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "services"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "apiVersion",
+    "kind",
+    "metadata",
+    "spec"
+  ],
+  "title": "CAKD Platform Project Specification",
+  "type": "object"
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.nguyentin05/cakd-platform",
+  "description": "CAKD Platform MCP Server for declarative Kubernetes & Spring Boot microservice scaffolding, provisioning, and AI diagnostics.",
+  "repository": {
+    "url": "https://github.com/nguyentin05/cakd-platform",
+    "source": "github"
+  },
+  "version_detail": {
+    "version": "1.0.0"
+  },
+  "remotes": [],
+  "packages": [
+    {
+      "registry_name": "github-releases",
+      "name": "cakd-mcp",
+      "version": "1.0.0",
+      "runtime_hint": "binary",
+      "runtime_arguments": [
+        {
+          "description": "Start MCP server over stdio",
+          "is_required": false,
+          "format": "string",
+          "value": "--transport=stdio",
+          "default": "--transport=stdio",
+          "type": "named",
+          "name": "--transport"
+        }
+      ],
+      "environment_variables": [
+        {
+          "name": "GITHUB_TOKEN",
+          "description": "GitHub Personal Access Token for repository provisioning",
+          "is_required": false
+        },
+        {
+          "name": "GEMINI_API_KEY",
+          "description": "Google Gemini API key for AI workload diagnostics",
+          "is_required": false
+        }
+      ]
+    }
+  ]
+}
