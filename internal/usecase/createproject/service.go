@@ -121,9 +121,11 @@ func (s *Service) Execute(ctx context.Context, req Request) (Result, error) {
 			if err := os.MkdirAll(svcDir, 0o750); err != nil {
 				return Result{}, errcode.Wrap(errcode.CodeProvision, "create service directory "+svc.Name, err)
 			}
-			if svc.GroupID == "" {
-				svc.GroupID = "com." + sanitizeGroupOwner(proj.Metadata.Owner)
+			groupID := svc.GetFrameworkOption("groupId", svc.GroupID)
+			if groupID == "" {
+				groupID = "com." + sanitizeGroupOwner(proj.Metadata.Owner)
 			}
+			svc.GroupID = groupID
 			if err := s.frameworkGen.GenerateService(ctx, svc, svcDir); err != nil {
 				return Result{}, err
 			}

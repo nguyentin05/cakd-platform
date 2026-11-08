@@ -15,6 +15,7 @@ const (
 	keyDefault              = "default"
 	keyItems                = "items"
 	keyName                 = "name"
+	keyDescription         = "description"
 	typeObject              = "object"
 	typeString              = "string"
 	typeBoolean             = "boolean"
@@ -145,6 +146,11 @@ func GenerateJSONSchema() ([]byte, error) {
 								"packageName":       map[string]any{keyType: typeString},
 								"packaging":         map[string]any{keyType: typeString, keyEnum: catalog.ValidPackaging},
 								"configuration":     map[string]any{keyType: typeString, keyEnum: catalog.SpringConfigFormats},
+								"frameworkOptions": map[string]any{
+									keyType:                 typeObject,
+									keyAdditionalProperties: map[string]any{keyType: typeString},
+									keyDescription:          "Key-value options specific to the service framework or runtime",
+								},
 								"dependencies": map[string]any{
 									keyType:  typeArray,
 									keyItems: map[string]any{keyType: typeString, keyEnum: catalog.ValidSpringDependencies},

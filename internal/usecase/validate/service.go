@@ -241,21 +241,27 @@ func validateAndDefaultServices(proj *project.Project) error {
 			svc.Resources.Memory = catalog.Defaults.Memory
 		}
 
+		normalizeFrameworkOptions(svc)
+
 		if svc.Language == catalog.LangJavaSpringBoot {
 			if !catalog.IsAllowed(svc.Version, catalog.ValidJavaVersions) {
 				return errcode.New(errcode.CodeValidation, fmt.Sprintf("unsupported java-version %q on service %q; allowed: %v", svc.Version, svc.Name, catalog.ValidJavaVersions))
 			}
-			if svc.SpringBootVersion != "" && !catalog.IsAllowed(svc.SpringBootVersion, catalog.ValidSpringBootVersions) {
-				return errcode.New(errcode.CodeValidation, fmt.Sprintf("unsupported spring-boot-version %q on service %q", svc.SpringBootVersion, svc.Name))
+			bootVer := svc.GetFrameworkOption("springBootVersion", svc.SpringBootVersion)
+			if bootVer != "" && !catalog.IsAllowed(bootVer, catalog.ValidSpringBootVersions) {
+				return errcode.New(errcode.CodeValidation, fmt.Sprintf("unsupported spring-boot-version %q on service %q", bootVer, svc.Name))
 			}
-			if svc.ProjectBuild != "" && !catalog.IsAllowed(svc.ProjectBuild, catalog.ValidProjectBuilds) {
-				return errcode.New(errcode.CodeValidation, fmt.Sprintf("unsupported project-build %q on service %q", svc.ProjectBuild, svc.Name))
+			buildTool := svc.GetFrameworkOption("projectBuild", svc.ProjectBuild)
+			if buildTool != "" && !catalog.IsAllowed(buildTool, catalog.ValidProjectBuilds) {
+				return errcode.New(errcode.CodeValidation, fmt.Sprintf("unsupported project-build %q on service %q", buildTool, svc.Name))
 			}
-			if svc.Packaging != "" && !catalog.IsAllowed(svc.Packaging, catalog.ValidPackaging) {
-				return errcode.New(errcode.CodeValidation, fmt.Sprintf("unsupported packaging %q on service %q", svc.Packaging, svc.Name))
+			pkg := svc.GetFrameworkOption("packaging", svc.Packaging)
+			if pkg != "" && !catalog.IsAllowed(pkg, catalog.ValidPackaging) {
+				return errcode.New(errcode.CodeValidation, fmt.Sprintf("unsupported packaging %q on service %q", pkg, svc.Name))
 			}
-			if svc.Configuration != "" && !catalog.IsAllowed(svc.Configuration, catalog.SpringConfigFormats) {
-				return errcode.New(errcode.CodeValidation, fmt.Sprintf("unsupported spring-config-format %q on service %q", svc.Configuration, svc.Name))
+			cfg := svc.GetFrameworkOption("configuration", svc.Configuration)
+			if cfg != "" && !catalog.IsAllowed(cfg, catalog.SpringConfigFormats) {
+				return errcode.New(errcode.CodeValidation, fmt.Sprintf("unsupported spring-config-format %q on service %q", cfg, svc.Name))
 			}
 			for _, dep := range svc.Dependencies {
 				if !catalog.IsAllowed(dep, catalog.ValidSpringDependencies) {
@@ -330,4 +336,35 @@ func validateDependencyDAG(proj *project.Project) error {
 		}
 	}
 	return nil
+}
+
+func normalizeFrameworkOptions(svc *project.ServiceSpec) {
+	if svc.FrameworkOptions == nil {
+		svc.FrameworkOptions = make(map[string]string)
+	}
+
+	syncPair := func(legacyVal *string, keys ...string) {
+		if *legacyVal == "" {
+			for _, k := range keys {
+				if v, ok := svc.FrameworkOptions[k]; ok && v != "" {
+					*legacyVal = v
+					break
+				}
+			}
+		}
+		if *legacyVal != "" {
+			primaryKey := keys[0]
+			if _, ok := svc.FrameworkOptions[primaryKey]; !ok || svc.FrameworkOptions[primaryKey] == "" {
+				svc.FrameworkOptions[primaryKey] = *legacyVal
+			}
+		}
+	}
+
+	syncPair(&svc.SpringBootVersion, "springBootVersion", "spring_boot_version")
+	syncPair(&svc.GroupID, "groupId", "group_id")
+	syncPair(&svc.ArtifactID, "artifactId", "artifact_id")
+	syncPair(&svc.ProjectBuild, "projectBuild", "project_build")
+	syncPair(&svc.Packaging, "packaging")
+	syncPair(&svc.Configuration, "configuration")
+	syncPair(&svc.PackageName, "packageName", "package_name")
 }
