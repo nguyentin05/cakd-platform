@@ -1,6 +1,7 @@
 package composition
 
 import (
+	"github.com/nguyentin05/cakd-platform/internal/adapter/cli/cmdutil"
 	"github.com/nguyentin05/cakd-platform/internal/infrastructure/configfile"
 	"github.com/nguyentin05/cakd-platform/internal/infrastructure/credstore"
 	"github.com/nguyentin05/cakd-platform/internal/infrastructure/k8s"
@@ -52,8 +53,7 @@ func NewContainer() *Container {
 	promClient := prometheus.NewClient()
 	lokiClient := loki.NewClient()
 
-	creds, _ := credStore.Get()
-	discClient := discord.NewClient(creds.DiscordBotToken, creds.DiscordGuildID)
+	discClient := discord.NewClientWithStore(credStore)
 
 	valUC := validate.NewService()
 	initUC := initcluster.NewService(specRepo, valUC, tfProv, k8sBootstrap, stateStore)
@@ -82,6 +82,21 @@ func NewContainer() *Container {
 		ObserveUC:  obsUC,
 		AuthUC:     authUC,
 		AgentTools: tools,
+	}
+}
+
+// ToServices converts the Container to the decoupled cmdutil.Services bundle.
+func (c *Container) ToServices() *cmdutil.Services {
+	return &cmdutil.Services{
+		ValidateUC: c.ValidateUC,
+		InitUC:     c.InitUC,
+		CreateUC:   c.CreateUC,
+		ObserveUC:  c.ObserveUC,
+		AuthUC:     c.AuthUC,
+		AgentTools: c.AgentTools,
+		SpecRepo:   c.SpecRepo,
+		CredStore:  c.CredStore,
+		StateStore: c.StateStore,
 	}
 }
 

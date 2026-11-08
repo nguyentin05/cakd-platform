@@ -11,6 +11,7 @@ import (
 
 	"github.com/nguyentin05/cakd-platform/internal/domain/diagnostic"
 	"github.com/nguyentin05/cakd-platform/internal/domain/errcode"
+	"github.com/nguyentin05/cakd-platform/internal/usecase/ports"
 )
 
 const discordAPIURL = "https://discord.com/api/v10"
@@ -19,11 +20,12 @@ const discordAPIURL = "https://discord.com/api/v10"
 type Client struct {
 	token      string
 	guildID    string
+	credStore  ports.CredentialStore
 	apiBaseURL string
 	httpClient *http.Client
 }
 
-// NewClient creates a Discord notification Client.
+// NewClient creates a Discord notification Client with static credentials.
 func NewClient(token, guildID string) *Client {
 	return &Client{
 		token:      token,
@@ -31,6 +33,41 @@ func NewClient(token, guildID string) *Client {
 		apiBaseURL: discordAPIURL,
 		httpClient: &http.Client{Timeout: 10 * time.Second},
 	}
+}
+
+// NewClientWithStore creates a Discord notification Client that dynamically resolves credentials.
+func NewClientWithStore(store ports.CredentialStore) *Client {
+	return &Client{
+		credStore:  store,
+		apiBaseURL: discordAPIURL,
+		httpClient: &http.Client{Timeout: 10 * time.Second},
+	}
+}
+
+// NewClientWithStoreAndURL creates a Discord Client with a custom base URL (useful for testing).
+func NewClientWithStoreAndURL(store ports.CredentialStore, apiBaseURL string) *Client {
+	return &Client{
+		credStore:  store,
+		apiBaseURL: apiBaseURL,
+		httpClient: &http.Client{Timeout: 10 * time.Second},
+	}
+}
+
+func (c *Client) resolveCredentials() (string, string) {
+	if c.credStore != nil {
+		if creds, err := c.credStore.Get(); err == nil {
+			token := creds.DiscordBotToken
+			guildID := creds.DiscordGuildID
+			if token == "" {
+				token = c.token
+			}
+			if guildID == "" {
+				guildID = c.guildID
+			}
+			return token, guildID
+		}
+	}
+	return c.token, c.guildID
 }
 
 type channelResponse struct {
@@ -58,13 +95,14 @@ type webhookPayload struct {
 
 // ProvisionWebhook creates a Discord channel and webhook for channelName and returns the webhook URL.
 func (c *Client) ProvisionWebhook(ctx context.Context, channelName string) (string, error) {
-	if c.token == "" || c.guildID == "" {
+	token, guildID := c.resolveCredentials()
+	if token == "" || guildID == "" {
 		return "", errcode.New(errcode.CodeAuth, "Discord bot token and guild ID are required to provision webhooks")
 	}
 
 	var chResp channelResponse
-	chURL := fmt.Sprintf("%s/guilds/%s/channels", c.apiBaseURL, c.guildID)
-	err := c.doBotRequest(ctx, http.MethodPost, chURL, map[string]any{
+	chURL := fmt.Sprintf("%s/guilds/%s/channels", c.apiBaseURL, guildID)
+	err := c.doBotRequest(ctx, http.MethodPost, chURL, token, map[string]any{
 		"name": "alerts-" + channelName,
 		"type": 0,
 	}, &chResp)
@@ -74,7 +112,7 @@ func (c *Client) ProvisionWebhook(ctx context.Context, channelName string) (stri
 
 	var whResp webhookResponse
 	whURL := fmt.Sprintf("%s/channels/%s/webhooks", c.apiBaseURL, chResp.ID)
-	err = c.doBotRequest(ctx, http.MethodPost, whURL, map[string]any{
+	err = c.doBotRequest(ctx, http.MethodPost, whURL, token, map[string]any{
 		"name": "CAKD Alerting - " + channelName,
 	}, &whResp)
 	if err != nil {
@@ -142,7 +180,7 @@ func (c *Client) postWebhook(ctx context.Context, webhookURL string, payload web
 	return nil
 }
 
-func (c *Client) doBotRequest(ctx context.Context, method, urlStr string, payload, result any) error {
+func (c *Client) doBotRequest(ctx context.Context, method, urlStr, token string, payload, result any) error {
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return err
@@ -151,7 +189,7 @@ func (c *Client) doBotRequest(ctx context.Context, method, urlStr string, payloa
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", "Bot "+c.token)
+	req.Header.Set("Authorization", "Bot "+token)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.httpClient.Do(req)

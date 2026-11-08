@@ -15,7 +15,7 @@ func TestCLIVersionSchemaAndValidateJSON(t *testing.T) {
 	c := composition.NewContainer()
 
 	var out bytes.Buffer
-	root := cli.NewCakdCmd(cmdutil.NewFactoryWith(c, strings.NewReader(""), &out, &out))
+	root := cli.NewCakdCmd(cmdutil.NewFactoryWith(c.ToServices(), strings.NewReader(""), &out, &out))
 	root.SetArgs([]string{"version", "--json"})
 	if err := root.Execute(); err != nil {
 		t.Fatalf("version --json failed: %v", err)
@@ -26,7 +26,7 @@ func TestCLIVersionSchemaAndValidateJSON(t *testing.T) {
 
 	out.Reset()
 	schemaPath := filepath.Join(t.TempDir(), "platform.schema.json")
-	root = cli.NewCakdCmd(cmdutil.NewFactoryWith(c, strings.NewReader(""), &out, &out))
+	root = cli.NewCakdCmd(cmdutil.NewFactoryWith(c.ToServices(), strings.NewReader(""), &out, &out))
 	root.SetArgs([]string{"schema", "-o", schemaPath})
 	if err := root.Execute(); err != nil {
 		t.Fatalf("schema command failed: %v", err)
@@ -44,7 +44,7 @@ func TestCLIVersionSchemaAndValidateJSON(t *testing.T) {
 	}
 
 	out.Reset()
-	root = cli.NewCakdCmd(cmdutil.NewFactoryWith(c, strings.NewReader(""), &out, &out))
+	root = cli.NewCakdCmd(cmdutil.NewFactoryWith(c.ToServices(), strings.NewReader(""), &out, &out))
 	root.SetArgs([]string{"validate", "-f", specPath, "--json"})
 	if err := root.Execute(); err != nil {
 		t.Fatalf("validate -f --json failed: %v", err)

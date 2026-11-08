@@ -43,7 +43,11 @@ func TestWizardGeneratesCanonicalSpecFile(t *testing.T) {
 	}, "\n") + "\n"
 
 	var out bytes.Buffer
-	err := tui.RunWizard(context.Background(), strings.NewReader(input), &out, c, tui.Options{
+	err := tui.RunWizard(context.Background(), strings.NewReader(input), &out, &tui.Services{
+		ValidateUC: c.ValidateUC,
+		SpecRepo:   c.SpecRepo,
+		CreateUC:   c.CreateUC,
+	}, tui.Options{
 		OutputPath: outPath,
 	})
 	if err != nil {

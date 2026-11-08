@@ -17,28 +17,33 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/usecase/validate"
 )
 
-// ToolAnnotations describes MCP safety and idempotency hints for AI agents.
-type ToolAnnotations struct {
+// ToolHints describes execution safety and idempotency hints for agent tools.
+type ToolHints struct {
 	ReadOnlyHint    bool `json:"readOnlyHint"`
 	DestructiveHint bool `json:"destructiveHint"`
 	IdempotentHint  bool `json:"idempotentHint"`
 }
 
-// ToolDefinition defines a single MCP tool exposed by CAKD Platform.
-type ToolDefinition struct {
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	InputSchema map[string]any  `json:"inputSchema"`
-	Annotations ToolAnnotations `json:"annotations"`
+// ToolDescriptor defines a single tool capability exposed to AI agents.
+type ToolDescriptor struct {
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	InputSchema map[string]any `json:"inputSchema"`
+	Annotations ToolHints      `json:"annotations"`
 }
 
-// ResourceDefinition defines a single MCP resource exposed by CAKD Platform.
-type ResourceDefinition struct {
+// ResourceDescriptor defines a resource capability exposed to AI agents.
+type ResourceDescriptor struct {
 	URI         string `json:"uri"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	MimeType    string `json:"mimeType"`
 }
+
+// Aliases for protocol compatibility.
+type ToolAnnotations = ToolHints
+type ToolDefinition = ToolDescriptor
+type ResourceDefinition = ResourceDescriptor
 
 // Catalog dispatches MCP tool and resource calls to CAKD application use cases.
 type Catalog struct {

@@ -83,21 +83,64 @@ type BackingSpec struct {
 
 // ServiceSpec declares an application microservice and its framework settings.
 type ServiceSpec struct {
-	Name              string         `yaml:"name" json:"name"`
-	Language          string         `yaml:"language" json:"language"`
-	Version           string         `yaml:"version,omitempty" json:"version,omitempty"`
-	SpringBootVersion string         `yaml:"springBootVersion,omitempty" json:"springBootVersion,omitempty"`
-	ProjectBuild      string         `yaml:"projectBuild,omitempty" json:"projectBuild,omitempty"`
-	GroupID           string         `yaml:"groupId,omitempty" json:"groupId,omitempty"`
-	ArtifactID        string         `yaml:"artifactId,omitempty" json:"artifactId,omitempty"`
-	Description       string         `yaml:"description,omitempty" json:"description,omitempty"`
-	PackageName       string         `yaml:"packageName,omitempty" json:"packageName,omitempty"`
-	Packaging         string         `yaml:"packaging,omitempty" json:"packaging,omitempty"`
-	Configuration     string         `yaml:"configuration,omitempty" json:"configuration,omitempty"`
-	Dependencies      []string       `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
-	Replicas          int            `yaml:"replicas,omitempty" json:"replicas,omitempty"`
-	Resources         *ResourcesSpec `yaml:"resources,omitempty" json:"resources,omitempty"`
-	Uses              []string       `yaml:"uses,omitempty" json:"uses,omitempty"`
+	Name              string            `yaml:"name" json:"name"`
+	Language          string            `yaml:"language" json:"language"`
+	Version           string            `yaml:"version,omitempty" json:"version,omitempty"`
+	SpringBootVersion string            `yaml:"springBootVersion,omitempty" json:"springBootVersion,omitempty"`
+	ProjectBuild      string            `yaml:"projectBuild,omitempty" json:"projectBuild,omitempty"`
+	GroupID           string            `yaml:"groupId,omitempty" json:"groupId,omitempty"`
+	ArtifactID        string            `yaml:"artifactId,omitempty" json:"artifactId,omitempty"`
+	Description       string            `yaml:"description,omitempty" json:"description,omitempty"`
+	PackageName       string            `yaml:"packageName,omitempty" json:"packageName,omitempty"`
+	Packaging         string            `yaml:"packaging,omitempty" json:"packaging,omitempty"`
+	Configuration     string            `yaml:"configuration,omitempty" json:"configuration,omitempty"`
+	Dependencies      []string          `yaml:"dependencies,omitempty" json:"dependencies,omitempty"`
+	FrameworkOptions  map[string]string `yaml:"frameworkOptions,omitempty" json:"frameworkOptions,omitempty"`
+	Replicas          int               `yaml:"replicas,omitempty" json:"replicas,omitempty"`
+	Resources         *ResourcesSpec    `yaml:"resources,omitempty" json:"resources,omitempty"`
+	Uses              []string          `yaml:"uses,omitempty" json:"uses,omitempty"`
+}
+
+// GetFrameworkOption returns the framework option value for key, checking FrameworkOptions first,
+// then mapping to legacy JVM fields (such as "springBootVersion", "groupId", "artifactId",
+// "packageName", "packaging"), or returning fallback if not found.
+func (s ServiceSpec) GetFrameworkOption(key, fallback string) string {
+	if s.FrameworkOptions != nil {
+		if val, ok := s.FrameworkOptions[key]; ok && val != "" {
+			return val
+		}
+	}
+	switch key {
+	case "springBootVersion", "spring_boot_version":
+		if s.SpringBootVersion != "" {
+			return s.SpringBootVersion
+		}
+	case "groupId", "group_id":
+		if s.GroupID != "" {
+			return s.GroupID
+		}
+	case "artifactId", "artifact_id":
+		if s.ArtifactID != "" {
+			return s.ArtifactID
+		}
+	case "packageName", "package_name":
+		if s.PackageName != "" {
+			return s.PackageName
+		}
+	case "packaging":
+		if s.Packaging != "" {
+			return s.Packaging
+		}
+	case "configuration":
+		if s.Configuration != "" {
+			return s.Configuration
+		}
+	case "projectBuild", "project_build":
+		if s.ProjectBuild != "" {
+			return s.ProjectBuild
+		}
+	}
+	return fallback
 }
 
 // ResourcesSpec defines Kubernetes CPU and memory limits for a service.
