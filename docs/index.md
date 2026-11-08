@@ -8,9 +8,9 @@
 
 | Surface | Entrypoint | Target Persona |
 | :--- | :--- | :--- |
-| **CLI** | `cakd validate \| init \| create \| observe \| auth \| schema` | Developers, DevOps engineers, CI/CD pipelines (`--json`) |
-| **Interactive TUI Wizard** | `cakd ui` or `cakd create -i` | Developers who want guided step-by-step project creation without writing YAML |
-| **MCP Server** | `cakd mcp` or `cakd-mcp` (Stdio & Streamable HTTP) | AI Coding Assistants (Claude Desktop, Cursor, Antigravity) |
+| **CLI** | `cakd-cli validate \| init \| create \| observe \| auth \| schema` | Developers, DevOps engineers, CI/CD pipelines (`--json`) |
+| **Interactive TUI Wizard** | `cakd-cli ui` or `cakd-cli create -i` | Developers who want guided step-by-step project creation without writing YAML |
+| **MCP Server** | `cakd-cli mcp` or `cakd-mcp` (Stdio & Streamable HTTP) | AI Coding Assistants (Claude Desktop, Cursor, Antigravity) |
 
 ## Quick Navigation
 

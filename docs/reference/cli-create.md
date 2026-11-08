@@ -1,4 +1,4 @@
-# `cakd create`
+# `cakd-cli create`
 
 Scaffolds microservices, renders Dockerfiles, CI workflows, and Helm charts, provisions a GitHub repository via Terraform, pushes initial code, and registers the ArgoCD application.
 
@@ -6,11 +6,11 @@ Scaffolds microservices, renders Dockerfiles, CI workflows, and Helm charts, pro
 
 ```bash
 # Full pipeline
-cakd create -f platform.yaml [--force] [--json]
+cakd-cli create -f platform.yaml [--force] [--json]
 
 # Scaffold locally only (no cloud/GitHub calls)
-cakd create -f platform.yaml --scaffold-only [--force]
+cakd-cli create -f platform.yaml --scaffold-only [--force]
 
 # Interactive TUI wizard
-cakd create -i
+cakd-cli create -i
 ```

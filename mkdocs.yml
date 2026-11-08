@@ -67,10 +67,10 @@ nav:
       - Overview: reference/index.md
       - platform.yaml Schema: reference/platform-yaml.md
       - CLI Overview: reference/cli.md
-      - cakd validate: reference/cli-validate.md
-      - cakd init: reference/cli-init.md
-      - cakd create: reference/cli-create.md
-      - cakd observe: reference/cli-observe.md
+      - cakd-cli validate: reference/cli-validate.md
+      - cakd-cli init: reference/cli-init.md
+      - cakd-cli create: reference/cli-create.md
+      - cakd-cli observe: reference/cli-observe.md
       - cakd-agent Daemon: reference/cli-agent.md
       - MCP Tools & Resources: reference/mcp-tools.md
   - ADRs:

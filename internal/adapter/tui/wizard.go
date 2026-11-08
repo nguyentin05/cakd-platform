@@ -109,7 +109,7 @@ func RunWizard(ctx context.Context, in io.Reader, out io.Writer, c *composition.
 	}
 	_, _ = fmt.Fprintf(out, "✔ Saved configuration to %s\n", outPath)
 
-	if askYesNo(scanner, out, "8. Run 'cakd create' now? [y/N]", false) {
+	if askYesNo(scanner, out, "8. Run 'cakd-cli create' now? [y/N]", false) {
 		ctxWithSink := progress.WithSink(ctx, progress.SinkFunc(func(ev progress.Event) {
 			_, _ = fmt.Fprintf(out, "  [%s] (%s) %s\n", ev.Phase, ev.Status, ev.Message)
 		}))

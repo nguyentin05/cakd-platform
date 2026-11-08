@@ -5,7 +5,7 @@
 
 ## Context
 
-Previously, `platform.yaml` placed `infra`, `providers`, `observability`, `backing`, and `services` at the root level alongside `metadata`, and shared a single `.platform/terraform/` directory between `cakd init` (AWS EC2) and `cakd create` (GitHub repository), causing Terraform state collisions.
+Previously, `platform.yaml` placed `infra`, `providers`, `observability`, `backing`, and `services` at the root level alongside `metadata`, and shared a single `.platform/terraform/` directory between `cakd-cli init` (AWS EC2) and `cakd-cli create` (GitHub repository), causing Terraform state collisions.
 
 ## Decision
 

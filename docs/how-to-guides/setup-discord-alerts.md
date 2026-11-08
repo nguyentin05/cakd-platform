@@ -8,7 +8,7 @@ CAKD Platform integrates Prometheus Alertmanager, `cakd-agent`, Google Gemini, a
 ## 1. Configure Credentials
 
 ```bash
-cakd auth set \
+cakd-cli auth set \
   --discord-token "YOUR_DISCORD_BOT_TOKEN" \
   --discord-guild "YOUR_DISCORD_GUILD_ID" \
   --gemini-key "YOUR_GEMINI_API_KEY"

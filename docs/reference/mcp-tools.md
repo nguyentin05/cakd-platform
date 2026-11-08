@@ -1,6 +1,6 @@
 # MCP Tools & Resources Reference
 
-`cakd mcp` and `cakd-mcp` expose the following Model Context Protocol (MCP) primitives:
+`cakd-cli mcp` and `cakd-mcp` expose the following Model Context Protocol (MCP) primitives:
 
 ## MCP Resources
 

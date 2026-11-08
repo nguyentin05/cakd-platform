@@ -25,13 +25,13 @@ func getBinaryPath(t *testing.T) string {
 			return
 		}
 		projectRoot := filepath.Dir(wd)
-		builtBin = filepath.Join(projectRoot, "bin", "cakd")
-		cmd := exec.Command("go", "build", "-o", builtBin, "./cmd/cakd")
+		builtBin = filepath.Join(projectRoot, "bin", "cakd-cli")
+		cmd := exec.Command("go", "build", "-o", builtBin, "./cmd/cakd-cli")
 		cmd.Dir = projectRoot
 		buildError = cmd.Run()
 	})
 	if buildError != nil {
-		t.Fatalf("failed to compile cakd binary: %v", buildError)
+		t.Fatalf("failed to compile cakd-cli binary: %v", buildError)
 	}
 	return builtBin
 }
@@ -126,7 +126,7 @@ spec:
 	if err != nil {
 		t.Fatalf("version failed: %v", err)
 	}
-	if !strings.Contains(string(verOut), "cakd version") {
+	if !strings.Contains(string(verOut), "cakd-cli version") {
 		t.Fatalf("unexpected version output: %s", string(verOut))
 	}
 }

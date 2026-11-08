@@ -14,9 +14,9 @@ A developer-centric CLI, interactive TUI wizard, Model Context Protocol (MCP) se
 
 - **Hexagonal Architecture (Ports & Adapters)** — Pure domain and application use cases decoupled from terminal I/O and infrastructure adapters, continuously verified by an automated Go AST boundary test (`internal/platform/architecture_test.go`).
 - **Three Driving Surfaces**:
-  - **CLI (`cakd`)** — Full command suite (`validate`, `init`, `create`, `observe`, `auth`, `schema`, `ui`, `mcp`, `version`) with `--json` output mode.
-  - **Interactive TUI Wizard (`cakd ui` / `cakd create -i`)** — Step-by-step guided project creation without writing YAML manually.
-  - **MCP Server (`cakd mcp` / `cakd-mcp`)** — Stdio and Streamable HTTP (`POST /mcp`) Model Context Protocol server exposing 2 MCP Resources and 7 MCP Tools for AI coding agents.
+  - **CLI (`cakd-cli`)** — Full command suite (`validate`, `init`, `create`, `observe`, `auth`, `schema`, `ui`, `mcp`, `version`) with `--json` output mode.
+  - **Interactive TUI Wizard (`cakd-cli ui` / `cakd-cli create -i`)** — Step-by-step guided project creation without writing YAML manually.
+  - **MCP Server (`cakd-cli mcp` / `cakd-mcp`)** — Stdio and Streamable HTTP (`POST /mcp`) Model Context Protocol server exposing 2 MCP Resources and 7 MCP Tools for AI coding agents.
 - **Canonical `cakd.io/v1alpha1` Schema** — Unified Kubernetes-style `spec:` block (`spec.cluster`, `spec.providers`, `spec.observability`, `spec.backing`, `spec.services`) with backward-compatible normalization for legacy `platform.dev/v1alpha1` files and Draft 2020-12 JSON Schema (`schemas/platform.schema.json`).
 - **Isolated Terraform State** — Separate state directories for cluster provisioning (`.platform/terraform/cluster/`) and VCS repository provisioning (`.platform/terraform/vcs/`).
 - **In-Cluster AI Diagnostics (`cakd-agent`)** — Receives Alertmanager webhooks, routes alerts per namespace to Discord channels, and runs Google Gemini root-cause analysis on Prometheus metrics and Loki logs.
@@ -27,7 +27,7 @@ A developer-centric CLI, interactive TUI wizard, Model Context Protocol (MCP) se
 
 | Binary | Path | Purpose |
 | :--- | :--- | :--- |
-| **`cakd`** | `./cmd/cakd` | Developer CLI, Interactive TUI Wizard (`cakd ui`), and embedded MCP Server (`cakd mcp`) |
+| **`cakd-cli`** | `./cmd/cakd-cli` | Developer CLI, Interactive TUI Wizard (`cakd-cli ui`), and embedded MCP Server (`cakd-cli mcp`) |
 | **`cakd-agent`** | `./cmd/cakd-agent` | In-cluster Alertmanager webhook receiver & AI diagnostic dispatcher |
 | **`cakd-mcp`** | `./cmd/cakd-mcp` | Standalone Model Context Protocol (MCP) server binary (Stdio & Streamable HTTP) |
 
@@ -45,12 +45,12 @@ cd cakd-platform
 task build
 ```
 
-This compiles `bin/cakd`, `bin/cakd-agent`, and `bin/cakd-mcp`.
+This compiles `bin/cakd-cli`, `bin/cakd-agent`, and `bin/cakd-mcp`.
 
 ### 2. Option A: Interactive TUI Wizard (No YAML Needed)
 
 ```bash
-./bin/cakd ui
+./bin/cakd-cli ui
 ```
 
 ### 3. Option B: Declarative `platform.yaml`
@@ -93,22 +93,22 @@ spec:
 
 ```bash
 # Validate specification & dependency DAG
-./bin/cakd validate -f platform.yaml
+./bin/cakd-cli validate -f platform.yaml
 
 # Export JSON Schema
-./bin/cakd schema -o schemas/platform.schema.json
+./bin/cakd-cli schema -o schemas/platform.schema.json
 
 # Scaffold locally only (no cloud/VCS calls)
-./bin/cakd create -f platform.yaml --scaffold-only --force
+./bin/cakd-cli create -f platform.yaml --scaffold-only --force
 
 # Initialize cluster & install add-ons
-./bin/cakd init -f platform.yaml --all
+./bin/cakd-cli init -f platform.yaml --all
 
 # Full project bootstrap (GitHub Terraform + Git push + ArgoCD sync)
-./bin/cakd create -f platform.yaml --force
+./bin/cakd-cli create -f platform.yaml --force
 
 # Run on-demand AI workload diagnostics
-./bin/cakd observe -f platform.yaml -n order-system
+./bin/cakd-cli observe -f platform.yaml -n order-system
 ```
 
 ---
