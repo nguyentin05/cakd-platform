@@ -1,47 +1,30 @@
 # CAKD Platform — AI Assistant Working Guide
 
-CAKD Platform (Cloud-Agnostic Kubernetes Developer Platform) bootstraps cloud-native microservices, GitOps CI/CD pipelines, Kubernetes observability stacks, and AI-powered root-cause diagnostics from a single declarative configuration (`platform.yaml`) or interactive/agentic workflows.
+CAKD Platform (Cloud-Agnostic Kubernetes Developer Platform) bootstraps cloud-native microservices, GitOps CI/CD pipelines, Kubernetes observability stacks, and AI root-cause diagnostics from a single declarative manifest (`platform.yaml`) or interactive/agentic workflows.
 
 ---
 
-## 1. Read by Task (Rules & Skills in `.claude/`)
+## 1. Architecture at a Glance
 
-Always read the relevant rules and skills in [`.claude/`](./.claude/) before modifying code:
-
-| Task involves | Applicable Rule (`.claude/rules/`) | Practical Skill (`.claude/skills/`) |
-| :--- | :--- | :--- |
-| Architecture, package imports, layer boundaries, I/O | [01-hexagonal-boundaries.md](.claude/rules/01-hexagonal-boundaries.md) | [verify-platform](.claude/skills/verify-platform/SKILL.md) |
-| `platform.yaml` schema, defaults, legacy migration, Terraform state | [02-schema-and-state.md](.claude/rules/02-schema-and-state.md) | [verify-platform](.claude/skills/verify-platform/SKILL.md) |
-| Adding a new provider plugin (Cloud, VCS, CD, App, DB, LLM, Telemetry, Notify) | [01-hexagonal-boundaries.md](.claude/rules/01-hexagonal-boundaries.md), [03-go127-and-coding.md](.claude/rules/03-go127-and-coding.md) | [add-provider-plugin](.claude/skills/add-provider-plugin/SKILL.md) |
-| Adding/modifying a Use Case across CLI (`--json`), TUI, and MCP Server | [01-hexagonal-boundaries.md](.claude/rules/01-hexagonal-boundaries.md) | [add-surface-capability](.claude/skills/add-surface-capability/SKILL.md) |
-| Go 1.27 style, CNCF comments, error codes, secret redaction, commits | [03-go127-and-coding.md](.claude/rules/03-go127-and-coding.md) | [verify-platform](.claude/skills/verify-platform/SKILL.md) |
-
----
-
-## 2. Hexagonal Architecture & Repository Map
-
-Dependency direction is strictly inward:
+CAKD follows **Hexagonal Architecture (Ports & Adapters)** with inward-only dependencies:
 
 ```text
-domain  <--  usecase (and usecase/ports)  <--  adapter (Driving) / infrastructure (Driven)  <--  composition  <--  cmd/*
+domain  <--  usecase (and usecase/ports)  <--  adapter / infrastructure  <--  composition  <--  cmd/*
 ```
 
-- **`cmd/cakd-cli/`**: Developer entrypoint (CLI with `--json`, interactive TUI wizard via `cakd-cli ui`, and stdio MCP via `cakd-cli mcp`).
-- **`cmd/cakd-agent/`**: In-cluster daemon listening for Alertmanager webhooks, querying Prometheus/Loki, running Gemini RCA, and dispatching Discord alerts.
-- **`cmd/cakd-mcp/`**: Standalone MCP Server supporting both Stdio and Streamable HTTP (`POST /mcp` with Bearer token auth).
-- **`cmd/cakd-tools/`**: Internal maintainer utilities (`registry-fetch`, `schema-gen`).
-- **`internal/domain/`**: Pure Go entities (`project`, `catalog`, `diagnostic`, `errcode`). Zero external dependencies.
-- **`internal/platform/`**: Technical primitives (`buildinfo`, `progress`, `logging`, `redact`) and AST architecture guard (`architecture_test.go`).
-- **`internal/usecase/` & `internal/usecase/ports/`**: Application workflows (`validate`, `initcluster`, `createproject`, `observe`, `alertdispatch`, `auth`, `agenttools`, `schema`) and Outbound Port interfaces.
-- **`internal/adapter/`**: Driving adapters (`cli`, `tui`, `mcpserver`, `webhook`).
-- **`internal/infrastructure/`**: Driven adapters (`configfile`, `credstore`, `statestore`, `terraform`, `k8s`, `scaffold`, `providers/*`).
-- **`internal/composition/`**: Shared Dependency Injection container and provider registry wiring.
+- **Domain (`internal/domain/`)**: Pure entities (`project`, `catalog`, `diagnostic`) and canonical error codes (`errcode`).
+- **Use Cases & Ports (`internal/usecase/`)**: Core application workflows (`validate`, `initcluster`, `createproject`, `observe`, `alertdispatch`) and outbound port interfaces.
+- **Driving Adapters (`internal/adapter/`)**: External entry surfaces — Developer CLI (`cakd-cli`), interactive TUI wizard (`ui`), MCP Server (`mcp`), and Alertmanager webhook daemon (`cakd-agent`).
+- **Driven Infrastructure (`internal/infrastructure/`)**: Concrete implementations of ports — Terraform modules, K8s/Helm bootstrapper, template scaffolding, and provider clients (GitHub, ArgoCD, Discord, Gemini, Prometheus, Loki).
+- **Composition (`internal/composition/`)**: Pure constructor dependency injection container.
+
+For core boundary rules and invariants, see [`.claude/rules/01-architecture.md`](.claude/rules/01-architecture.md).
 
 ---
 
-## 3. Core Commands & Verification
+## 2. Core Development Commands
 
-- `GOTOOLCHAIN=auto go test ./... -race` — Run unit tests and AST architecture guard (`TestArchitecture`).
-- `task build` — Compile binaries into `bin/`.
+- `task test` or `go test ./... -race` — Run unit tests and AST architecture boundary guard (`TestArchitecture`).
+- `task build` — Compile platform binaries (`bin/cakd-cli`, `bin/cakd-agent`, `bin/cakd-mcp`).
 - `task lint` — Run `golangci-lint`.
 - `task fmt` / `task vet` — Format and vet Go source code.
