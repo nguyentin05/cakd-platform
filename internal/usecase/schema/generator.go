@@ -15,7 +15,7 @@ const (
 	keyDefault              = "default"
 	keyItems                = "items"
 	keyName                 = "name"
-	keyDescription         = "description"
+	keyDescription          = "description"
 	typeObject              = "object"
 	typeString              = "string"
 	typeBoolean             = "boolean"

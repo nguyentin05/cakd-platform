@@ -12,6 +12,8 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/usecase/alertdispatch"
 )
 
+const statusFiring = "firing"
+
 type stubNotifier struct {
 	mu      sync.Mutex
 	batches [][]diagnostic.NotificationItem
@@ -65,10 +67,10 @@ func TestDispatchDualPhaseAlertAndAIDiagnosis(t *testing.T) {
 	svc := alertdispatch.NewService("https://discord.com/api/webhooks/default", notif, &stubAI{}, store)
 
 	err := svc.ProcessAlertPayload(context.Background(), diagnostic.AlertPayload{
-		Status: "firing",
+		Status: statusFiring,
 		Alerts: []diagnostic.Alert{
 			{
-				Status:      "firing",
+				Status:      statusFiring,
 				Labels:      map[string]string{"alertname": "HighRestarts", "namespace": "order-system", "severity": "critical"},
 				Annotations: map[string]string{"description": "Pod order-api restarted 5 times"},
 			},
@@ -99,10 +101,10 @@ func TestConcurrentAlertStorm(t *testing.T) {
 		go func(idx int) {
 			defer wg.Done()
 			err := svc.ProcessAlertPayload(context.Background(), diagnostic.AlertPayload{
-				Status: "firing",
+				Status: statusFiring,
 				Alerts: []diagnostic.Alert{
 					{
-						Status:      "firing",
+						Status:      statusFiring,
 						Labels:      map[string]string{"alertname": "CrashLoopBackOff", "namespace": "order-system", "severity": "critical"},
 						Annotations: map[string]string{"description": "Pod crashed repeatedly"},
 					},

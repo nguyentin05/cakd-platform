@@ -37,42 +37,48 @@ func TestHexagonalArchitectureBoundaries(t *testing.T) {
 				return nil
 			}
 
-			rel, err := filepath.Rel(repoRoot, path)
-			if err != nil {
-				return err
-			}
-			rel = filepath.ToSlash(rel)
-			parts := strings.Split(rel, "/")
-			layer := parts[0]
-			if layer == "internal" && len(parts) > 1 {
-				layer = parts[1]
-			}
-
-			// Only enforce on hexagonal layers: domain, usecase, adapter, infrastructure, composition, platform, cmd
-			switch layer {
-			case layerDomain, layerUsecase, layerAdapter, layerInfrastructure, "composition", "platform", "cmd":
-			default:
-				return nil
-			}
-
-			fileAst, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
-			if err != nil {
-				t.Fatalf("failed to parse %s: %v", rel, err)
-			}
-
-			for _, imp := range fileAst.Imports {
-				impPath := strings.Trim(imp.Path.Value, `"`)
-				checkImportBoundary(t, rel, layer, impPath)
-			}
-
-			if layer == layerDomain || layer == layerUsecase || layer == layerInfrastructure {
-				checkForbiddenCalls(t, fset, rel, layer, fileAst)
-			}
+			inspectSourceFile(t, fset, repoRoot, path)
 			return nil
 		})
 		if err != nil {
 			t.Fatalf("walk dir %s failed: %v", scanDir, err)
 		}
+	}
+}
+
+func inspectSourceFile(t *testing.T, fset *token.FileSet, repoRoot, path string) {
+	t.Helper()
+
+	rel, err := filepath.Rel(repoRoot, path)
+	if err != nil {
+		t.Fatalf("failed to determine relative path for %s: %v", path, err)
+	}
+	rel = filepath.ToSlash(rel)
+	parts := strings.Split(rel, "/")
+	layer := parts[0]
+	if layer == "internal" && len(parts) > 1 {
+		layer = parts[1]
+	}
+
+	// Only enforce on hexagonal layers: domain, usecase, adapter, infrastructure, composition, platform, cmd
+	switch layer {
+	case layerDomain, layerUsecase, layerAdapter, layerInfrastructure, "composition", "platform", "cmd":
+	default:
+		return
+	}
+
+	fileAst, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
+	if err != nil {
+		t.Fatalf("failed to parse %s: %v", rel, err)
+	}
+
+	for _, imp := range fileAst.Imports {
+		impPath := strings.Trim(imp.Path.Value, `"`)
+		checkImportBoundary(t, rel, layer, impPath)
+	}
+
+	if layer == layerDomain || layer == layerUsecase || layer == layerInfrastructure {
+		checkForbiddenCalls(t, fset, rel, layer, fileAst)
 	}
 }
 

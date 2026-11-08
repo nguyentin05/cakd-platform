@@ -64,19 +64,19 @@ var Defaults = PlatformDefaults{
 }
 
 var (
-	APIVersions          = []string{"cakd.io/v1alpha1", "platform.dev/v1alpha1"}
-	Kinds                = []string{"Project"}
-	ClusterProviders     = []string{ClusterLocal, ClusterAWSEC2}
-	InstanceTypes        = []string{"t3.micro", "t3.small", "t3.medium", "t3.large"}
-	VersionControlTypes  = []string{ProviderGitHub}
-	CITypes              = []string{ProviderGitHubActions}
-	CDTypes              = []string{ProviderArgoCD}
-	NotificationTypes    = []string{ProviderDiscord}
-	LLMTypes             = []string{ProviderGemini}
-	MonitoringTypes      = []string{ProviderPrometheus}
-	LoggingTypes         = []string{ProviderLoki}
-	ServiceLanguages = []string{LangJavaSpringBoot}
-	BackingTypes     = []string{BackingPostgreSQL}
+	APIVersions         = []string{"cakd.io/v1alpha1", "platform.dev/v1alpha1"}
+	Kinds               = []string{"Project"}
+	ClusterProviders    = []string{ClusterLocal, ClusterAWSEC2}
+	InstanceTypes       = []string{"t3.micro", "t3.small", "t3.medium", "t3.large"}
+	VersionControlTypes = []string{ProviderGitHub}
+	CITypes             = []string{ProviderGitHubActions}
+	CDTypes             = []string{ProviderArgoCD}
+	NotificationTypes   = []string{ProviderDiscord}
+	LLMTypes            = []string{ProviderGemini}
+	MonitoringTypes     = []string{ProviderPrometheus}
+	LoggingTypes        = []string{ProviderLoki}
+	ServiceLanguages    = []string{LangJavaSpringBoot}
+	BackingTypes        = []string{BackingPostgreSQL}
 )
 
 // IsAllowed reports whether val is present in the allowed slice.

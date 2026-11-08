@@ -9,6 +9,12 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/usecase/validate"
 )
 
+const (
+	testOwner          = "acme"
+	defaultBootVersion = "3.5.15.RELEASE"
+	defaultPackaging   = "jar"
+)
+
 func TestValidateAppliesDefaultsAndChecksRules(t *testing.T) {
 	svc := validate.NewService()
 
@@ -17,7 +23,7 @@ func TestValidateAppliesDefaultsAndChecksRules(t *testing.T) {
 		Kind:       project.KindProject,
 		Metadata: project.Metadata{
 			Name:  "order-system",
-			Owner: "acme",
+			Owner: testOwner,
 		},
 		Spec: project.Spec{
 			Backing: []project.BackingSpec{
@@ -61,7 +67,7 @@ func TestValidateDetectsServiceDependencyCycle(t *testing.T) {
 	proj := &project.Project{
 		APIVersion: project.CanonicalAPIVersion,
 		Kind:       project.KindProject,
-		Metadata:   project.Metadata{Name: "cycled", Owner: "acme"},
+		Metadata:   project.Metadata{Name: "cycled", Owner: testOwner},
 		Spec: project.Spec{
 			Services: []project.ServiceSpec{
 				{Name: "svc-a", Language: catalog.LangJavaSpringBoot, Uses: []string{"svc-b"}},
@@ -74,94 +80,98 @@ func TestValidateDetectsServiceDependencyCycle(t *testing.T) {
 	}
 }
 
+//nolint:gocyclo
 func TestValidateBidirectionalFrameworkOptions(t *testing.T) {
 	svc := validate.NewService()
 
-	// 1. Pure FrameworkOptions syncs to legacy fields
-	pureOptsProj := &project.Project{
-		APIVersion: project.CanonicalAPIVersion,
-		Kind:       project.KindProject,
-		Metadata:   project.Metadata{Name: "opt-sync", Owner: "acme"},
-		Spec: project.Spec{
-			Services: []project.ServiceSpec{
-				{
-					Name:     "payment-svc",
-					Language: catalog.LangJavaSpringBoot,
-					FrameworkOptions: map[string]string{
-						"springBootVersion": "3.5.15.RELEASE",
-						"groupId":           "com.acme.pay",
-						"artifactId":        "pay-core",
-						"projectBuild":      "maven-project",
-						"packaging":         "jar",
-						"configuration":     "yaml",
+	t.Run("PureFrameworkOptions", func(t *testing.T) {
+		proj := &project.Project{
+			APIVersion: project.CanonicalAPIVersion,
+			Kind:       project.KindProject,
+			Metadata:   project.Metadata{Name: "opt-sync", Owner: testOwner},
+			Spec: project.Spec{
+				Services: []project.ServiceSpec{
+					{
+						Name:     "payment-svc",
+						Language: catalog.LangJavaSpringBoot,
+						FrameworkOptions: map[string]string{
+							"springBootVersion": defaultBootVersion,
+							"groupId":           "com.acme.pay",
+							"artifactId":        "pay-core",
+							"projectBuild":      "maven-project",
+							"packaging":         defaultPackaging,
+							"configuration":     "yaml",
+						},
 					},
 				},
 			},
-		},
-	}
-	if err := svc.ValidateAndDefault(pureOptsProj); err != nil {
-		t.Fatalf("ValidateAndDefault failed for pure FrameworkOptions: %v", err)
-	}
-	s1 := pureOptsProj.Spec.Services[0]
-	if s1.SpringBootVersion != "3.5.15.RELEASE" || s1.GroupID != "com.acme.pay" || s1.ArtifactID != "pay-core" {
-		t.Fatalf("legacy fields not populated from FrameworkOptions: %+v", s1)
-	}
-	if s1.ProjectBuild != "maven-project" || s1.Packaging != "jar" || s1.Configuration != "yaml" {
-		t.Fatalf("build/packaging/config not populated from FrameworkOptions: %+v", s1)
-	}
+		}
+		if err := svc.ValidateAndDefault(proj); err != nil {
+			t.Fatalf("ValidateAndDefault failed for pure FrameworkOptions: %v", err)
+		}
+		s := proj.Spec.Services[0]
+		if s.SpringBootVersion != defaultBootVersion || s.GroupID != "com.acme.pay" || s.ArtifactID != "pay-core" {
+			t.Fatalf("legacy fields not populated from FrameworkOptions: %+v", s)
+		}
+		if s.ProjectBuild != "maven-project" || s.Packaging != defaultPackaging || s.Configuration != "yaml" {
+			t.Fatalf("build/packaging/config not populated from FrameworkOptions: %+v", s)
+		}
+	})
 
-	// 2. Legacy fields sync to FrameworkOptions
-	legacyProj := &project.Project{
-		APIVersion: project.CanonicalAPIVersion,
-		Kind:       project.KindProject,
-		Metadata:   project.Metadata{Name: "legacy-sync", Owner: "acme"},
-		Spec: project.Spec{
-			Services: []project.ServiceSpec{
-				{
-					Name:              "order-svc",
-					Language:          catalog.LangJavaSpringBoot,
-					SpringBootVersion: "3.5.15.RELEASE",
-					GroupID:           "com.acme.orders",
-					ArtifactID:        "orders-core",
-					ProjectBuild:      "gradle-project",
-					Packaging:         "jar",
-					Configuration:     "properties",
-				},
-			},
-		},
-	}
-	if err := svc.ValidateAndDefault(legacyProj); err != nil {
-		t.Fatalf("ValidateAndDefault failed for legacy fields: %v", err)
-	}
-	s2 := legacyProj.Spec.Services[0]
-	if s2.FrameworkOptions["springBootVersion"] != "3.5.15.RELEASE" ||
-		s2.FrameworkOptions["groupId"] != "com.acme.orders" ||
-		s2.FrameworkOptions["artifactId"] != "orders-core" ||
-		s2.FrameworkOptions["projectBuild"] != "gradle-project" ||
-		s2.FrameworkOptions["packaging"] != "jar" ||
-		s2.FrameworkOptions["configuration"] != "properties" {
-		t.Fatalf("FrameworkOptions not populated from legacy fields: %+v", s2.FrameworkOptions)
-	}
-
-	// 3. Invalid FrameworkOption springBootVersion returns validation error
-	invalidProj := &project.Project{
-		APIVersion: project.CanonicalAPIVersion,
-		Kind:       project.KindProject,
-		Metadata:   project.Metadata{Name: "invalid-opt", Owner: "acme"},
-		Spec: project.Spec{
-			Services: []project.ServiceSpec{
-				{
-					Name:     "invalid-svc",
-					Language: catalog.LangJavaSpringBoot,
-					FrameworkOptions: map[string]string{
-						"springBootVersion": "99.99.99-INVALID",
+	t.Run("LegacyFields", func(t *testing.T) {
+		proj := &project.Project{
+			APIVersion: project.CanonicalAPIVersion,
+			Kind:       project.KindProject,
+			Metadata:   project.Metadata{Name: "legacy-sync", Owner: testOwner},
+			Spec: project.Spec{
+				Services: []project.ServiceSpec{
+					{
+						Name:              "order-svc",
+						Language:          catalog.LangJavaSpringBoot,
+						SpringBootVersion: defaultBootVersion,
+						GroupID:           "com.acme.orders",
+						ArtifactID:        "orders-core",
+						ProjectBuild:      "gradle-project",
+						Packaging:         defaultPackaging,
+						Configuration:     "properties",
 					},
 				},
 			},
-		},
-	}
-	err := svc.ValidateAndDefault(invalidProj)
-	if !errcode.IsCode(err, errcode.CodeValidation) {
-		t.Fatalf("expected CodeValidation for invalid springBootVersion in FrameworkOptions, got %v", err)
-	}
+		}
+		if err := svc.ValidateAndDefault(proj); err != nil {
+			t.Fatalf("ValidateAndDefault failed for legacy fields: %v", err)
+		}
+		s := proj.Spec.Services[0]
+		if s.FrameworkOptions["springBootVersion"] != defaultBootVersion ||
+			s.FrameworkOptions["groupId"] != "com.acme.orders" ||
+			s.FrameworkOptions["artifactId"] != "orders-core" ||
+			s.FrameworkOptions["projectBuild"] != "gradle-project" ||
+			s.FrameworkOptions["packaging"] != defaultPackaging ||
+			s.FrameworkOptions["configuration"] != "properties" {
+			t.Fatalf("FrameworkOptions not populated from legacy fields: %+v", s.FrameworkOptions)
+		}
+	})
+
+	t.Run("InvalidFrameworkOptions", func(t *testing.T) {
+		proj := &project.Project{
+			APIVersion: project.CanonicalAPIVersion,
+			Kind:       project.KindProject,
+			Metadata:   project.Metadata{Name: "invalid-opt", Owner: testOwner},
+			Spec: project.Spec{
+				Services: []project.ServiceSpec{
+					{
+						Name:     "invalid-svc",
+						Language: catalog.LangJavaSpringBoot,
+						FrameworkOptions: map[string]string{
+							"springBootVersion": "99.99.99-INVALID",
+						},
+					},
+				},
+			},
+		}
+		err := svc.ValidateAndDefault(proj)
+		if !errcode.IsCode(err, errcode.CodeValidation) {
+			t.Fatalf("expected CodeValidation for invalid springBootVersion in FrameworkOptions, got %v", err)
+		}
+	})
 }

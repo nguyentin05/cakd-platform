@@ -110,37 +110,31 @@ func (s ServiceSpec) GetFrameworkOption(key, fallback string) string {
 			return val
 		}
 	}
-	switch key {
-	case "springBootVersion", "spring_boot_version":
-		if s.SpringBootVersion != "" {
-			return s.SpringBootVersion
-		}
-	case "groupId", "group_id":
-		if s.GroupID != "" {
-			return s.GroupID
-		}
-	case "artifactId", "artifact_id":
-		if s.ArtifactID != "" {
-			return s.ArtifactID
-		}
-	case "packageName", "package_name":
-		if s.PackageName != "" {
-			return s.PackageName
-		}
-	case "packaging":
-		if s.Packaging != "" {
-			return s.Packaging
-		}
-	case "configuration":
-		if s.Configuration != "" {
-			return s.Configuration
-		}
-	case "projectBuild", "project_build":
-		if s.ProjectBuild != "" {
-			return s.ProjectBuild
-		}
+	if v := s.legacyFrameworkOption(key); v != "" {
+		return v
 	}
 	return fallback
+}
+
+func (s ServiceSpec) legacyFrameworkOption(key string) string {
+	switch key {
+	case "springBootVersion", "spring_boot_version":
+		return s.SpringBootVersion
+	case "groupId", "group_id":
+		return s.GroupID
+	case "artifactId", "artifact_id":
+		return s.ArtifactID
+	case "packageName", "package_name":
+		return s.PackageName
+	case "packaging":
+		return s.Packaging
+	case "configuration":
+		return s.Configuration
+	case "projectBuild", "project_build":
+		return s.ProjectBuild
+	default:
+		return ""
+	}
 }
 
 // ResourcesSpec defines Kubernetes CPU and memory limits for a service.
