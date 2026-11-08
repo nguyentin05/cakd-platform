@@ -34,11 +34,11 @@ GOTOOLCHAIN=auto go run ./cmd/cakd-tools/schema-gen > schemas/platform.schema.js
 ## 5. Multi-Binary Build & Surface Smoke Tests
 Compile all main binaries and verify CLI and MCP entrypoints respond cleanly:
 ```bash
-GOTOOLCHAIN=auto go build -o bin/cakd ./cmd/cakd
+GOTOOLCHAIN=auto go build -o bin/cakd-cli ./cmd/cakd-cli
 GOTOOLCHAIN=auto go build -o bin/cakd-agent ./cmd/cakd-agent
 GOTOOLCHAIN=auto go build -o bin/cakd-mcp ./cmd/cakd-mcp
 
-./bin/cakd validate -f platform.yaml
-./bin/cakd validate -f platform.yaml --json
-printf '{"jsonrpc":"2.0","id":1,"method":"tools/list"}\n' | ./bin/cakd mcp
+./bin/cakd-cli validate -f platform.yaml
+./bin/cakd-cli validate -f platform.yaml --json
+printf '{"jsonrpc":"2.0","id":1,"method":"tools/list"}\n' | ./bin/cakd-cli mcp
 ```

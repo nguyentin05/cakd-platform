@@ -26,7 +26,7 @@ Dependency direction is strictly inward:
 domain  <--  usecase (and usecase/ports)  <--  adapter (Driving) / infrastructure (Driven)  <--  composition  <--  cmd/*
 ```
 
-- **`cmd/cakd/`**: Developer entrypoint (CLI with `--json`, interactive TUI wizard via `cakd ui`, and stdio MCP via `cakd mcp`).
+- **`cmd/cakd-cli/`**: Developer entrypoint (CLI with `--json`, interactive TUI wizard via `cakd-cli ui`, and stdio MCP via `cakd-cli mcp`).
 - **`cmd/cakd-agent/`**: In-cluster daemon listening for Alertmanager webhooks, querying Prometheus/Loki, running Gemini RCA, and dispatching Discord alerts.
 - **`cmd/cakd-mcp/`**: Standalone MCP Server supporting both Stdio and Streamable HTTP (`POST /mcp` with Bearer token auth).
 - **`cmd/cakd-tools/`**: Internal maintainer utilities (`registry-fetch`, `schema-gen`).

@@ -137,7 +137,7 @@ Before filing, search existing issues to avoid duplicates.
 
 When filing a bug, include:
 
-1. **`cakd version` output** — which version are you on?
+1. **`cakd-cli version` output** — which version are you on?
 2. **OS and architecture** — `uname -a`
 3. **Your `platform.yaml`** — remove any sensitive values
 4. **What you did** — exact command you ran
@@ -172,7 +172,7 @@ For large features (new provider, new schema field), open an issue **before** wr
 ### Project structure
 
 ```
-cmd/cakd/          CLI command definitions (thin layer, no business logic)
+cmd/cakd-cli/      CLI entrypoint (calls cli.Execute; commands live in internal/adapter/cli/<cmd>/)
 internal/
   registry/        Single source of truth for supported providers and defaults
   config/          Schema + parser (references registry, no hardcoded values)

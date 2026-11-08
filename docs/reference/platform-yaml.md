@@ -1,6 +1,6 @@
 # `platform.yaml` Schema Reference
 
-CAKD Platform uses the canonical `cakd.io/v1alpha1` schema (with automatic backward compatibility for legacy `platform.dev/v1alpha1` files). The machine-readable Draft 2020-12 JSON Schema is located at `schemas/platform.schema.json` and can be exported at any time via `cakd schema`.
+CAKD Platform uses the canonical `cakd.io/v1alpha1` schema (with automatic backward compatibility for legacy `platform.dev/v1alpha1` files). The machine-readable Draft 2020-12 JSON Schema is located at `schemas/platform.schema.json` and can be exported at any time via `cakd-cli schema`.
 
 ## Full Example
 

@@ -26,12 +26,12 @@ spec:
       language: java-spring-boot
 ```
 
-## 2. Run `cakd init`
+## 2. Run `cakd-cli init`
 
 ```bash
 export AWS_ACCESS_KEY_ID="AKIA..."
 export AWS_SECRET_ACCESS_KEY="..."
-./bin/cakd init -f platform.yaml
+./bin/cakd-cli init -f platform.yaml
 ```
 
-CAKD provisions the EC2 instance in `.platform/terraform/cluster/`, configures a 2GB swap file, installs K3s with `--tls-san <public_ip>`, writes `~/.kube/cakd-config`, and saves the cluster state (`~/.cakd/cluster-state.json`) for subsequent `cakd create` runs.
+CAKD provisions the EC2 instance in `.platform/terraform/cluster/`, configures a 2GB swap file, installs K3s with `--tls-san <public_ip>`, writes `~/.kube/cakd-config`, and saves the cluster state (`~/.cakd/cluster-state.json`) for subsequent `cakd-cli create` runs.

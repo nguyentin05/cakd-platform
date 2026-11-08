@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/nguyentin05/cakd-platform/internal/adapter/cli"
+	"github.com/nguyentin05/cakd-platform/internal/adapter/cli/cmdutil"
 	"github.com/nguyentin05/cakd-platform/internal/composition"
 )
 
@@ -14,7 +15,7 @@ func TestCLIVersionSchemaAndValidateJSON(t *testing.T) {
 	c := composition.NewContainer()
 
 	var out bytes.Buffer
-	root := cli.NewRootCommand(c, strings.NewReader(""), &out, &out)
+	root := cli.NewCakdCmd(cmdutil.NewFactoryWith(c, strings.NewReader(""), &out, &out))
 	root.SetArgs([]string{"version", "--json"})
 	if err := root.Execute(); err != nil {
 		t.Fatalf("version --json failed: %v", err)
@@ -25,7 +26,7 @@ func TestCLIVersionSchemaAndValidateJSON(t *testing.T) {
 
 	out.Reset()
 	schemaPath := filepath.Join(t.TempDir(), "platform.schema.json")
-	root = cli.NewRootCommand(c, strings.NewReader(""), &out, &out)
+	root = cli.NewCakdCmd(cmdutil.NewFactoryWith(c, strings.NewReader(""), &out, &out))
 	root.SetArgs([]string{"schema", "-o", schemaPath})
 	if err := root.Execute(); err != nil {
 		t.Fatalf("schema command failed: %v", err)
@@ -43,7 +44,7 @@ func TestCLIVersionSchemaAndValidateJSON(t *testing.T) {
 	}
 
 	out.Reset()
-	root = cli.NewRootCommand(c, strings.NewReader(""), &out, &out)
+	root = cli.NewCakdCmd(cmdutil.NewFactoryWith(c, strings.NewReader(""), &out, &out))
 	root.SetArgs([]string{"validate", "-f", specPath, "--json"})
 	if err := root.Execute(); err != nil {
 		t.Fatalf("validate -f --json failed: %v", err)

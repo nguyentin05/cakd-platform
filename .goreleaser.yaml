@@ -7,9 +7,9 @@ before:
     - go mod tidy
 
 builds:
-  - id: cakd
-    main: ./cmd/cakd
-    binary: cakd
+  - id: cakd-cli
+    main: ./cmd/cakd-cli
+    binary: cakd-cli
     env:
       - CGO_ENABLED=0
     goos:

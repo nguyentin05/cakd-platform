@@ -12,5 +12,5 @@ Modern platform engineering serves both human operators (who benefit from an int
 Expose the same application use cases (`internal/usecase/*`) through three primary driving surfaces:
 
 1. **CLI (`internal/adapter/cli`)** with `--json` output mode.
-2. **Interactive TUI Wizard (`internal/adapter/tui`)** via `cakd ui` and `cakd create -i`.
-3. **MCP Server (`internal/adapter/mcpserver`)** via `cakd mcp` and standalone `cakd-mcp` binary supporting both Stdio and Streamable HTTP transports.
+2. **Interactive TUI Wizard (`internal/adapter/tui`)** via `cakd-cli ui` and `cakd-cli create -i`.
+3. **MCP Server (`internal/adapter/mcpserver`)** via `cakd-cli mcp` and standalone `cakd-mcp` binary supporting both Stdio and Streamable HTTP transports.

@@ -1,7 +1,7 @@
 version: '3'
 vars:
-  BINARY: cakd
-  CMD_PATH: ./cmd/cakd
+  BINARY: cakd-cli
+  CMD_PATH: ./cmd/cakd-cli
   OUT_DIR: bin
 tasks:
   default:
@@ -10,9 +10,9 @@ tasks:
       - task --list
 
   build:
-    desc: Build all platform binaries (cakd, cakd-agent, cakd-mcp)
+    desc: Build all platform binaries (cakd-cli, cakd-agent, cakd-mcp)
     cmds:
-      - go build -ldflags "-s -w -X github.com/nguyentin05/cakd-platform/internal/platform/buildinfo.Version={{.VERSION}}" -o {{.OUT_DIR}}/cakd ./cmd/cakd
+      - go build -ldflags "-s -w -X github.com/nguyentin05/cakd-platform/internal/platform/buildinfo.Version={{.VERSION}}" -o {{.OUT_DIR}}/cakd-cli ./cmd/cakd-cli
       - go build -ldflags "-s -w -X github.com/nguyentin05/cakd-platform/internal/platform/buildinfo.Version={{.VERSION}}" -o {{.OUT_DIR}}/cakd-agent ./cmd/cakd-agent
       - go build -ldflags "-s -w -X github.com/nguyentin05/cakd-platform/internal/platform/buildinfo.Version={{.VERSION}}" -o {{.OUT_DIR}}/cakd-mcp ./cmd/cakd-mcp
     vars:

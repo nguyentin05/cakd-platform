@@ -25,7 +25,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Build CAKD CLI
-        run: go build -o bin/cakd ./cmd/cakd
+        run: go build -o bin/cakd-cli ./cmd/cakd-cli
 
       - name: Run CAKD Create (Generate Templates Only)
         run: |
@@ -44,7 +44,7 @@ jobs:
               language: java-spring-boot
           EOF
         
-          ./bin/cakd create -f platform.yaml --scaffold-only --force
+          ./bin/cakd-cli create -f platform.yaml --scaffold-only --force
 
       - name: Setup Helm
         uses: azure/setup-helm@v5

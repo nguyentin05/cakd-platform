@@ -39,7 +39,7 @@ body:
     id: version
     attributes:
       label: CAKD version
-      placeholder: "v0.1.0 (run: cakd version)"
+      placeholder: "v0.1.0 (run: cakd-cli version)"
     validations:
       required: true
 
