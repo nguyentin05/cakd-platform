@@ -18,7 +18,11 @@ func NewCommand(f *cmdutil.Factory) *cobra.Command {
 		Use:   "ui",
 		Short: "Launch interactive TUI wizard to build platform.yaml and bootstrap projects",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return tui.RunWizard(cmd.Context(), f.In, f.Out, f.C, tui.Options{
+			return tui.RunWizard(cmd.Context(), f.In, f.Out, &tui.Services{
+				ValidateUC: f.C.ValidateUC,
+				SpecRepo:   f.C.SpecRepo,
+				CreateUC:   f.C.CreateUC,
+			}, tui.Options{
 				OutputPath: outPath,
 				Force:      force,
 			})

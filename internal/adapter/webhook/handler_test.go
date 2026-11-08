@@ -47,7 +47,7 @@ func TestWebhookHandlerAuthAndAccept(t *testing.T) {
 		t.Fatal(err)
 	}
 	resAuth.Body.Close()
-	if resAuth.StatusCode != http.StatusOK {
-		t.Fatalf("expected 200 for valid secret, got %d", resAuth.StatusCode)
+	if resAuth.StatusCode != http.StatusAccepted {
+		t.Fatalf("expected 202 for valid secret, got %d", resAuth.StatusCode)
 	}
 }

@@ -66,12 +66,12 @@ func (h *Handler) HandleAlert(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusAccepted)
 	_, _ = w.Write([]byte(`{"status":"accepted"}`))
 
 	if h.dispatcher != nil {
 		go func(p diagnostic.AlertPayload) {
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 			defer cancel()
 			_ = h.dispatcher.ProcessAlertPayload(ctx, p)
 		}(payload)

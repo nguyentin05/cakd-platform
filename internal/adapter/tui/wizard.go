@@ -7,12 +7,20 @@ import (
 	"io"
 	"strings"
 
-	"github.com/nguyentin05/cakd-platform/internal/composition"
 	"github.com/nguyentin05/cakd-platform/internal/domain/catalog"
 	"github.com/nguyentin05/cakd-platform/internal/domain/project"
 	"github.com/nguyentin05/cakd-platform/internal/platform/progress"
 	"github.com/nguyentin05/cakd-platform/internal/usecase/createproject"
+	"github.com/nguyentin05/cakd-platform/internal/usecase/ports"
+	"github.com/nguyentin05/cakd-platform/internal/usecase/validate"
 )
+
+// Services contains the application services required by the interactive TUI wizard.
+type Services struct {
+	ValidateUC *validate.Service
+	SpecRepo   ports.SpecRepository
+	CreateUC   *createproject.Service
+}
 
 // Options configures the interactive TUI project creation wizard.
 type Options struct {
@@ -22,7 +30,7 @@ type Options struct {
 
 // RunWizard runs an interactive step-by-step terminal wizard that builds a canonical
 // platform.yaml without requiring manual YAML authoring, and optionally executes project bootstrap.
-func RunWizard(ctx context.Context, in io.Reader, out io.Writer, c *composition.Container, opts Options) error {
+func RunWizard(ctx context.Context, in io.Reader, out io.Writer, s *Services, opts Options) error {
 	scanner := bufio.NewScanner(in)
 	outPath := opts.OutputPath
 	if outPath == "" {
@@ -91,11 +99,11 @@ func RunWizard(ctx context.Context, in io.Reader, out io.Writer, c *composition.
 		},
 	}
 
-	if err := c.ValidateUC.ValidateAndDefault(proj); err != nil {
+	if err := s.ValidateUC.ValidateAndDefault(proj); err != nil {
 		return err
 	}
 
-	yamlBytes, err := c.SpecRepo.MarshalCanonical(proj)
+	yamlBytes, err := s.SpecRepo.MarshalCanonical(proj)
 	if err != nil {
 		return err
 	}
@@ -104,7 +112,7 @@ func RunWizard(ctx context.Context, in io.Reader, out io.Writer, c *composition.
 	_, _ = fmt.Fprint(out, string(yamlBytes))
 	_, _ = fmt.Fprintln(out, "─────────────────────────────────────────────────────────")
 
-	if err := c.SpecRepo.SaveFile(outPath, proj); err != nil {
+	if err := s.SpecRepo.SaveFile(outPath, proj); err != nil {
 		return err
 	}
 	_, _ = fmt.Fprintf(out, "✔ Saved configuration to %s\n", outPath)
@@ -113,7 +121,7 @@ func RunWizard(ctx context.Context, in io.Reader, out io.Writer, c *composition.
 		ctxWithSink := progress.WithSink(ctx, progress.SinkFunc(func(ev progress.Event) {
 			_, _ = fmt.Fprintf(out, "  [%s] (%s) %s\n", ev.Phase, ev.Status, ev.Message)
 		}))
-		res, err := c.CreateUC.Execute(ctxWithSink, createproject.Request{
+		res, err := s.CreateUC.Execute(ctxWithSink, createproject.Request{
 			Project: proj,
 			Force:   opts.Force,
 		})

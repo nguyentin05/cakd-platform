@@ -23,3 +23,11 @@ func TestNewFactoryWithDefaultsAndWriteJSON(t *testing.T) {
 		t.Fatalf("got %q, want %q", got, want)
 	}
 }
+
+func TestFactoryCustomServices(t *testing.T) {
+	s := &cmdutil.Services{}
+	f := cmdutil.NewFactoryWith(s, nil, nil, nil)
+	if f.C != s {
+		t.Fatal("expected custom Services to be set")
+	}
+}

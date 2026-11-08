@@ -3,14 +3,11 @@ package statestore
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sync"
 
 	"github.com/nguyentin05/cakd-platform/internal/domain/errcode"
-	"github.com/nguyentin05/cakd-platform/internal/platform/progress"
 	"github.com/nguyentin05/cakd-platform/internal/usecase/ports"
 )
 
@@ -18,24 +15,23 @@ import (
 type Store struct {
 	mu      sync.Mutex
 	baseDir string
-	syncK8s bool
 }
 
 // NewStore creates a Store using /etc/cakd if present, or ~/.cakd.
 func NewStore() *Store {
 	if st, err := os.Stat("/etc/cakd/webhooks.json"); err == nil && !st.IsDir() {
-		return &Store{baseDir: "/etc/cakd", syncK8s: true}
+		return &Store{baseDir: "/etc/cakd"}
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return &Store{baseDir: ".cakd", syncK8s: true}
+		return &Store{baseDir: ".cakd"}
 	}
-	return &Store{baseDir: filepath.Join(home, ".cakd"), syncK8s: true}
+	return &Store{baseDir: filepath.Join(home, ".cakd")}
 }
 
 // NewStoreWithDir creates a Store rooted at a specific directory (useful for tests).
 func NewStoreWithDir(baseDir string) *Store {
-	return &Store{baseDir: baseDir, syncK8s: false}
+	return &Store{baseDir: baseDir}
 }
 
 func (s *Store) clusterStatePath() string {
@@ -126,17 +122,6 @@ func (s *Store) SaveWebhook(ctx context.Context, projectName, webhookURL string)
 	}
 	if err := os.WriteFile(s.webhooksPath(), data, 0o600); err != nil {
 		return errcode.Wrap(errcode.CodeExternal, "failed to write webhooks file", err)
-	}
-
-	if s.syncK8s {
-		if _, lookErr := exec.LookPath("kubectl"); lookErr == nil {
-			patchData := fmt.Sprintf(`{"data":{"webhooks.json":%q}}`, string(data))
-			//nolint:gosec
-			cmd := exec.CommandContext(ctx, "kubectl", "patch", "configmap", "cakd-webhooks", "-n", "monitoring", "-p", patchData)
-			if err := cmd.Run(); err != nil {
-				progress.Emit(ctx, "notify", progress.StatusWarn, "could not sync webhook to Kubernetes ConfigMap (cluster may not be running)")
-			}
-		}
 	}
 	return nil
 }

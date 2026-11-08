@@ -55,11 +55,16 @@ func NewCakdCmd(f *cmdutil.Factory) *cobra.Command {
 
 // Execute runs the root command with a signal-aware context: SIGINT/SIGTERM cancels
 // in-flight work and exits 130; any other failure prints "Error: <message>" and exits 1.
-func Execute() {
+func Execute(services ...*cmdutil.Services) {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	err := NewCakdCmd(cmdutil.NewFactory()).ExecuteContext(ctx)
+	var s *cmdutil.Services
+	if len(services) > 0 && services[0] != nil {
+		s = services[0]
+	}
+	f := cmdutil.NewFactoryWith(s, os.Stdin, os.Stdout, os.Stderr)
+	err := NewCakdCmd(f).ExecuteContext(ctx)
 	switch {
 	case err == nil:
 		return

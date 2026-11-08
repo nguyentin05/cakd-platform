@@ -98,3 +98,59 @@ services:
 		t.Fatalf("expected canonical YAML output to contain 'spec:' block, got:\n%s", string(data))
 	}
 }
+
+func TestLoadGenericFrameworkOptionsAndLegacyFallback(t *testing.T) {
+	loader := configfile.NewLoader()
+
+	yamlContent := []byte(`
+apiVersion: cakd.io/v1alpha1
+kind: Project
+metadata:
+  name: polyglot-platform
+  owner: acme
+spec:
+  services:
+    - name: generic-service
+      language: node-express
+      frameworkOptions:
+        nodeVersion: "20"
+        packageManager: pnpm
+        framework: express
+    - name: legacy-spring-service
+      language: java-spring-boot
+      springBootVersion: "3.2.0"
+      groupId: com.acme
+      artifactId: order-service
+`)
+	proj, err := loader.LoadBytes(yamlContent)
+	if err != nil {
+		t.Fatalf("LoadBytes failed: %v", err)
+	}
+	if len(proj.Spec.Services) != 2 {
+		t.Fatalf("expected 2 services, got %d", len(proj.Spec.Services))
+	}
+
+	// 1. Generic service with FrameworkOptions
+	s1 := proj.Spec.Services[0]
+	if got := s1.GetFrameworkOption("nodeVersion", ""); got != "20" {
+		t.Fatalf("expected nodeVersion=20, got %q", got)
+	}
+	if got := s1.GetFrameworkOption("packageManager", ""); got != "pnpm" {
+		t.Fatalf("expected packageManager=pnpm, got %q", got)
+	}
+	if got := s1.GetFrameworkOption("missing", "default-val"); got != "default-val" {
+		t.Fatalf("expected fallback 'default-val', got %q", got)
+	}
+
+	// 2. Legacy Spring Boot service
+	s2 := proj.Spec.Services[1]
+	if got := s2.GetFrameworkOption("springBootVersion", ""); got != "3.2.0" {
+		t.Fatalf("expected springBootVersion=3.2.0, got %q", got)
+	}
+	if got := s2.GetFrameworkOption("groupId", ""); got != "com.acme" {
+		t.Fatalf("expected groupId=com.acme, got %q", got)
+	}
+	if got := s2.GetFrameworkOption("artifactId", ""); got != "order-service" {
+		t.Fatalf("expected artifactId=order-service, got %q", got)
+	}
+}

@@ -9,29 +9,34 @@ import (
 	"strings"
 
 	"github.com/nguyentin05/cakd-platform/internal/domain/errcode"
-	"github.com/nguyentin05/cakd-platform/internal/infrastructure/terraform"
 	"github.com/nguyentin05/cakd-platform/internal/platform/progress"
 	"github.com/nguyentin05/cakd-platform/internal/platform/redact"
 	"github.com/nguyentin05/cakd-platform/internal/usecase/ports"
 )
 
+// RepoProvisioner provisions and destroys remote Git repositories via infrastructure tools.
+type RepoProvisioner interface {
+	ProvisionGitHubRepo(ctx context.Context, req ports.RepoProvisionRequest) (string, error)
+	DestroyGitHubRepo(ctx context.Context, req ports.RepoProvisionRequest) error
+}
+
 // Client implements ports.VCSProvider for GitHub using isolated Terraform state and redacted git CLI calls.
 type Client struct {
-	tf *terraform.Provisioner
+	prov RepoProvisioner
 }
 
 // NewClient creates a GitHub VCS provider Client.
-func NewClient(tf *terraform.Provisioner) *Client {
-	if tf == nil {
-		tf = terraform.NewProvisioner()
-	}
-	return &Client{tf: tf}
+func NewClient(prov RepoProvisioner) *Client {
+	return &Client{prov: prov}
 }
 
 // ProvisionAndPush provisions the GitHub repository via Terraform and pushes the scaffolded project directory.
 func (c *Client) ProvisionAndPush(ctx context.Context, req ports.RepoProvisionRequest) (string, error) {
 	progress.Emit(ctx, "vcs-terraform", progress.StatusRunning, "provisioning GitHub repository via Terraform")
-	repoURL, err := c.tf.ProvisionGitHubRepo(ctx, req)
+	if c.prov == nil {
+		return "", errcode.New(errcode.CodeProvision, "repository provisioner is not configured")
+	}
+	repoURL, err := c.prov.ProvisionGitHubRepo(ctx, req)
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +54,10 @@ func (c *Client) ProvisionAndPush(ctx context.Context, req ports.RepoProvisionRe
 
 // Rollback destroys the provisioned GitHub repository in the isolated VCS Terraform state directory.
 func (c *Client) Rollback(ctx context.Context, req ports.RepoProvisionRequest) error {
-	return c.tf.DestroyGitHubRepo(ctx, req)
+	if c.prov == nil {
+		return nil
+	}
+	return c.prov.DestroyGitHubRepo(ctx, req)
 }
 
 func (c *Client) initAndPushGit(ctx context.Context, projectDir, repoCloneURL, token string) error {

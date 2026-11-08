@@ -14,26 +14,45 @@ import (
 	"github.com/spf13/pflag"
 	"golang.org/x/term"
 
-	"github.com/nguyentin05/cakd-platform/internal/composition"
 	"github.com/nguyentin05/cakd-platform/internal/platform/progress"
+	"github.com/nguyentin05/cakd-platform/internal/usecase/agenttools"
+	"github.com/nguyentin05/cakd-platform/internal/usecase/auth"
+	"github.com/nguyentin05/cakd-platform/internal/usecase/createproject"
+	"github.com/nguyentin05/cakd-platform/internal/usecase/initcluster"
+	"github.com/nguyentin05/cakd-platform/internal/usecase/observe"
+	"github.com/nguyentin05/cakd-platform/internal/usecase/ports"
+	"github.com/nguyentin05/cakd-platform/internal/usecase/validate"
 )
 
-// Factory holds the composition container, IO streams, and global flags shared by all subcommands.
+// Services bundles application use-case services needed by CLI commands.
+type Services struct {
+	ValidateUC *validate.Service
+	InitUC     *initcluster.Service
+	CreateUC   *createproject.Service
+	ObserveUC  *observe.Service
+	AuthUC     *auth.Service
+	AgentTools *agenttools.Catalog
+	SpecRepo   ports.SpecRepository
+	CredStore  ports.CredentialStore
+	StateStore ports.ClusterStateStore
+}
+
+// Factory holds decoupled use-case services, IO streams, and global flags shared by all subcommands.
 type Factory struct {
-	C      *composition.Container
+	C      *Services
 	In     io.Reader
 	Out    io.Writer
 	ErrOut io.Writer
 	JSON   bool
 }
 
-// NewFactory wires a Factory against the real process streams.
+// NewFactory wires a Factory against the real process streams with empty services.
 func NewFactory() *Factory {
-	return NewFactoryWith(composition.NewContainer(), os.Stdin, os.Stdout, os.Stderr)
+	return NewFactoryWith(nil, os.Stdin, os.Stdout, os.Stderr)
 }
 
 // NewFactoryWith builds a Factory with injected dependencies; nil streams fall back to os streams.
-func NewFactoryWith(c *composition.Container, in io.Reader, out, errOut io.Writer) *Factory {
+func NewFactoryWith(s *Services, in io.Reader, out, errOut io.Writer) *Factory {
 	if in == nil {
 		in = os.Stdin
 	}
@@ -43,7 +62,10 @@ func NewFactoryWith(c *composition.Container, in io.Reader, out, errOut io.Write
 	if errOut == nil {
 		errOut = os.Stderr
 	}
-	return &Factory{C: c, In: in, Out: out, ErrOut: errOut}
+	if s == nil {
+		s = &Services{}
+	}
+	return &Factory{C: s, In: in, Out: out, ErrOut: errOut}
 }
 
 // BindFlags registers global persistent flags (currently `--json`).

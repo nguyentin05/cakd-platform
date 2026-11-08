@@ -119,16 +119,17 @@ func toGlobalView(proj *project.Project) globalView {
 		if ver == "" {
 			ver = catalog.Defaults.LanguageVersion[s.Language]
 		}
+		bootVer := s.GetFrameworkOption("springBootVersion", s.SpringBootVersion)
 		svcs = append(svcs, serviceView{
 			Name:               s.Name,
 			Language:           s.Language,
 			Version:            ver,
 			LanguageVersion:    ver,
-			SpringBootVersion:  s.SpringBootVersion,
-			FrameworkVersion:   s.SpringBootVersion,
-			ProjectBuild:       s.ProjectBuild,
-			Packaging:          s.Packaging,
-			SpringConfigFormat: s.Configuration,
+			SpringBootVersion:  bootVer,
+			FrameworkVersion:   bootVer,
+			ProjectBuild:       s.GetFrameworkOption("projectBuild", s.ProjectBuild),
+			Packaging:          s.GetFrameworkOption("packaging", s.Packaging),
+			SpringConfigFormat: s.GetFrameworkOption("configuration", s.Configuration),
 			Dependencies:       s.Dependencies,
 			Replicas:           s.Replicas,
 			Resources:          res,

@@ -24,7 +24,11 @@ func NewCommand(f *cmdutil.Factory) *cobra.Command {
 		Short: "Scaffold microservices, provision repository, and register GitOps deployment",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if interactive {
-				return tui.RunWizard(cmd.Context(), f.In, f.Out, f.C, tui.Options{
+				return tui.RunWizard(cmd.Context(), f.In, f.Out, &tui.Services{
+					ValidateUC: f.C.ValidateUC,
+					SpecRepo:   f.C.SpecRepo,
+					CreateUC:   f.C.CreateUC,
+				}, tui.Options{
 					OutputPath: filePath,
 					Force:      force,
 				})

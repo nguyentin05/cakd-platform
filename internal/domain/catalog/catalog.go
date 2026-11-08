@@ -64,56 +64,20 @@ var Defaults = PlatformDefaults{
 }
 
 var (
-	APIVersions          = []string{"cakd.io/v1alpha1", "platform.dev/v1alpha1"}
-	Kinds                = []string{"Project"}
-	ClusterProviders     = []string{ClusterLocal, ClusterAWSEC2}
-	InstanceTypes        = []string{"t3.micro", "t3.small", "t3.medium", "t3.large"}
-	VersionControlTypes  = []string{ProviderGitHub}
-	CITypes              = []string{ProviderGitHubActions}
-	CDTypes              = []string{ProviderArgoCD}
-	NotificationTypes    = []string{ProviderDiscord}
-	LLMTypes             = []string{ProviderGemini}
-	MonitoringTypes      = []string{ProviderPrometheus}
-	LoggingTypes         = []string{ProviderLoki}
-	ServiceLanguages     = []string{LangJavaSpringBoot}
-	BackingTypes         = []string{BackingPostgreSQL}
-	SpringConfigFormats  = []string{"yaml", "properties"}
-	SpringBackingDepsMap = map[string][]string{
-		BackingPostgreSQL: {depDataJPA, "postgresql"},
-		BackingMySQL:      {depDataJPA, "mysql"},
-		BackingRedis:      {"data-redis"},
-		BackingRabbitMQ:   {"amqp"},
-	}
-	MonitoringDepsMap = map[string]string{
-		ProviderPrometheus: "prometheus",
-	}
+	APIVersions         = []string{"cakd.io/v1alpha1", "platform.dev/v1alpha1"}
+	Kinds               = []string{"Project"}
+	ClusterProviders    = []string{ClusterLocal, ClusterAWSEC2}
+	InstanceTypes       = []string{"t3.micro", "t3.small", "t3.medium", "t3.large"}
+	VersionControlTypes = []string{ProviderGitHub}
+	CITypes             = []string{ProviderGitHubActions}
+	CDTypes             = []string{ProviderArgoCD}
+	NotificationTypes   = []string{ProviderDiscord}
+	LLMTypes            = []string{ProviderGemini}
+	MonitoringTypes     = []string{ProviderPrometheus}
+	LoggingTypes        = []string{ProviderLoki}
+	ServiceLanguages    = []string{LangJavaSpringBoot}
+	BackingTypes        = []string{BackingPostgreSQL}
 )
-
-// ResolveSpringBootDependencies merges user dependencies with backing and monitoring dependencies.
-func ResolveSpringBootDependencies(userDeps, backingTypes []string, monitoringProvider string) []string {
-	seen := make(map[string]bool, len(userDeps)+4)
-	result := make([]string, 0, len(userDeps)+4)
-	add := func(dep string) {
-		if dep != "" && !seen[dep] {
-			seen[dep] = true
-			result = append(result, dep)
-		}
-	}
-
-	for _, d := range userDeps {
-		add(d)
-	}
-	for _, bt := range backingTypes {
-		for _, dep := range SpringBackingDepsMap[bt] {
-			add(dep)
-		}
-	}
-	if monDep, ok := MonitoringDepsMap[monitoringProvider]; ok {
-		add("actuator")
-		add(monDep)
-	}
-	return result
-}
 
 // IsAllowed reports whether val is present in the allowed slice.
 func IsAllowed(val string, allowed []string) bool {

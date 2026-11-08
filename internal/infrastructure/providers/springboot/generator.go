@@ -51,15 +51,15 @@ func (g *Generator) GenerateService(ctx context.Context, svc project.ServiceSpec
 		}
 	}
 
-	groupID := svc.GroupID
+	groupID := svc.GetFrameworkOption("groupId", svc.GroupID)
 	if groupID == "" {
 		groupID = "com.example"
 	}
-	artifactID := svc.ArtifactID
+	artifactID := svc.GetFrameworkOption("artifactId", svc.ArtifactID)
 	if artifactID == "" {
 		artifactID = svc.Name
 	}
-	buildType := svc.ProjectBuild
+	buildType := svc.GetFrameworkOption("projectBuild", svc.ProjectBuild)
 	if buildType == "" {
 		buildType = "maven-project"
 	}
@@ -67,7 +67,7 @@ func (g *Generator) GenerateService(ctx context.Context, svc project.ServiceSpec
 	if javaVersion == "" {
 		javaVersion = catalog.Defaults.LanguageVersion[catalog.LangJavaSpringBoot]
 	}
-	packaging := svc.Packaging
+	packaging := svc.GetFrameworkOption("packaging", svc.Packaging)
 	if packaging == "" {
 		packaging = "jar"
 	}
@@ -81,8 +81,9 @@ func (g *Generator) GenerateService(ctx context.Context, svc project.ServiceSpec
 	q.Set("artifactId", artifactID)
 	q.Set("name", svc.Name)
 	q.Set("dependencies", strings.Join(deps, ","))
-	if svc.SpringBootVersion != "" {
-		q.Set("bootVersion", svc.SpringBootVersion)
+	bootVer := svc.GetFrameworkOption("springBootVersion", svc.SpringBootVersion)
+	if bootVer != "" {
+		q.Set("bootVersion", bootVer)
 	}
 
 	reqURL := g.baseURL + "?" + q.Encode()
