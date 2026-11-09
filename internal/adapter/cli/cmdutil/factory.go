@@ -17,6 +17,7 @@ import (
 	"github.com/nguyentin05/cakd-platform/internal/platform/progress"
 	"github.com/nguyentin05/cakd-platform/internal/usecase/agenttools"
 	"github.com/nguyentin05/cakd-platform/internal/usecase/auth"
+	"github.com/nguyentin05/cakd-platform/internal/usecase/catalog"
 	"github.com/nguyentin05/cakd-platform/internal/usecase/createproject"
 	"github.com/nguyentin05/cakd-platform/internal/usecase/initcluster"
 	"github.com/nguyentin05/cakd-platform/internal/usecase/observe"
@@ -32,6 +33,7 @@ type Services struct {
 	ObserveUC  *observe.Service
 	AuthUC     *auth.Service
 	AgentTools *agenttools.Catalog
+	CatalogUC  *catalog.Service
 	SpecRepo   ports.SpecRepository
 	CredStore  ports.CredentialStore
 	StateStore ports.ClusterStateStore

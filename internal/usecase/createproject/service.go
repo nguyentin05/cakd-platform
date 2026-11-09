@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/nguyentin05/cakd-platform/internal/domain/catalog"
 	"github.com/nguyentin05/cakd-platform/internal/domain/errcode"
 	"github.com/nguyentin05/cakd-platform/internal/domain/project"
 	"github.com/nguyentin05/cakd-platform/internal/platform/progress"
@@ -21,7 +22,7 @@ type Request struct {
 	OutputDir    string
 	Force        bool
 	ScaffoldOnly bool
-	GitHubToken  string
+	VCSToken     string
 }
 
 // Result summarizes the artifacts produced by project creation.
@@ -167,20 +168,27 @@ func (s *Service) Execute(ctx context.Context, req Request) (Result, error) {
 	}
 
 	if s.vcs != nil && proj.Spec.Providers != nil && proj.Spec.Providers.VersionControl != "" {
-		ghToken := req.GitHubToken
-		if ghToken == "" && s.credStore != nil {
-			if creds, err := s.credStore.Get(); err == nil {
-				ghToken = creds.GitHubToken
+		vcsProvider := proj.Spec.Providers.VersionControl
+		isLocal := vcsProvider == "local" || vcsProvider == "local-git" || vcsProvider == catalog.ProviderLocalGit
+		vcsToken := req.VCSToken
+		if !isLocal {
+			if vcsToken == "" && s.credStore != nil {
+				if creds, err := s.credStore.Get(); err == nil {
+					if vcsProvider == catalog.ProviderGitHub || vcsProvider == "" {
+						vcsToken = creds.GitHubToken
+					}
+				}
 			}
-		}
-		if ghToken == "" {
-			return res, errcode.New(errcode.CodeAuth, "GITHUB_TOKEN is required to provision and push the repository")
+			if vcsToken == "" {
+				return res, errcode.New(errcode.CodeAuth, fmt.Sprintf("%s token is required to provision and push the repository", vcsProvider))
+			}
 		}
 
 		repoURL, err := s.vcs.ProvisionAndPush(ctx, ports.RepoProvisionRequest{
+			Provider:    vcsProvider,
 			ProjectName: proj.Metadata.Name,
 			Owner:       proj.Metadata.Owner,
-			Token:       ghToken,
+			Token:       vcsToken,
 			SourceDir:   outDir,
 			StateDir:    filepath.Join(outDir, ".platform", "terraform", "vcs"),
 		})

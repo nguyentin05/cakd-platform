@@ -18,18 +18,20 @@ func TestWizardGeneratesCanonicalSpecFile(t *testing.T) {
 
 	// Inputs:
 	// 1. Project name: order-system
-	// 2. Owner: acme
-	// 3. Cluster provider: aws-ec2
-	// 4. Region: ap-southeast-1
-	// 5. Instance type: t3.medium
-	// 6. Service name: order-api
-	// 7. Java version: 21
-	// 8. Build tool: maven-project
-	// 9. Add PostgreSQL?: y
-	// 10. DB name: orders-db
-	// 11. Run create now?: n
+	// 2. VCS provider: github
+	// 3. Owner: acme
+	// 4. Cluster provider: aws-ec2
+	// 5. Region: ap-southeast-1
+	// 6. Instance type: t3.medium
+	// 7. Service name: order-api
+	// 8. Java version: 21
+	// 9. Build tool: maven-project
+	// 10. Add PostgreSQL?: y
+	// 11. DB name: orders-db
+	// 12. Run create now?: n
 	input := strings.Join([]string{
 		"order-system",
+		"github",
 		"acme",
 		"aws-ec2",
 		"ap-southeast-1",
@@ -47,6 +49,7 @@ func TestWizardGeneratesCanonicalSpecFile(t *testing.T) {
 		ValidateUC: c.ValidateUC,
 		SpecRepo:   c.SpecRepo,
 		CreateUC:   c.CreateUC,
+		CatalogUC:  c.CatalogUC,
 	}, tui.Options{
 		OutputPath: outPath,
 	})

@@ -9,6 +9,7 @@ const (
 	BackingRabbitMQ   = "rabbitmq"
 
 	ProviderGitHub        = "github"
+	ProviderLocalGit      = "local-git"
 	ProviderGitHubActions = "github-actions"
 	ProviderArgoCD        = "argocd"
 	ProviderDiscord       = "discord"
@@ -68,7 +69,7 @@ var (
 	Kinds               = []string{"Project"}
 	ClusterProviders    = []string{ClusterLocal, ClusterAWSEC2}
 	InstanceTypes       = []string{"t3.micro", "t3.small", "t3.medium", "t3.large"}
-	VersionControlTypes = []string{ProviderGitHub}
+	VersionControlTypes = []string{ProviderGitHub, ProviderLocalGit}
 	CITypes             = []string{ProviderGitHubActions}
 	CDTypes             = []string{ProviderArgoCD}
 	NotificationTypes   = []string{ProviderDiscord}

@@ -1,0 +1,33 @@
+CAKD Platform
+Copyright 2026 Trong Tin Nguyen and contributors
+
+This product includes software developed by
+Trong Tin Nguyen (https://github.com/nguyentin05/cakd-platform).
+
+========================================================================
+Third-Party Software Attributions
+========================================================================
+
+This product embeds and statically links the following third-party software
+components:
+
+1. gopkg.in/yaml.v3
+   Copyright 2011-2016 Canonical Ltd.
+   Licensed under the Apache License, Version 2.0.
+
+2. github.com/spf13/cobra
+   Copyright 2013 Steve Francia and contributors.
+   Licensed under the Apache License, Version 2.0.
+
+3. github.com/spf13/pflag
+   Copyright (c) 2012 Alex Ogier. All rights reserved.
+   Copyright (c) 2012 The Go Authors. All rights reserved.
+   Licensed under the BSD 3-Clause License.
+
+4. github.com/inconshreveable/mousetrap
+   Copyright 2014 Steve Francia.
+   Licensed under the Apache License, Version 2.0.
+
+5. golang.org/x/crypto, golang.org/x/term, golang.org/x/sys
+   Copyright (c) 2009 The Go Authors. All rights reserved.
+   Licensed under the BSD 3-Clause License.

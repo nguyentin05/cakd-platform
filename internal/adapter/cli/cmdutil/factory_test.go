@@ -30,4 +30,7 @@ func TestFactoryCustomServices(t *testing.T) {
 	if f.C != s {
 		t.Fatal("expected custom Services to be set")
 	}
+	if f.C.CatalogUC != nil {
+		t.Fatal("expected nil CatalogUC initially")
+	}
 }

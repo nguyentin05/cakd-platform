@@ -1,0 +1,15 @@
+id: local-git
+name: Local Git
+category: vcs
+description: Local Git repository initialization without remote push
+version: 1.0.0
+steps:
+  - id: default_branch
+    title: "Default Branch"
+    type: choice
+    default: "main"
+    options:
+      - label: "main"
+        value: "main"
+      - label: "master"
+        value: "master"

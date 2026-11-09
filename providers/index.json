@@ -1,0 +1,19 @@
+{
+  "apiVersion": "v1",
+  "providers": [
+    {
+      "id": "github",
+      "name": "GitHub",
+      "category": "vcs",
+      "description": "GitHub Version Control and repository hosting",
+      "version": "1.0.0"
+    },
+    {
+      "id": "local-git",
+      "name": "Local Git",
+      "category": "vcs",
+      "description": "Local Git repository initialization without remote push",
+      "version": "1.0.0"
+    }
+  ]
+}

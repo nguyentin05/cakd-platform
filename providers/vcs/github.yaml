@@ -1,0 +1,25 @@
+id: github
+name: GitHub
+category: vcs
+description: GitHub Version Control and repository hosting
+version: 1.0.0
+introspection:
+  fetch:
+    url: "https://api.github.com/user"
+    headers:
+      Authorization: "Bearer {{.token}}"
+      Accept: "application/vnd.github.v3+json"
+steps:
+  - id: owner
+    title: "Repository Owner / Organization"
+    type: choice
+    extract: "login"
+  - id: visibility
+    title: "Repository Visibility"
+    type: choice
+    default: "private"
+    options:
+      - label: "Private"
+        value: "private"
+      - label: "Public"
+        value: "public"

@@ -3,6 +3,7 @@ package ports
 import (
 	"context"
 
+	"github.com/nguyentin05/cakd-platform/internal/domain/catalog"
 	"github.com/nguyentin05/cakd-platform/internal/domain/diagnostic"
 	"github.com/nguyentin05/cakd-platform/internal/domain/project"
 )
@@ -119,6 +120,7 @@ type FrameworkGenerator interface {
 
 // RepoProvisionRequest configures remote VCS repository creation and initial push.
 type RepoProvisionRequest struct {
+	Provider    string
 	ProjectName string
 	Owner       string
 	Token       string
@@ -167,3 +169,13 @@ type LogCollector interface {
 type AIAnalyzer interface {
 	Analyze(ctx context.Context, prompt string) (string, error)
 }
+
+// CatalogStore loads declarative provider catalog index and manifests, and evaluates dynamic introspection requests.
+type CatalogStore interface {
+	LoadIndex(ctx context.Context) (*catalog.CatalogIndex, error)
+	LoadManifest(ctx context.Context, category, providerID string) (*catalog.ProviderManifest, error)
+	Introspect(ctx context.Context, manifest *catalog.ProviderManifest, params map[string]string) ([]catalog.ChoiceOption, error)
+}
+
+// ManifestLoader is an alias for CatalogStore maintaining backwards compatibility.
+type ManifestLoader = CatalogStore
